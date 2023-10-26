@@ -10,6 +10,9 @@ COPY . .
 
 RUN npm run build
 
+# migration 스크립트 추가
+CMD ["npm", "run", "migration:run"]
+
 FROM node:latest as production
 
 ARG NODE_ENV=production

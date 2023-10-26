@@ -25,5 +25,13 @@ services:
       PG_DATA: /var/lib/postgresql/data
     ports:
       - 5432:5432
+  migration:
+    build:
+      context: ./backend
+    command: npm run migration:run
+    depends_on:
+      - postgres
+    links:
+      - postgres
 networks:
   webnet:

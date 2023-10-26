@@ -1,0 +1,29 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ts
+      POSTGRES_PASSWORD: ts
+      POSTGRES_DB: ts
+    ports:
+      - "5432:5432"
+
+  nest-app:
+    build:
+      context: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    links:
+      - postgres
+
+  migration:
+    build:
+      context: ./backend
+    command: npm run migration:run
+    depends_on:
+      - postgres
+    links:
+      - postgres

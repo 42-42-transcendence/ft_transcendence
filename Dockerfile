@@ -2,7 +2,9 @@ FROM        node
 MAINTAINER  heryu@student.42seoul.kr
 
 RUN         mkdir -p  /react/test
+
 COPY        ./front/package.json  /react/test/.
+COPY        ./front/package-lock.json  /react/test/.
 COPY        ./front/public /react/test/public
 COPY        ./front/src /react/test/src
 

@@ -1,0 +1,44 @@
+@font-face {
+  font-family: 'DungGeunMo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff')
+    format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --background-color: #333d4b;
+  --header-bg-color: #3d4857;
+  --text-white: #f5f5f5;
+  --active-color: #fd8d73;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DungGeunMo';
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-white);
+}
+
+button {
+  font-family: 'DungGeunMo';
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--text-white);
+}
+
+li {
+  list-style: none;
+}

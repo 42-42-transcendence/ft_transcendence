@@ -1,0 +1,10 @@
+/front/node_modules
+
+# misc
+.DS_Store
+
+# debug
+
+# local env files
+
+# typescript

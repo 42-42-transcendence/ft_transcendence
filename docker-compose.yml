@@ -1,29 +1,29 @@
-version: '3'
+version: '3.7'
+
 services:
+  main:
+    container_name: tsApp
+    build:
+      context: ./backend
+      target: development
+    ports:
+      - 3000:3000
+    command: npm run start:dev
+    networks:
+      - webnet
+    depends_on:
+      - postgres
   postgres:
+    container_name: postgres
     image: postgres:latest
+    networks:
+      - webnet
     environment:
-      POSTGRES_USER: ts
       POSTGRES_PASSWORD: ts
+      POSTGRES_USER: ts
       POSTGRES_DB: ts
+      PG_DATA: /var/lib/postgresql/data
     ports:
-      - "5432:5432"
-
-  nest-app:
-    build:
-      context: ./backend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
-    links:
-      - postgres
-
-  migration:
-    build:
-      context: ./backend
-    command: npm run migration:run
-    depends_on:
-      - postgres
-    links:
-      - postgres
+      - 5432:5432
+networks:
+  webnet:

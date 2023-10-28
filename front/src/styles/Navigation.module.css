@@ -1,0 +1,73 @@
+.header {
+  background: var(--header-bg-color);
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.nav_list {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.nav_list li {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 0 16px;
+}
+
+.nav_list li a {
+  padding: 12px;
+  margin: 12px;
+}
+
+.nav_list li a:hover {
+  background-color: var(--background-color);
+  border-radius: 8px;
+}
+
+.nav_list li a.active::after {
+  content: '';
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: -4px;
+  left: 0;
+  border-bottom: 4px dashed var(--active-color);
+}
+
+.icon_list {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: 8px;
+  transform: translateY(50%);
+}
+
+.icon_list li {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+}
+
+.icon_list button {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+.icon_list button:active {
+  transform: scale(1.1);
+}
+
+.icon_list svg {
+  fill: var(--text-white);
+  width: 100%;
+  height: 100%;
+}

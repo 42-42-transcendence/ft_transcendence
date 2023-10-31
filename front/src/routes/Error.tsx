@@ -1,11 +1,25 @@
-import Navigation from '../components/Navigation/Navigation';
+import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 
 const ErrorPage = () => {
+  const error = useRouteError();
+  let errorMessage;
+
+  if (isRouteErrorResponse(error)) {
+    errorMessage = error.data.message || error.statusText;
+  } else if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === 'string') {
+    errorMessage = error;
+  } else {
+    console.error(error);
+    errorMessage = 'Sorry, an unexpected error has occurred.';
+  }
+
   return (
     <>
-      <Navigation />
       <main>
         <h1>Error Page</h1>
+        <p>{errorMessage}</p>
       </main>
     </>
   );

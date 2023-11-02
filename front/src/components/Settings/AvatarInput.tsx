@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import styles from '../../styles/SettingProfileForm.module.css';
 import defaultThumNailURI from '../../assets/42logo.svg';
-import AvatarImage from './AvatarImage';
+import AvatarImage from '../../UI/AvatarImage';
 
 const AvatarInput = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -24,7 +24,7 @@ const AvatarInput = () => {
       <label htmlFor="avatar">
         <div>프로필 이미지</div>
         <div>
-          <AvatarImage imageURI={avatarFileURI} radius={200} />
+          <AvatarImage imageURI={avatarFileURI} radius="200px" />
         </div>
       </label>
       <input

@@ -28,6 +28,7 @@
   display: none;
 }
 
-.label:not(.checked):hover {
-  background-color: #44a9aa;
+.label:hover {
+  background-color: var(--active-hover-color);
+  color: var(--text-white);
 }

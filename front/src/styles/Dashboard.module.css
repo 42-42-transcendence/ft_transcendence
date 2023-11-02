@@ -40,8 +40,8 @@
 }
 
 .win {
-  color: #55ca45;
+  color: var(--win-color);
 }
 .lose {
-  color: #fd2b2b;
+  color: var(--lose-color);
 }

@@ -1,0 +1,100 @@
+.profile {
+  display: flex;
+  justify-content: center;
+
+  position: relative;
+}
+
+.avatar {
+  margin-right: 48px;
+  width: 20vw;
+
+  position: relative;
+  top: 0;
+  transform: translateY(15%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detail {
+  height: 70vh;
+  display: grid;
+  grid-template-areas:
+    'winCount loseCount'
+    'ladderPoint ladderPoint'
+    'achievement achievement';
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr auto;
+}
+
+.grid {
+  background-color: var(--tone-up-color);
+}
+
+.winCount {
+  grid-area: winCount;
+  color: var(--win-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.loseCount {
+  grid-area: loseCount;
+  color: var(--lose-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ladderPoint {
+  grid-area: ladderPoint;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.achievement {
+  grid-area: achievement;
+
+  display: grid;
+  grid-template-columns: repeat(5, 75px);
+  grid-template-rows: repeat(2, 75px);
+  gap: 16px;
+}
+
+.achievement .item {
+  background-color: var(--tone-down-color);
+  font-size: 150%;
+}
+
+.achievement .item.achieved {
+  background-color: var(--tone-deep-color);
+}
+.achievement .item.achieved:hover {
+  background-color: #000000;
+}
+
+.detail h2 {
+  margin: 0;
+  margin-bottom: 16px;
+}
+
+.info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info span {
+  align-self: flex-end;
+  margin-bottom: 8px;
+  margin-left: 8px;
+}
+
+.number {
+  font-size: 500%;
+}

@@ -10,7 +10,7 @@ const LoginPage = () => {
   };
 
   return (
-    <main>
+    <>
       <div className={styles.login}>
         <img src={ftLogo} alt="42 icon" />
         <h1>FT_Transcendence</h1>
@@ -19,7 +19,7 @@ const LoginPage = () => {
           <span>Intra Login</span>
         </button>
       </div>
-    </main>
+    </>
   );
 };
 export default LoginPage;

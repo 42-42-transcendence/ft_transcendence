@@ -1,5 +1,5 @@
 import { json, redirect } from 'react-router-dom';
-import SettingProfileForm from '../components/Profile/SettingProfileForm';
+import SettingProfileForm from '../components/Settings/SettingProfileForm';
 
 const SettingProfilePage = () => {
   return (

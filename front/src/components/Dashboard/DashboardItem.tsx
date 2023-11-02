@@ -1,5 +1,5 @@
 import styles from '../../styles/Dashboard.module.css';
-import AvatarImage from '../Profile/AvatarImage';
+import AvatarImage from '../../UI/AvatarImage';
 
 type Props = {
   id: string;
@@ -14,7 +14,7 @@ const DashboardItem = ({ id, image, mode, isWin, type, score }: Props) => {
   return (
     <li className={styles.item}>
       <h3>VS</h3>
-      <AvatarImage imageURI={image} radius={64} />
+      <AvatarImage imageURI={image} radius="64px" />
       <div>{id}</div>
       <div className={isWin ? styles.win : styles.lose}>{score}</div>
       <div>{type.toLocaleUpperCase()}</div>

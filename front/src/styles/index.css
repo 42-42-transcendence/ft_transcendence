@@ -11,10 +11,14 @@
   --header-color: #1f1f1f;
   --text-white: #f5f5f5;
   --active-color: #53b7ba;
+  --active-hover-color: #3da4a5;
   --focus-color: #e84244;
   --focus-hover-color: #c92828;
   --tone-up-color: #30363c;
   --tone-down-color: #24282b;
+  --tone-deep-color: #171a1c;
+  --win-color: #55ca45;
+  --lose-color: #fd2b2b;
 }
 
 * {
@@ -27,6 +31,7 @@ body {
   padding: 0;
   background-color: var(--background-color);
   color: var(--text-white);
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -52,9 +57,16 @@ button {
   cursor: pointer;
 }
 button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+button:disabled {
+  cursor: default;
+}
+button:disabled:active {
+  transform: scale(1);
 }
 
 main {
   text-align: center;
+  margin: 0 5%;
 }

@@ -1,4 +1,4 @@
-export const initWebGPU = async (canvas) => {
+export const initWebGPU = async (canvas : HTMLCanvasElement) => {
     /* 브라우저에서 WebGPU를 사용할 수 있는지 확인 */
     if (!navigator.gpu) {
         console.warn('WebGPU not supported');

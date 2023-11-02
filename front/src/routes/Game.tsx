@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { initWebGPU } from '../components/WebGPU/Canvas';
+import { initWebGPU } from '../components/WebGPU/initalize';
 
 const GamePage = () => {
     /* useRef를 사용하여 canvas DOM을 가져옴 */

@@ -1,21 +1,29 @@
 .header {
-  background: var(--header-bg-color);
+  background: var(--header-color);
   display: flex;
   justify-content: space-between;
   position: relative;
+  width: 100%;
 }
 
 .nav_list {
   display: flex;
-  justify-content: center;
-  width: 100%;
+  margin-left: 5%;
 }
 
 .nav_list li {
   display: flex;
   align-items: center;
   position: relative;
-  margin: 0 16px;
+  margin: 0 32px;
+}
+
+.nav_list .logo {
+  width: 80px;
+  margin-right: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .nav_list li a {
@@ -42,10 +50,7 @@
 .icon_list {
   display: flex;
   align-items: center;
-  position: absolute;
-  top: 0;
-  right: 8px;
-  transform: translateY(50%);
+  margin-right: 5%;
 }
 
 .icon_list li {
@@ -61,9 +66,6 @@
   border: none;
   width: 100%;
   height: 100%;
-}
-.icon_list button:active {
-  transform: scale(1.1);
 }
 
 .icon_list svg {

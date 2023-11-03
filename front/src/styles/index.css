@@ -7,10 +7,14 @@
 }
 
 :root {
-  --background-color: #333d4b;
-  --header-bg-color: #3d4857;
+  --background-color: #121212;
+  --header-color: #1f1f1f;
   --text-white: #f5f5f5;
-  --active-color: #fd8d73;
+  --active-color: #53b7ba;
+  --focus-color: #e84244;
+  --focus-hover-color: #c92828;
+  --tone-up-color: #30363c;
+  --tone-down-color: #24282b;
 }
 
 * {
@@ -23,6 +27,7 @@ body {
   padding: 0;
   background-color: var(--background-color);
   color: var(--text-white);
+  overflow: hidden;
 }
 
 button {
@@ -45,4 +50,11 @@ li {
 
 button {
   cursor: pointer;
+}
+button:active {
+  transform: scale(0.98);
+}
+
+main {
+  text-align: center;
 }

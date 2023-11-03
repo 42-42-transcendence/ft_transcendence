@@ -1,0 +1,33 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background-color: #1f1f1f;
+  color: #777777;
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.label.checked {
+  background-color: var(--active-color);
+  color: var(--text-white);
+}
+.label:active {
+  transform: scale(0.98);
+}
+
+.label + input {
+  display: none;
+}
+
+.label:not(.checked):hover {
+  background-color: #44a9aa;
+}

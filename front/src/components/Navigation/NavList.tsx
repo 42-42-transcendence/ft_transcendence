@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 import styles from '../../styles/Navigation.module.css';
+import logo from '../../assets/42logo.svg';
 
 const checkNavActivation = ({ isActive }: { isActive: boolean }): string => {
   return isActive ? styles.active : '';
@@ -9,24 +10,19 @@ const checkNavActivation = ({ isActive }: { isActive: boolean }): string => {
 const NavList = () => {
   return (
     <ul className={styles.nav_list}>
-      <li>
+      <div className={styles.logo}>
         <NavLink to="/" className={checkNavActivation}>
-          홈
+          <img src={logo} alt="42 logo" />
         </NavLink>
-      </li>
+      </div>
       <li>
         <NavLink to="/dashboard" className={checkNavActivation}>
-          대시보드
-        </NavLink>
-      </li>
-      <li>
-        <NavLink to="/profile" className={checkNavActivation}>
-          프로필
+          전적
         </NavLink>
       </li>
       <li>
         <NavLink to="/channels" className={checkNavActivation}>
-          채팅
+          채팅방
         </NavLink>
       </li>
       <li>

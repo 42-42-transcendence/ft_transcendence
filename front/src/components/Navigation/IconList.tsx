@@ -1,19 +1,18 @@
+import NotificationIcon from '../../assets/notification-icon';
+import UserIcon from '../../assets/user-icon';
 import styles from '../../styles/Navigation.module.css';
-
-import SettingsIcon from '../../assets/SettingsIcon';
-import LogoutIcon from '../../assets/LogoutIcon';
 
 const IconList = () => {
   return (
     <ul className={styles.icon_list}>
       <li>
         <button>
-          <SettingsIcon />
+          <NotificationIcon />
         </button>
       </li>
       <li>
         <button>
-          <LogoutIcon />
+          <UserIcon />
         </button>
       </li>
     </ul>

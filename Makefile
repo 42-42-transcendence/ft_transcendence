@@ -18,7 +18,7 @@ start: all
 	@echo "\033[1;32m"
 	@echo "It is just only \"react-test\" server"
 	@echo "Actually, be built by the backend"
-	@echo "Open browser => http://localhost:3001/login"
+	@echo "Open browser => http://localhost:3001"
 
 clean:
 		$(DC) rm -f $(CONTAINER);

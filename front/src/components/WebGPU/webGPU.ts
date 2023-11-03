@@ -2,7 +2,7 @@ import vertexShaderCode from './Shaders/vertex.wgsl';
 import fragmentShaderCode from './Shaders/fragment.wgsl';
 
 export const webgpuStart = 
-	async ( webGPU : webGPU, canvasSize: canvasSize ): Promise<void> => {
+	( webGPU : webGPU, canvasSize: canvasSize ) => {
 
 	try {
 		// Create the vertex shader module

@@ -1,54 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { initWebGPU } from '../components/WebGPU/initalize';
+import React, { useRef, useState, useEffect } from 'react';
+import useWebGPU from '../components/WebGPU/hook/useWebGPU';
+import useCanvasSize from '../components/WebGPU/hook/useCanvasSize';
+import webgpuStart from '../components/WebGPU/webGPU';
 
 const GamePage = () => {
-    /* useRef를 사용하여 canvas DOM을 가져옴 */
-    const canvasRef = useRef(null);
-    /* useState를 사용하여 창의 높이를 가져옴 */
-    const [height, setHeight] = useState(window.innerHeight);
-
-    /* useEffect를 사용하여 창의 크기 변화를 감지 */
-    useEffect(() => {
-        /* 창의 크기가 변화할 때마다 높이를 가져옴 */
-        const handleResize = () => {
-            setHeight(window.innerHeight);
-        };
-        /* 창의 크기가 변화할 때마다 handleResize 함수를 실행 */
-        window.addEventListener('resize', handleResize);
-        handleResize(); // 초기 설정
-
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const init = async () => {
-            try {
-                /* initWebGPU 함수를 실행하여 WebGPU를 초기화 */
-                const result = await initWebGPU(canvas);
-                if (result) {
-                    const { gpuDevice, gpuAdapter } = result;
-                } else {
-                    console.error("Failed to initialize WebGPU");
-                }
-            } catch (e) {
-                console.error("Failed to initialize WebGPU:", e);
-            }
-        };
-
-        init();
-    }, []);
-
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const { webGPU, error } = useWebGPU(canvasRef);
+    useCanvasSize(canvasRef);
+    if (!error && webGPU && canvasRef.current) {
+        const canvasSize = { width: canvasRef.current.width, height: canvasRef.current.height };
+        webgpuStart(webGPU, canvasSize);
+    }
     return (
         <main>
-            <canvas
-                ref={canvasRef}
-                width="600"
-                height={height}
-                style={{ backgroundColor: 'black', boxShadow: '0 4px 15px red' }}
-            ></canvas>
+            {error && <p className="error-message">{error}</p>}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <canvas
+                    ref={canvasRef}
+                    width="600"
+                    height={window.innerHeight}
+                    style={{ backgroundColor: 'black', boxShadow: '0 4px 15px red' }}
+                ></canvas>
+            </div>
         </main>
     );
 };

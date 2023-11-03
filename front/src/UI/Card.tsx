@@ -2,7 +2,7 @@ import styles from '../styles/Card.module.css';
 
 type Props = {
   children: React.ReactNode;
-  className: string;
+  className?: string;
 };
 
 const Card = ({ children, className }: Props) => {

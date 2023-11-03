@@ -1,20 +1,19 @@
 import CardButton from '../../UI/CardButton';
 import ToggleRadioButton from '../../UI/ToggleRadioButton';
-
-import styles from '../../styles/Channel.module.css';
+import styles from '../../styles/Friends.module.css';
 
 type Props = {
   selectedOption: string;
   onChangeOption: (option: string) => void;
 };
 
-const filterOptionList = ['public', 'private', 'direct'];
+const filterOptionList = ['friends', 'block'];
 
-const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
+const FriendsSidebar = ({ selectedOption, onChangeOption }: Props) => {
   const optionRadioList = filterOptionList.map((option, index) => (
     <ToggleRadioButton
       key={option}
-      name="option"
+      name={option}
       id={option}
       value={option}
       title={option.toLocaleUpperCase()}
@@ -24,9 +23,9 @@ const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
     />
   ));
 
-  const addChannelHandler = (e: React.MouseEvent<HTMLButtonElement>) => {};
+  const addFriendsHandler = (e: React.MouseEvent<HTMLButtonElement>) => {};
   const addChannelButton = (
-    <CardButton className={styles.add} clickHandler={addChannelHandler}>
+    <CardButton className={styles.add} clickHandler={addFriendsHandler}>
       + ADD
     </CardButton>
   );
@@ -38,4 +37,4 @@ const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
     </ul>
   );
 };
-export default ChannelSidebar;
+export default FriendsSidebar;

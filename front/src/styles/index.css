@@ -10,6 +10,7 @@
   --background-color: #121212;
   --header-color: #1f1f1f;
   --text-white: #f5f5f5;
+  --text-grey: #777777;
   --active-color: #53b7ba;
   --active-hover-color: #3da4a5;
   --focus-color: #e84244;
@@ -19,6 +20,11 @@
   --tone-deep-color: #171a1c;
   --win-color: #55ca45;
   --lose-color: #fd2b2b;
+  --scrollbar-bg-color: var(--tone-deep-color);
+  --scrollbar-th-color: var(--tone-down-color);
+  --online-color: #55ca45;
+  --offline-color: #777777;
+  --in-game-color: #fd2b2b;
 }
 
 * {

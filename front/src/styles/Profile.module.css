@@ -1,8 +1,15 @@
+/* .container {
+  display: flex;
+  justify-content: center;
+} */
+
 .profile {
   display: flex;
   justify-content: center;
-
   position: relative;
+  /* background-color: var(--tone-deep-color);
+  border-radius: 16px;
+  padding: 16px; */
 }
 
 .avatar {
@@ -19,7 +26,6 @@
 }
 
 .detail {
-  height: 70vh;
   display: grid;
   grid-template-areas:
     'winCount loseCount'

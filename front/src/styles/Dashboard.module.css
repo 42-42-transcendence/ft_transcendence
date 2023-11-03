@@ -9,10 +9,19 @@
 }
 
 .items {
-  overflow: scroll;
+  overflow: auto;
   overflow-x: hidden;
   max-height: 70vh;
+  height: 100%;
   width: 50%;
+}
+.items::-webkit-scrollbar {
+  background-color: var(--scrollbar-bg-color);
+  border-radius: 16px;
+}
+.items::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-th-color);
+  border-radius: 16px;
 }
 
 .item {

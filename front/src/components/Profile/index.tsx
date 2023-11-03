@@ -57,6 +57,7 @@ const Profile = () => {
   }
 
   return (
+    // <div className={styles.container}>
     <div className={styles.profile}>
       <div className={styles.avatar}>
         <h1>{DUMMY_USER.id}</h1>
@@ -89,6 +90,7 @@ const Profile = () => {
         </Card>
       </div>
     </div>
+    // </div>
   );
 };
 export default Profile;

@@ -3,7 +3,7 @@ import lockIcon from '../../assets/lock-icon.svg';
 import { Link } from 'react-router-dom';
 
 type Props = {
-  id: number;
+  id: string;
   title: string;
   mode: 'public' | 'private' | 'direct';
   total?: number;

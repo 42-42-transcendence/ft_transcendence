@@ -1,4 +1,4 @@
-import styles from '../styles/SettingProfileForm.module.css';
+import styles from '../styles/AvatarImage.module.css';
 
 type Props = {
   imageURI: string;

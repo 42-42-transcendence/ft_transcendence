@@ -11,10 +11,15 @@
 .items {
   overflow: auto;
   overflow-x: hidden;
-  max-height: 70vh;
   height: 100%;
+  max-height: 70vh;
   width: 50%;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, auto));
+  gap: 16px;
 }
+
 .items::-webkit-scrollbar {
   background-color: var(--scrollbar-bg-color);
   border-radius: 16px;
@@ -24,49 +29,50 @@
   border-radius: 16px;
 }
 
-.items a {
-  display: block;
-  width: 100%;
-
-  background: none;
-  outline: none;
-  border: none;
-  margin: 0;
-  padding: 0;
-
-  margin-bottom: 16px;
-}
-
 .item {
-  background-color: var(--tone-up-color);
-  width: 100%;
-  color: var(--text-white);
-
   display: flex;
-  justify-content: space-between;
   align-items: center;
 
-  padding: 16px 32px;
-  border-radius: 16px;
-  font-size: 16px;
+  width: 100%;
+
+  color: var(--text-white);
+  background-color: var(--tone-up-color);
+
+  position: relative;
+  overflow: hidden;
+}
+
+.item.offline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .item:hover {
   background-color: var(--tone-down-color);
 }
 
-.title {
-  display: flex;
+.info {
+  flex: 1;
   align-items: center;
 }
-
-.title img {
-  fill: var(--text-white);
+.name {
+  margin-bottom: 8px;
+  font-size: 18px;
 }
 
-.title div {
-  margin: 0;
-  margin-right: 16px;
+.status.online {
+  color: var(--online-color);
+}
+.status.offline {
+  color: var(--offline-color);
+}
+.status.in-game {
+  color: var(--in-game-color);
 }
 
 .add {

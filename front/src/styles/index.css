@@ -18,13 +18,17 @@
   --tone-up-color: #30363c;
   --tone-down-color: #24282b;
   --tone-deep-color: #171a1c;
-  --win-color: #55ca45;
-  --lose-color: #fd2b2b;
+  --red-color: #e84244;
+  --green-color: #55ca45;
+  --win-color: var(--green-color);
+  --lose-color: var(--red-color);
   --scrollbar-bg-color: var(--tone-deep-color);
   --scrollbar-th-color: var(--tone-down-color);
-  --online-color: #55ca45;
-  --offline-color: #777777;
-  --in-game-color: #fd2b2b;
+  --online-color: var(--green-color);
+  --in-game-color: var(--red-color);
+  --offline-color: var(--text-grey);
+  --owner-color: var(--red-color);
+  --staff-color: var(--green-color);
 }
 
 * {
@@ -75,4 +79,13 @@ button:disabled:active {
 main {
   text-align: center;
   margin: 0 5%;
+}
+
+::-webkit-scrollbar {
+  background-color: var(--scrollbar-bg-color);
+  border-radius: 16px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-th-color);
+  border-radius: 16px;
 }

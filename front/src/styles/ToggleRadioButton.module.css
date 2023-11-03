@@ -4,7 +4,8 @@
   align-items: center;
 
   margin-bottom: 16px;
-  width: 120px;
+  min-width: 120px;
+  max-width: 100%;
 }
 
 .label {

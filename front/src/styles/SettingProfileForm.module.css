@@ -10,7 +10,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
 }
 
 .avatar label div {
@@ -19,6 +18,10 @@
 
 .avatar input {
   display: none;
+}
+
+.avatar img {
+  cursor: pointer;
 }
 
 .name {

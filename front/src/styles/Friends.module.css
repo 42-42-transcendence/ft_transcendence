@@ -3,11 +3,6 @@
   justify-content: center;
 }
 
-.sidebar {
-  margin-right: 48px;
-  font-size: 20px;
-}
-
 .items {
   overflow: auto;
   overflow-x: hidden;
@@ -19,27 +14,8 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, auto));
   gap: 16px;
 }
-
-.items::-webkit-scrollbar {
-  background-color: var(--scrollbar-bg-color);
-  border-radius: 16px;
-}
-.items::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-th-color);
-  border-radius: 16px;
-}
-
 .item {
-  display: flex;
-  align-items: center;
-
-  width: 100%;
-
-  color: var(--text-white);
-  background-color: var(--tone-up-color);
-
   position: relative;
-  overflow: hidden;
 }
 
 .item.offline::after {
@@ -52,27 +28,45 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.item:hover {
-  background-color: var(--tone-down-color);
+.sidebar {
+  margin-right: 48px;
+  font-size: 20px;
 }
 
-.info {
-  flex: 1;
-  align-items: center;
+.status {
+  position: relative;
+  margin-left: 8px;
 }
-.name {
-  margin-bottom: 8px;
-  font-size: 18px;
+
+.status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  position: absolute;
+
+  transform: translate(-150%, 50%);
+  border-radius: 50%;
 }
 
 .status.online {
   color: var(--online-color);
 }
+.status.online::before {
+  background-color: var(--online-color);
+}
+
 .status.offline {
   color: var(--offline-color);
 }
+.status.offline::before {
+  background-color: var(--offline-color);
+}
+
 .status.in-game {
   color: var(--in-game-color);
+}
+.status.in-game::before {
+  background-color: var(--in-game-color);
 }
 
 .add {

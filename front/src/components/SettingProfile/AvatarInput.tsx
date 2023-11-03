@@ -20,7 +20,7 @@ const AvatarInput = () => {
   };
 
   return (
-    <div className={styles.avatar}>
+    <div className={styles.avatar} style={{ cursor: 'pointer' }}>
       <label htmlFor="avatar">
         <div>프로필 이미지</div>
         <div>

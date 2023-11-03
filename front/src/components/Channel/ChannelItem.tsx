@@ -12,7 +12,7 @@ type Props = {
 
 const ChannelItem = ({ id, title, mode, total, password }: Props) => {
   return (
-    <Link to={`/chatting/${id}`}>
+    <Link to={`/chatting/${mode}/${id}`}>
       <li className={styles.item}>
         <div className={styles.title}>
           <div>{title}</div>

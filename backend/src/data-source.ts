@@ -11,6 +11,6 @@ export default new DataSource({
   database: 'ts',
   synchronize: false,
   entities: ['src/**/*.entity.ts'],
-  migrations: ['src/database/migrations/*.ts'],
-  migrationsTableName: 'migrations',
+  // migrations: ['src/database/migrations/*.ts'],
+  // migrationsTableName: 'migrations',
 });

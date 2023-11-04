@@ -3,7 +3,6 @@ import { UserAchievement } from '../../user-achievement/entities/user-achievemen
 import { ChannelMember } from '../../channel-member/entities/channel-member.entity';
 import { Chat } from '../../chat/entities/chat.entity';
 import { Relation } from '../../relation/entities/relation.entity';
-import { Game } from '../../game/entities/game.entity';
 
 @Entity()
 export class User {
@@ -39,9 +38,9 @@ export class User {
   @OneToMany(() => Relation, (relation) => relation.responder)
   receivedRelations: Relation[];
 
-  @OneToMany(() => Game, (game) => game.playerOne)
-  initiatedGames: Game[];
-
-  @OneToMany(() => Game, (game) => game.playerTwo)
-  joinedGames: Game[];
+  // @OneToMany(() => Game, (game) => game.playerOne)
+  // initiatedGames: Game[];
+  //
+  // @OneToMany(() => Game, (game) => game.playerTwo)
+  // joinedGames: Game[];
 }

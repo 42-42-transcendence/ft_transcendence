@@ -1,18 +1,18 @@
 version: '3.7'
 
 services:
-    main:
-        container_name: tsApp
-        build:
-            context: ./backend
-            target: development
-        ports:
-            - 3000:3000
-        command: npm run start:dev
-        networks:
-            - webnet
-        depends_on:
-            - postgres
+#    main:
+#        container_name: tsApp
+#        build:
+#            context: ./backend
+#            target: development
+#        ports:
+#            - 3000:3000
+#        command: npm run start:dev
+#        networks:
+#            - webnet
+#        depends_on:
+#            - postgres
     postgres:
         container_name: postgres
         image: postgres:latest

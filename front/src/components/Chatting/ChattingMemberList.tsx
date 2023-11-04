@@ -1,5 +1,5 @@
 import styles from '../../styles/Chatting.module.css';
-import MemberItem from './MemberItem';
+import ChattingMemberItem from './ChattingMemberItem';
 
 type User = {
   id: string;
@@ -14,7 +14,7 @@ type Props = {
 
 const ChattingMembers = ({ members }: Props) => {
   const memberItemList = members.map((member) => (
-    <MemberItem
+    <ChattingMemberItem
       key={member.id}
       id={member.id}
       image={member.image}

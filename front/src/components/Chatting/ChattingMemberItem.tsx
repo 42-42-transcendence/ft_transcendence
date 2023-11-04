@@ -8,10 +8,10 @@ type Props = {
   isMuted: boolean;
 };
 
-const MemberItem = ({ id, image, role, isMuted }: Props) => {
+const ChattingMemberItem = ({ id, image, role, isMuted }: Props) => {
   return (
     <li>
-      <UserItem id={id} image={image} className={styles.item}>
+      <UserItem id={id} image={image} className={styles.member}>
         <div className={`${styles[role]}`}>
           {role !== 'member' && role.toLocaleUpperCase()}
         </div>
@@ -19,4 +19,4 @@ const MemberItem = ({ id, image, role, isMuted }: Props) => {
     </li>
   );
 };
-export default MemberItem;
+export default ChattingMemberItem;

@@ -1,0 +1,24 @@
+.item {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  color: var(--text-white);
+  background-color: var(--tone-up-color);
+
+  overflow: hidden;
+}
+
+.item:hover {
+  background-color: var(--tone-down-color);
+}
+
+.info {
+  flex: 1;
+  align-items: center;
+}
+.name {
+  margin-bottom: 8px;
+  font-size: 18px;
+}

@@ -1,0 +1,136 @@
+.container {
+  display: flex;
+  justify-content: center;
+  height: 70vh;
+  background-color: var(--tone-deep-color);
+  width: fit-content;
+  margin: auto;
+  border-radius: 16px;
+
+  position: relative;
+}
+
+.members {
+  width: 200px;
+  padding: 16px;
+
+  overflow: auto;
+  overflow-x: hidden;
+  height: 100%;
+  max-height: 70vh;
+
+  border-left: 2px dashed var(--tone-up-color);
+}
+
+.member {
+  margin-bottom: 8px;
+}
+.member .owner {
+  color: var(--owner-color);
+}
+.member .staff {
+  color: var(--staff-color);
+}
+
+.contents {
+  width: 50vw;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+}
+
+.form {
+  width: 100%;
+
+  display: flex;
+}
+
+.input {
+  height: 100%;
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 16px;
+
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+
+  background-color: var(--tone-up-color);
+  color: var(--text-white);
+}
+
+.submit {
+  padding: 8px 16px;
+  border: none;
+  background-color: var(--active-color);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  color: var(--text-white);
+}
+
+.message-list {
+  height: 100%;
+  width: 100%;
+  padding: 0 8px;
+  overflow: auto;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.message-item {
+  margin-bottom: 16px;
+}
+
+.sender {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.message-box {
+  display: flex;
+  margin-left: 40px;
+}
+.message-box.me {
+  margin-left: 0;
+  flex-direction: row-reverse;
+}
+
+.message {
+  padding: 8px 16px;
+  background-color: var(--tone-up-color);
+  max-width: 300px;
+  text-align: left;
+  border-radius: 8px;
+}
+.message-box.me .message {
+  background-color: var(--active-color);
+}
+
+.message-date {
+  align-self: flex-end;
+  margin: 0 4px;
+}
+
+.setting {
+  background: none;
+  border: none;
+  fill: var(--text-white);
+  position: absolute;
+  width: 32px;
+
+  top: -32px;
+  right: 0;
+}
+
+.system {
+  background-color: var(--tone-down-color);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  display: inline-flex;
+}

@@ -4,6 +4,8 @@
   align-items: center;
 
   margin-bottom: 16px;
+  min-width: 120px;
+  max-width: 100%;
 }
 
 .label {
@@ -28,6 +30,7 @@
   display: none;
 }
 
-.label:not(.checked):hover {
-  background-color: #44a9aa;
+.label:hover {
+  background-color: var(--active-hover-color);
+  color: var(--text-white);
 }

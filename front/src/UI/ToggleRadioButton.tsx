@@ -1,8 +1,8 @@
 import styles from '../styles/ToggleRadioButton.module.css';
 
 type Props = {
-  id: string;
   name: string;
+  id: string;
   value: string;
   title: string;
   isChecked: boolean;

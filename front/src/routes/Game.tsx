@@ -1,12 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
-import useWebGPU from '../components/WebGPU/hook/useWebGL';
 import useCanvasSize from '../components/WebGPU/hook/useCanvasSize';
-import fragmet from '../components/WebGPU/Shaders/fragment.glsl';
-import vertex from '../components/WebGPU/Shaders/vertex.glsl';
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    // const { gl, error } = useWebGPU(canvasRef);
     useCanvasSize(canvasRef);
     
     useEffect(() => {
@@ -17,6 +13,10 @@ const GamePage = () => {
             console.error('WebGL not supported');
             return ;
         }
+        
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	    gl.clear(gl.COLOR_BUFFER_BIT);
+
         const vsGLSL = `
             attribute vec4 aVertexPosition;
 

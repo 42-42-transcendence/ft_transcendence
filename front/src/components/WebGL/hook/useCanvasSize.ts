@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, RefObject } from 'react';
+import { useEffect, RefObject } from 'react';
 import { debounce } from 'lodash'; // lodash의 debounce 함수 사용
 
 function useCanvasSize(canvasRef : RefObject<HTMLCanvasElement>) {
@@ -9,11 +9,8 @@ const updateCanvasSize = debounce(() => {
 	if (canvasRef.current) {
     canvasRef.current.width = window.innerWidth / 1.5;
     canvasRef.current.height = canvasRef.current.width / ratio;
-
-		// 렌더링 로직을 업데이트하는 코드 추가
-
 	}
-}, 100); // 100ms 디바운스
+}, 10); // 100ms 디바운스
 
   useEffect(() => {
     window.addEventListener('resize', updateCanvasSize);

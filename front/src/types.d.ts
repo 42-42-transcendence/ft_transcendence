@@ -21,4 +21,6 @@ interface gameData {
 		radius: number;
 	};
 	gl: WebGLRenderingContext;
+	paddleBuffer: WebGLBuffer | null;
+	ballBuffer: WebGLBuffer | null;
 }

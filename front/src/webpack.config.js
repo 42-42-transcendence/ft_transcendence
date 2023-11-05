@@ -20,7 +20,7 @@ module.exports = {
 				use: ['style-loader', 'css-loader'],
 			},
 			{
-				test: /\.wgsl$/,
+				test: /\.glsl$/,
 				use: 'raw-loader',
 			},
 		],

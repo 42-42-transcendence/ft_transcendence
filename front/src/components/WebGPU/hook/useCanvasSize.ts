@@ -9,8 +9,9 @@ const updateCanvasSize = debounce(() => {
 	if (canvasRef.current) {
     canvasRef.current.width = window.innerWidth / 1.5;
     canvasRef.current.height = canvasRef.current.width / ratio;
-    console.log("canvasSize: ", canvasRef.current);
-		// WebGPU 렌더링 로직을 업데이트하는 코드 추가
+
+		// 렌더링 로직을 업데이트하는 코드 추가
+
 	}
 }, 100); // 100ms 디바운스
 

@@ -7,14 +7,9 @@
 // interface Navigator {
 // 	gpu: GPU;
 // }
-declare module '*.wgsl' {
+declare module '*.glsl' {
 	const content: string;
 	export default content;
-}
-
-interface webGPU {
-	gpuDevice: GPUDevice;
-	gpuAdapter: GPUAdapter;
 }
 
 interface canvasSize {

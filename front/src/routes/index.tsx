@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, redirect } from 'react-router-dom';
 
 import RootLayout from './RootLayout';
 import ErrorPage from './Error';
@@ -78,6 +78,13 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/logout',
+    action: () => {
+      console.log('logout!');
+      return redirect('/login');
+    },
   },
 ]);
 

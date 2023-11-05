@@ -53,13 +53,13 @@
   margin-right: 5%;
 }
 
-.icon_list li {
+.icon_item {
   width: 32px;
   height: 32px;
   padding: 6px;
 }
 
-.icon_list button {
+.toggle {
   margin: 0;
   padding: 0;
   background: none;
@@ -68,7 +68,7 @@
   height: 100%;
 }
 
-.icon_list svg {
+.toggle svg {
   fill: var(--text-white);
   width: 100%;
   height: 100%;

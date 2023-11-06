@@ -5,6 +5,6 @@ type Props = {
 };
 
 const SystemMessageItem = ({ message }: Props) => {
-  return <div className={styles.system}>{message}</div>;
+  return <div className={styles['system-message']}>{message}</div>;
 };
 export default SystemMessageItem;

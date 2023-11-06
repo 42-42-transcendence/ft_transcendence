@@ -5,19 +5,71 @@
   width: 100%;
   height: 100vh;
   z-index: 20;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal {
-  color: #030303;
   position: fixed;
-  top: 20vh;
+  top: 25%;
   left: 30%;
   width: 40%;
-  background-color: white;
+  background-color: var(--tone-up-color);
+  color: var(--text-white);
   padding: 1rem;
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   z-index: 30;
   animation: slide-down 300ms ease-out forwards;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-3rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.footer-button {
+  background-color: red;
+  color: var(--text-white);
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+}
+
+.confirm {
+  background-color: var(--active-color);
+}
+
+.cancel {
+  background-color: var(--focus-color);
+}
+
+.confirm:hover {
+  background-color: var(--active-hover-color);
+}
+.cancel:hover {
+  background-color: var(--focus-hover-color);
+}
+
+.user-wrapper {
+  width: 80%;
+  background-color: var(--tone-down-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: center;
 }

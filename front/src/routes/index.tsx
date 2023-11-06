@@ -35,7 +35,16 @@ const router = createBrowserRouter([
         path: '/',
         element: <RootLayout />,
         children: [
-          { index: true, element: <MainPage /> },
+          {
+            index: true,
+            element: <MainPage />,
+            // 임시 액션 딜레이
+            action: async () => {
+              await new Promise((res) => setTimeout(res, 1000));
+
+              return redirect('/game/1');
+            },
+          },
           {
             path: '/dashboard',
             children: [

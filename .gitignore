@@ -1,6 +1,6 @@
 # compiled output
-/dist
-/node_modules
+backend/dist
+backend/node_modules
 
 # Logs
 logs
@@ -19,7 +19,8 @@ lerna-debug.log*
 /.nyc_output
 
 # IDEs and editors
-/.idea
+.idea
+backend/.idea
 .project
 .classpath
 .c9/
@@ -33,3 +34,5 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+data/

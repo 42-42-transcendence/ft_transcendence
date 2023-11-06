@@ -2,8 +2,8 @@ import { useState } from 'react';
 
 import styles from '../../styles/Navigation.module.css';
 
-import NotificationIcon from '../../assets/notification-icon';
-import UserIcon from '../../assets/user-icon';
+import notificationIcon from '../../assets/notification-icon.svg';
+import userIcon from '../../assets/user-icon.svg';
 import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
 
@@ -35,13 +35,13 @@ const IconList = () => {
           onClick={toggleShowNotificationHandler}
           className={styles.toggle}
         >
-          <NotificationIcon />
+          <img src={notificationIcon} alt="notification icon" />
         </button>
         {showNotificationDropdown && <NotificationDropdown />}
       </li>
       <li onBlur={offNotificationHandler} className={styles.icon_item}>
         <button onClick={toggleShowUserDropdown} className={styles.toggle}>
-          <UserIcon />
+          <img src={userIcon} alt="user icon" />
         </button>
         {showUserDropdown && <UserDropdown />}
       </li>

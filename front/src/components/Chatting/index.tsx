@@ -2,6 +2,7 @@ import ChattingContents from './ChattingContents';
 import ChattingMemberList from './ChattingMemberList';
 
 import styles from '../../styles/Chatting.module.css';
+import ChattingSettingList from './ChattingSettingList';
 
 type Member = {
   id: string;
@@ -475,6 +476,7 @@ const Chatting = () => {
         contents={DUMMY_ITEMS.contents}
       />
       <ChattingMemberList members={DUMMY_ITEMS.members} />
+      <ChattingSettingList />
     </div>
   );
 };

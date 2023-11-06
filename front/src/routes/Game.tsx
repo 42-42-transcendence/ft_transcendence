@@ -1,16 +1,16 @@
 import React, { useRef, useEffect } from 'react';
 import useCanvasSize from '../components/WebGPU/hook/useCanvasSize';
-import { useDispatch } from 'react-redux';
-import { actions as modalActions } from '../store/modal';
+import useCloseModal from '../components/Modal/useCloseModal';
 
 const GamePage = () => {
-  const dispatch = useDispatch();
+  const closeModal = useCloseModal();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useCanvasSize(canvasRef);
 
   useEffect(() => {
-    dispatch(modalActions.closeModal());
+    closeModal();
+
     let gl = null;
     if (canvasRef.current === null) return;
     gl = canvasRef.current.getContext('webgl') as WebGLRenderingContext;
@@ -163,7 +163,7 @@ const GamePage = () => {
     gl.enableVertexAttribArray(positionLoc);
     gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-  }, [dispatch]);
+  }, [closeModal]);
 
   return (
     <main>

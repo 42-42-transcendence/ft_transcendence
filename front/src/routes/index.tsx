@@ -52,7 +52,17 @@ const router = createBrowserRouter([
               { path: ':userID', element: <DashboardPage /> },
             ],
           },
-          { path: '/channels', element: <ChannelsPage /> },
+          {
+            path: '/channels',
+            element: <ChannelsPage />,
+            action: async ({ request }) => {
+              const data = await request.formData();
+              console.log(data.get('room-type'));
+              console.log(data.get('room-name'));
+              console.log(data.get('room-password'));
+              return null;
+            },
+          },
           { path: '/chatting/:mode/:chatID', element: <ChattingPage /> },
           { path: '/friends', element: <FriendsPage /> },
           {

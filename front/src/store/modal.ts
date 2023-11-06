@@ -39,5 +39,6 @@ const modalSlice = createSlice({
   },
 });
 
+export type { ModalState };
 export const actions = modalSlice.actions;
 export default modalSlice;

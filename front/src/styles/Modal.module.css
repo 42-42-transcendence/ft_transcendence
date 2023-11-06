@@ -11,12 +11,13 @@
 .modal {
   position: fixed;
   top: 25%;
-  left: 30%;
-  width: 40%;
+  left: 50%;
+  max-width: 500px;
+
   background-color: var(--tone-up-color);
   color: var(--text-white);
-  padding: 1rem;
-  border-radius: 14px;
+  padding: 32px 16px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   z-index: 30;
   animation: slide-down 300ms ease-out forwards;
@@ -25,18 +26,34 @@
 @keyframes slide-down {
   from {
     opacity: 0;
-    transform: translateY(-3rem);
+    transform: translate(-50%, -3rem);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.header {
+  border-bottom: 1px solid var(--tone-deep-color);
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
 }
 
 .footer {
   display: flex;
+  justify-content: center;
   gap: 16px;
-  margin-top: 32px;
+  margin-top: 16px;
 }
 
 .footer-button {
@@ -72,4 +89,55 @@
   justify-content: center;
   gap: 16px;
   align-items: center;
+}
+
+.input-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px 16px;
+}
+
+.input-field .title {
+  width: 80px;
+}
+
+.input-field .toggle {
+  flex: 1;
+
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.toggle label {
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: #1f1f1f;
+  color: #777777;
+  border-radius: 4px;
+}
+
+.toggle input {
+  display: none;
+}
+
+.toggle label:has(input:checked) {
+  background-color: var(--active-color);
+  color: var(--text-white);
+}
+
+.input-field .input {
+  flex: 1;
+  padding: 8px 16px;
+  background-color: var(--tone-deep-color);
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  color: var(--text-white);
+}
+.input-field .input:disabled {
+  background-color: var(--tone-down-color);
 }

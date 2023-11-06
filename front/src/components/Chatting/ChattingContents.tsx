@@ -1,7 +1,6 @@
 import styles from '../../styles/Chatting.module.css';
 import ChattingForm from './ChattingForm';
 import ChattingMessageList from './ChattingMessageList';
-import ChattingSettingsButton from './ChattingSettingsButton';
 
 type Content = {
   key: number;
@@ -28,7 +27,6 @@ const ChattingContents = ({ members, contents }: Props) => {
     <div className={styles.contents}>
       <ChattingMessageList members={members} contents={contents} />
       <ChattingForm />
-      <ChattingSettingsButton />
     </div>
   );
 };

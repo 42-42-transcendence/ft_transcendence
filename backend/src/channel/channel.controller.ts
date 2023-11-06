@@ -22,9 +22,16 @@ export class ChannelController {
     return (this.channelService.getAllChannels());
   }
 
+  @ApiOperation({
+    summary: '채널 생성'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Channel
+  })
   @Post()
-  create(@Body() createChannelDto: CreateChannelDto) {
-    return this.channelService.create(createChannelDto);
+  createChannel(@Body() createChannelDto: CreateChannelDto): Promise<Channel> {
+    return (this.channelService.createChennel(createChannelDto));
   }
 
   @Get(':id')

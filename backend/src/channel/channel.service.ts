@@ -4,20 +4,18 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from './entities/channel.entity';
 import { Repository } from 'typeorm';
+import { ChannelRepository } from './channel.repository';
 
 @Injectable()
 export class ChannelService {
-  constructor(
-    @InjectRepository(Channel)
-    private channelRepository: Repository<Channel>
-  ) {}
+  constructor(private channelRepository: ChannelRepository) {}
 
-  async getAllChannels(): Promise<Channel[]> {
-    return (await this.channelRepository.find());
+  getAllChannels(): Promise<Channel[]> {
+    return (this.channelRepository.getAllChannels());
   }
 
-  create(createChannelDto: CreateChannelDto) {
-    return 'This action adds a new channel';
+  createChennel(createChannelDto: CreateChannelDto): Promise<Channel> {
+    return (this.channelRepository.createChennel(createChannelDto));
   }
 
   findAll() {

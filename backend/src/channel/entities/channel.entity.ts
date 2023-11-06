@@ -55,7 +55,7 @@ export class Channel {
     enum: ChannelTypeEnum,
     default: ChannelTypeEnum.PUBLIC,
   })
-  type: string;
+  type: ChannelTypeEnum;
 
 
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel)

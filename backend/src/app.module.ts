@@ -6,9 +6,24 @@ import { typeORMConfig } from './config/typeorm.config';
 import { UserAchievementModule } from './user-achievement/user-achievement.module';
 import { ChannelMemberModule } from './channel-member/channel-member.module';
 import { RelationModule } from './relation/relation.module';
+import { AchievementModule } from './achievement/achievement.module';
+import { ChannelModule } from './channel/channel.module';
+import { ChatModule } from './chat/chat.module';
+import { GameModule } from './game/game.module';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeORMConfig), UserAchievementModule, ChannelMemberModule, RelationModule],
+  imports: [
+    TypeOrmModule.forRoot(typeORMConfig),
+    AchievementModule,
+    ChannelModule,
+    ChannelMemberModule,
+    ChatModule,
+    GameModule,
+    RelationModule,
+    UserModule,
+    UserAchievementModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

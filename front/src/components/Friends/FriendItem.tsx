@@ -11,15 +11,17 @@ type Props = {
 
 const FriendItem = ({ id, image, status, isBlocked }: Props) => {
   return (
-    <li>
-      <UserItem
-        id={id}
-        image={image}
-        className={`${styles.item} ${styles[status]}`}
-      >
-        <div className={`${styles.status} ${styles[status]}`}>{status}</div>
-      </UserItem>
-    </li>
+    <>
+      <li>
+        <UserItem
+          id={id}
+          image={image}
+          className={`${styles.item} ${styles[status]}`}
+        >
+          <div className={`${styles.status} ${styles[status]}`}>{status}</div>
+        </UserItem>
+      </li>
+    </>
   );
 };
 export default FriendItem;

@@ -1,6 +1,7 @@
 import CardButton from '../../UI/CardButton';
 import ToggleRadioButton from '../../UI/ToggleRadioButton';
 import styles from '../../styles/Friends.module.css';
+import useOpenModal from '../Modal/useOpenModal';
 
 type Props = {
   selectedOption: string;
@@ -10,6 +11,8 @@ type Props = {
 const filterOptionList = ['friends', 'block'];
 
 const FriendsSidebar = ({ selectedOption, onChangeOption }: Props) => {
+  const openHandler = useOpenModal('showFriendRequest');
+
   const optionRadioList = filterOptionList.map((option, index) => (
     <ToggleRadioButton
       key={option}
@@ -23,9 +26,8 @@ const FriendsSidebar = ({ selectedOption, onChangeOption }: Props) => {
     />
   ));
 
-  const addFriendsHandler = (e: React.MouseEvent<HTMLButtonElement>) => {};
   const addChannelButton = (
-    <CardButton className={styles.add} clickHandler={addFriendsHandler}>
+    <CardButton className={styles.add} clickHandler={openHandler}>
       + ADD
     </CardButton>
   );

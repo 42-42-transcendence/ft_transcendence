@@ -64,7 +64,15 @@ const router = createBrowserRouter([
             },
           },
           { path: '/chatting/:mode/:chatID', element: <ChattingPage /> },
-          { path: '/friends', element: <FriendsPage /> },
+          {
+            path: '/friends',
+            element: <FriendsPage />,
+            action: async ({ request }) => {
+              const data = await request.formData();
+              console.log(data.get('name'));
+              return null;
+            },
+          },
           {
             path: '/profile',
             children: [

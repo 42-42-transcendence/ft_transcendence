@@ -35,7 +35,16 @@ const router = createBrowserRouter([
         path: '/',
         element: <RootLayout />,
         children: [
-          { index: true, element: <MainPage /> },
+          {
+            index: true,
+            element: <MainPage />,
+            // 임시 액션 딜레이
+            action: async () => {
+              await new Promise((res) => setTimeout(res, 1000));
+
+              return redirect('/game/1');
+            },
+          },
           {
             path: '/dashboard',
             children: [
@@ -43,9 +52,45 @@ const router = createBrowserRouter([
               { path: ':userID', element: <DashboardPage /> },
             ],
           },
-          { path: '/channels', element: <ChannelsPage /> },
-          { path: '/chatting/:mode/:chatID', element: <ChattingPage /> },
-          { path: '/friends', element: <FriendsPage /> },
+          {
+            path: '/channels',
+            element: <ChannelsPage />,
+            action: async ({ request }) => {
+              const data = await request.formData();
+              console.log(data.get('room-type'));
+              console.log(data.get('room-name'));
+              console.log(data.get('room-password'));
+              return null;
+            },
+          },
+          {
+            path: '/chatting/:mode/:chatID',
+            element: <ChattingPage />,
+            action: async ({ request }) => {
+              const data = await request.formData();
+              if (request.method === 'POST') {
+                console.log(data.get('name'));
+              }
+              if (request.method === 'PATCH') {
+                console.log(data.get('room-type'));
+                console.log(data.get('room-name'));
+                console.log(data.get('room-password'));
+              }
+              if (request.method === 'DELETE') {
+                console.log('channel delete');
+              }
+              return null;
+            },
+          },
+          {
+            path: '/friends',
+            element: <FriendsPage />,
+            action: async ({ request }) => {
+              const data = await request.formData();
+              console.log(data.get('name'));
+              return null;
+            },
+          },
           {
             path: '/profile',
             children: [

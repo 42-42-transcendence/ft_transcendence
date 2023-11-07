@@ -4,14 +4,18 @@ import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
 import initialize from '../components/WebGL/function/initialize';
 import usePress from "../components/WebGL/hook/usePress";
+import useCloseModal from '../components/Modal/useCloseModal';
 
 const GamePage = () => {
+    const closeModal = useCloseModal();
+  
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState(null);
     useCanvasSize(canvasRef);
     usePress();
     
     useEffect(() => {
+      closeModal();
         try {
             /* webGL 초기화 */
             initialize(canvasRef);

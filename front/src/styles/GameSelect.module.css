@@ -28,6 +28,7 @@
   font-size: 48px;
   color: var(--text-white);
 }
+
 .start:hover {
   background-color: var(--focus-hover-color);
 }

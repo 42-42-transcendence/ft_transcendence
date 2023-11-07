@@ -3,6 +3,13 @@ import ChattingMemberList from './ChattingMemberList';
 
 import styles from '../../styles/Chatting.module.css';
 import ChattingSettingList from './ChattingSettingList';
+import useModalState from '../Modal/useModalState';
+import ChatExitConfirmModal from '../Modal/ChatExitConfirmModal';
+import ChatInvitationModal from '../Modal/ChatInvitationModal';
+import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
+import { useParams } from 'react-router-dom';
+import ChatMemberDetailModal from '../Modal/ChatMemberDetailModal';
+import { useState } from 'react';
 
 type Member = {
   id: string;
@@ -469,14 +476,42 @@ const DUMMY_ITEMS: DUMMY_TYPE = {
 };
 
 const Chatting = () => {
+  const params = useParams();
+  const mode = params.mode;
+  console.log(mode);
+
+  const [activeMemeber, setActiveMember] = useState<Member>({
+    id: '',
+    image: '',
+    role: 'member',
+    isMuted: false,
+  });
+
+  const activeMemberHandler = (member: Member) => {
+    setActiveMember({ ...member });
+  };
+
+  const showChatRoomConfig = useModalState('showChatRoomConfig');
+  const showChatInvitation = useModalState('showChatInvitation');
+  const showChatExitConfirm = useModalState('showChatExitConfirm');
+  const showChatMemberDetail = useModalState('showChatMemberDetail');
+
   return (
     <div className={styles.container}>
       <ChattingContents
         members={DUMMY_ITEMS.members}
         contents={DUMMY_ITEMS.contents}
       />
-      <ChattingMemberList members={DUMMY_ITEMS.members} />
-      <ChattingSettingList />
+      <ChattingMemberList
+        members={DUMMY_ITEMS.members}
+        onActive={activeMemberHandler}
+      />
+      {mode !== 'direct' && <ChattingSettingList />}
+
+      {showChatRoomConfig && <ChatRoomConfigModal />}
+      {showChatInvitation && <ChatInvitationModal />}
+      {showChatExitConfirm && <ChatExitConfirmModal />}
+      {showChatMemberDetail && <ChatMemberDetailModal member={activeMemeber} />}
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import CardButton from '../../UI/CardButton';
 import ToggleRadioButton from '../../UI/ToggleRadioButton';
 
+import useOpenModal from '../Modal/useOpenModal';
+
 import styles from '../../styles/Channel.module.css';
 
 type Props = {
@@ -11,6 +13,8 @@ type Props = {
 const filterOptionList = ['public', 'private', 'direct'];
 
 const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
+  const openHandler = useOpenModal('showCreatingChatRoom');
+
   const optionRadioList = filterOptionList.map((option, index) => (
     <ToggleRadioButton
       key={option}
@@ -24,9 +28,8 @@ const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
     />
   ));
 
-  const addChannelHandler = (e: React.MouseEvent<HTMLButtonElement>) => {};
   const addChannelButton = (
-    <CardButton className={styles.add} clickHandler={addChannelHandler}>
+    <CardButton className={styles.add} clickHandler={openHandler}>
       + ADD
     </CardButton>
   );

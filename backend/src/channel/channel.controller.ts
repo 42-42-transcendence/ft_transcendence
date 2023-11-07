@@ -34,9 +34,16 @@ export class ChannelController {
     return (this.channelService.createChennel(createChannelDto));
   }
 
+  @ApiOperation({
+    summary: '채널 id 검색'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Channel
+  })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.channelService.findOne(+id);
+  getChannelById(@Param('id') id: number): Promise<Channel> {
+    return this.channelService.getChannelById(id);
   }
 
   @Patch(':id')

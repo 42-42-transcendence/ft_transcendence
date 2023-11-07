@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { Channel } from "./entities/channel.entity";
 import { CreateChannelDto } from "./dto/create-channel.dto";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {
@@ -24,6 +24,15 @@ export class ChannelRepository extends Repository<Channel> {
 		});
 
 		await this.save(channel);
+		return (channel);
+	}
+
+	async getChannelById(id: number): Promise<Channel> {
+		const channel = await this.findOneBy({id});
+
+		if (!channel)
+			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${id}`);
+
 		return (channel);
 	}
 }

@@ -18,12 +18,8 @@ export class ChannelService {
     return (this.channelRepository.createChennel(createChannelDto));
   }
 
-  findAll() {
-    return `This action returns all channel`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} channel`;
+  getChannelById(id: number): Promise<Channel> {
+    return (this.channelRepository.getChannelById(id));
   }
 
   update(id: number, updateChannelDto: UpdateChannelDto) {

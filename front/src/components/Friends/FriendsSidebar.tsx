@@ -11,7 +11,7 @@ type Props = {
 const filterOptionList = ['friends', 'block'];
 
 const FriendsSidebar = ({ selectedOption, onChangeOption }: Props) => {
-  const openHandler = useOpenModal('showFriendRequest');
+  const openHandler = useOpenModal('showAddFriend');
 
   const optionRadioList = filterOptionList.map((option, index) => (
     <ToggleRadioButton

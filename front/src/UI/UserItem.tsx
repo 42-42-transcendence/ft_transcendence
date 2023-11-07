@@ -8,7 +8,7 @@ type Props = {
   image: string;
   className?: string;
   children?: React.ReactNode;
-  clickHandler?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  clickHandler?: (e: React.MouseEvent<HTMLButtonElement> | undefined) => void;
 };
 
 const UserItem = ({ id, image, className, children, clickHandler }: Props) => {

@@ -4,7 +4,7 @@ import styles from '../../styles/Friends.module.css';
 import FriendList from './FriendList';
 import FriendsSidebar from './FriendsSidebar';
 import useModalState from '../Modal/useModalState';
-import FriendRequestModal from '../Modal/FriendRequestModal';
+import AddFriendModal from '../Modal/AddFriendModal';
 import FriendDetailModal from '../Modal/FriendDetailModal';
 
 type Friend = {
@@ -19,9 +19,14 @@ const Friends = () => {
 
   const showFriendDetail = useModalState('showFriendDetail');
 
-  const [activedFriend, setActivedFriend] = useState<Friend | null>(null);
+  const [activedFriend, setActivedFriend] = useState<Friend>({
+    id: '',
+    image: '',
+    status: 'offline',
+    isBlocked: false,
+  });
 
-  const showFriendRequest = useModalState('showFriendRequest');
+  const showAddFriend = useModalState('showAddFriend');
 
   const changeOptionHandler = (option: string) => {
     setSelectedOption(option);
@@ -41,7 +46,7 @@ const Friends = () => {
         selectedOption={selectedOption}
         onActive={activeFriendHandler}
       />
-      {showFriendRequest && <FriendRequestModal />}
+      {showAddFriend && <AddFriendModal />}
       {showFriendDetail && (
         <FriendDetailModal friend={activedFriend as Friend} />
       )}

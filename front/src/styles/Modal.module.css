@@ -68,8 +68,10 @@
 .confirm {
   background-color: var(--active-color);
 }
-
 .cancel {
+  background-color: var(--tone-deep-color);
+}
+.delete {
   background-color: var(--focus-color);
 }
 
@@ -77,6 +79,9 @@
   background-color: var(--active-hover-color);
 }
 .cancel:hover {
+  background-color: #030303;
+}
+.delete:hover {
   background-color: var(--focus-hover-color);
 }
 

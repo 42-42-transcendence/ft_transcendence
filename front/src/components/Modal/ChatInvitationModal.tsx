@@ -5,13 +5,13 @@ import useCloseModal from './useCloseModal';
 
 import styles from '../../styles/Modal.module.css';
 
-const FriendRequestModal = () => {
+const ChatInvitationModal = () => {
   const closeHandler = useCloseModal();
 
   return (
     <Modal onClose={closeHandler}>
       <Form method="POST">
-        <div className={styles.header}>친구 요청</div>
+        <div className={styles.header}>초대 하기</div>
         <div className={styles['input-field']}>
           <label className={styles.title}>닉네임</label>
           <input
@@ -19,7 +19,7 @@ const FriendRequestModal = () => {
             type="text"
             name="name"
             maxLength={8}
-            placeholder="친구 닉네임 입력"
+            placeholder="닉네임 입력"
           />
         </div>
         <div className={styles.footer}>
@@ -41,4 +41,4 @@ const FriendRequestModal = () => {
     </Modal>
   );
 };
-export default FriendRequestModal;
+export default ChatInvitationModal;

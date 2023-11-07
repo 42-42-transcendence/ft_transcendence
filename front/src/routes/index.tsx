@@ -63,7 +63,25 @@ const router = createBrowserRouter([
               return null;
             },
           },
-          { path: '/chatting/:mode/:chatID', element: <ChattingPage /> },
+          {
+            path: '/chatting/:mode/:chatID',
+            element: <ChattingPage />,
+            action: async ({ request }) => {
+              const data = await request.formData();
+              if (request.method === 'POST') {
+                console.log(data.get('name'));
+              }
+              if (request.method === 'PATCH') {
+                console.log(data.get('room-type'));
+                console.log(data.get('room-name'));
+                console.log(data.get('room-password'));
+              }
+              if (request.method === 'DELETE') {
+                console.log('channel delete');
+              }
+              return null;
+            },
+          },
           {
             path: '/friends',
             element: <FriendsPage />,

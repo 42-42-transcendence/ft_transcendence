@@ -8,8 +8,8 @@ type ModalState = {
   showFriendRequest: boolean;
   showFriendDetail: boolean;
   showChatRoomConfig: boolean;
-  showChatInvite: boolean;
-  showChatExitMessage: boolean;
+  showChatInvitation: boolean;
+  showChatExitConfirm: boolean;
   showChatMemberDetail: boolean;
 };
 
@@ -21,8 +21,8 @@ const initialState: ModalState = {
   showFriendRequest: false,
   showFriendDetail: false,
   showChatRoomConfig: false,
-  showChatInvite: false,
-  showChatExitMessage: false,
+  showChatInvitation: false,
+  showChatExitConfirm: false,
   showChatMemberDetail: false,
 };
 

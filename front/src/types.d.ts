@@ -16,11 +16,18 @@ interface gameData {
 		height: number;
 	};
 	ball: {
-		x: number;
-		y: number;
+		x: float32;
+		y: float32;
 		radius: number;
+		direction : number;
 	};
-	gl: WebGLRenderingContext;
+	keyPress: {
+		up: boolean;
+		down: boolean;
+	};
+	gl: WebGLRenderingContext | null;
 	paddleBuffer: WebGLBuffer | null;
 	ballBuffer: WebGLBuffer | null;
+	positionLoc: number;
+	lastTime: number;
 }

@@ -1,4 +1,8 @@
-function shader (gl : WebGLRenderingContext) {
+import data from '../interface/gameData';
+
+function shader () {
+	const gl = data.gl as WebGLRenderingContext;
+
 	const vsGLSL = `
             attribute vec4 aVertexPosition;
 
@@ -49,13 +53,11 @@ function shader (gl : WebGLRenderingContext) {
         gl.detachShader(shaderProgram, fragmentShader);
         gl.deleteShader(fragmentShader);
 
-        const positionLoc = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
-		if (positionLoc === -1) {
+        data.positionLoc = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
+		if (data.positionLoc === -1) {
 			throw new Error('Shader error');
 		}
         gl.useProgram(shaderProgram);
-
-		return positionLoc;
 }
 
 export default shader;

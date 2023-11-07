@@ -10,13 +10,13 @@ export function render() {
 	let { paddle } = data;
 	const paddleVertices = new Float32Array([
 	// 왼쪽 패들
-		paddle.x, paddle.y - data.paddle.height / 2.0, // 1
-		paddle.x + data.paddle.width / 2.0, paddle.y - data.paddle.height / 2.0, // 2
-		paddle.x, paddle.y + data.paddle.height / 2.0, // 3
+		paddle.position[0], paddle.position[1] - data.paddle.height / 2.0, // 1
+		paddle.position[0] + data.paddle.width / 2.0, paddle.position[1] - data.paddle.height / 2.0, // 2
+		paddle.position[0], paddle.position[1] + data.paddle.height / 2.0, // 3
 
-		paddle.x + data.paddle.width / 2.0, paddle.y - data.paddle.height / 2.0, // 2
-		paddle.x, paddle.y + data.paddle.height / 2.0, // 3
-		paddle.x + data.paddle.width / 2.0, paddle.y + data.paddle.height / 2.0, // 4
+		paddle.position[0] + data.paddle.width / 2.0, paddle.position[1] - data.paddle.height / 2.0, // 2
+		paddle.position[0], paddle.position[1] + data.paddle.height / 2.0, // 3
+		paddle.position[0] + data.paddle.width / 2.0, paddle.position[1] + data.paddle.height / 2.0, // 4
 
 	// 오른쪽 패들
 		1.0 - jump, 1.0 - data.paddle.height, // 1
@@ -31,13 +31,13 @@ export function render() {
 	let { ball } = data;
 	// 공의 크기와 위치
 	const ballVertices = new Float32Array([
-		ball.x - ball.radius, ball.y + ball.radius,  // 1
-		ball.x + ball.radius, ball.y + ball.radius,  // 2
-		ball.x - ball.radius, ball.y - ball.radius,   // 3
+		ball.position[0] - ball.radius, ball.position[1] + ball.radius,  // 1
+		ball.position[0] + ball.radius, ball.position[1] + ball.radius,  // 2
+		ball.position[0] - ball.radius, ball.position[1] - ball.radius,   // 3
 
-		ball.x + ball.radius, ball.y + ball.radius,  // 2
-		ball.x - ball.radius, ball.y - ball.radius,   // 3
-		ball.x + ball.radius, ball.y - ball.radius,    // 4
+		ball.position[0] + ball.radius, ball.position[1] + ball.radius,  // 2
+		ball.position[0] - ball.radius, ball.position[1] - ball.radius,   // 3
+		ball.position[0] + ball.radius, ball.position[1] - ball.radius,    // 4
 	]);
 
 	data.gl.bufferData(data.gl.ARRAY_BUFFER, paddleVertices, data.gl.STATIC_DRAW);

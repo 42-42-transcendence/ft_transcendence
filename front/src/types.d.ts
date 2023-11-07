@@ -3,23 +3,17 @@ declare module '*.glsl' {
 	export default content;
 }
 
-interface canvasSize {
-	width: number;
-	height: number;
-}
-
 interface gameData {
 	paddle: {
-		x: flaoat32;
-		y: flaoat32;
+		position: vec2,
+		velocity: vec2,
 		width: number;
 		height: number;
 	};
 	ball: {
-		x: float32;
-		y: float32;
+		position: vec2,
+		velocity: vec2,
 		radius: number;
-		direction : number;
 	};
 	keyPress: {
 		up: boolean;

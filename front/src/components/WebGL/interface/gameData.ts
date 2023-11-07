@@ -1,15 +1,16 @@
+import { vec2 } from 'gl-matrix';
+
 let data: gameData = {
 	paddle: {
-		x: -0.85, // 시작 위치 X
-		y: 0, // 시작 위치 Y
+		position: vec2.fromValues(-0.95, 0),
+		velocity: vec2.fromValues(0, 0),
 		width: 0.1, // 패들의 폭
 		height: 0.3, // 패들의 높이
 	},
 	ball: {
-		x: 0, // 시작 위치 X
-		y: 0, // 시작 위치 Y
-		radius: 0.03, // 공의 반지름
-		direction: 0.03, // 공의 방향
+		position: vec2.fromValues(0, 0),
+		velocity: vec2.fromValues(0.05, 0.05),
+		radius: 0.02, // 공의 반지름
 	},
 	keyPress: {
 		up: false,

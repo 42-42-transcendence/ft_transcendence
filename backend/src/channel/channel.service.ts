@@ -22,11 +22,13 @@ export class ChannelService {
     return (this.channelRepository.getChannelById(id));
   }
 
+  async deleteChannelById(id: number): Promise<void> {
+    await this.channelRepository.deleteChannelById(id);
+  }
+
   update(id: number, updateChannelDto: UpdateChannelDto) {
     return `This action updates a #${id} channel`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} channel`;
-  }
+
 }

@@ -35,4 +35,11 @@ export class ChannelRepository extends Repository<Channel> {
 
 		return (channel);
 	}
+
+	async deleteChannelById(id: number): Promise<void> {
+		const result = await this.delete(id);
+
+		if (result.affected === 0)
+			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${id}`);
+	}
 }

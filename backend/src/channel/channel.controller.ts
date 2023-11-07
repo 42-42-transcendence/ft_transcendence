@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ChannelService } from './channel.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Channel } from './entities/channel.entity';
 
 @ApiTags('CHANNEL')
@@ -46,13 +46,21 @@ export class ChannelController {
     return this.channelService.getChannelById(id);
   }
 
+  @ApiOperation({
+    summary: '채널 id 삭제'
+  })
+  @ApiOkResponse({
+    description: '성공',
+  })
+  @Delete(':id')
+  async deleteChannelById(@Param('id') id: number): Promise<void> {
+    await this.channelService.deleteChannelById(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateChannelDto: UpdateChannelDto) {
     return this.channelService.update(+id, updateChannelDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.channelService.remove(+id);
-  }
+
 }

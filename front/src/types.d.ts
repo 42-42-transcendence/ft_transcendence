@@ -7,12 +7,14 @@ interface gameData {
 	paddle: {
 		position: vec2,
 		velocity: vec2,
+		paddleSpeed: number,
 		width: number;
 		height: number;
 	};
 	ball: {
 		position: vec2,
-		velocity: vec2,
+		direction: vec2,
+		velocity: number,
 		radius: number;
 	};
 	keyPress: {

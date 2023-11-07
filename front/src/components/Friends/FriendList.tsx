@@ -1,14 +1,14 @@
 import styles from '../../styles/Friends.module.css';
 import FriendItem from './FriendItem';
 
-type DUMMY_TYPE = {
+type Friend = {
   id: string;
   image: string;
   status: 'offline' | 'online' | 'in-game';
   isBlocked: boolean;
 };
 
-const DUMMY_ITEMS: DUMMY_TYPE[] = [
+const DUMMY_ITEMS: Friend[] = [
   {
     id: '이지수',
     image:
@@ -109,7 +109,7 @@ const DUMMY_ITEMS: DUMMY_TYPE[] = [
   },
 ];
 
-const sortByStatus = (a: DUMMY_TYPE, b: DUMMY_TYPE): number => {
+const sortByStatus = (a: Friend, b: Friend): number => {
   const aPriority = a.status === 'offline' ? 1 : 0;
   const bPriority = b.status === 'offline' ? 1 : 0;
   return aPriority - bPriority;
@@ -117,10 +117,11 @@ const sortByStatus = (a: DUMMY_TYPE, b: DUMMY_TYPE): number => {
 
 type Props = {
   selectedOption: string;
+  onActive: (friend: Friend) => void;
 };
 
-const FriendList = ({ selectedOption }: Props) => {
-  let filteredFriendList: DUMMY_TYPE[] = [];
+const FriendList = ({ selectedOption, onActive }: Props) => {
+  let filteredFriendList: Friend[] = [];
   if (selectedOption === 'friends')
     filteredFriendList = DUMMY_ITEMS.filter((friend) => !friend.isBlocked);
   else filteredFriendList = DUMMY_ITEMS.filter((friend) => friend.isBlocked);
@@ -134,6 +135,7 @@ const FriendList = ({ selectedOption }: Props) => {
       image={friend.image}
       status={friend.status}
       isBlocked={friend.isBlocked}
+      onActive={onActive}
     />
   ));
 

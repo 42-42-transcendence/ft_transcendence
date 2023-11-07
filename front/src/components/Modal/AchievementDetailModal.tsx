@@ -14,7 +14,7 @@ const AchievementDetailModal = ({ title, description }: Props) => {
   return (
     <Modal onClose={closeHandler}>
       <div className={styles.header}>{title}</div>
-      <div>{description}</div>
+      <div className={styles.wrapper}>{description}</div>
       <div className={styles.footer}>
         <button
           type="button"

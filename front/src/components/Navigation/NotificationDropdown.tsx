@@ -14,8 +14,8 @@ const NotificationDropdown = () => {
         <button>asdf님에게 온 DM</button>
       </li>
       <li className={styles.list}>
-        <small>! 친구요청</small>
-        <button>홍길동님의 친구 요청</button>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
       </li>
     </ul>
   );

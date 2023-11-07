@@ -79,3 +79,7 @@
 .add:hover {
   background-color: var(--focus-hover-color);
 }
+
+.dropdown {
+  position: absolute;
+}

@@ -17,23 +17,23 @@ const GameInvitationModal = ({ user }: Props) => {
   const closeHandler = useCloseModal();
   return (
     <Modal onClose={closeHandler}>
+      <div className={styles.header}>게임 초대</div>
       <div className={styles.wrapper}>
-        <div className={styles.header}>게임 초대</div>
         <div className={styles['user-wrapper']}>
           <AvatarImage radius="30%" imageURI={user.image} />
           <h3>{user.id}</h3>
         </div>
-        <div className={styles.footer}>
-          <button className={`${styles['footer-button']} ${styles.confirm}`}>
-            ACCEPT
-          </button>
-          <button
-            className={`${styles['footer-button']} ${styles.cancel}`}
-            onClick={closeHandler}
-          >
-            CANCEL
-          </button>
-        </div>
+      </div>
+      <div className={styles.footer}>
+        <button className={`${styles['footer-button']} ${styles.confirm}`}>
+          ACCEPT
+        </button>
+        <button
+          className={`${styles['footer-button']} ${styles.cancel}`}
+          onClick={closeHandler}
+        >
+          CANCEL
+        </button>
       </div>
     </Modal>
   );

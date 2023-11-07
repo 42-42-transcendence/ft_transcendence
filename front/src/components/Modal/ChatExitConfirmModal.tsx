@@ -15,7 +15,8 @@ const ChatExitConfirmModal = () => {
 
   return (
     <Modal onClose={closeHandler}>
-      <div className={styles.header}>정말로 나가시겠습니까?</div>
+      <div className={styles.header}>채널 나가기</div>
+      <div className={styles.wrapper}>정말로 나가시겠습니까?</div>
       <div className={styles.footer}>
         <button
           className={`${styles['footer-button']} ${styles.confirm}`}

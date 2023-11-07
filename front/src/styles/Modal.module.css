@@ -12,11 +12,12 @@
   position: fixed;
   top: 25%;
   left: 50%;
+  min-width: 300px;
   max-width: 500px;
 
   background-color: var(--tone-up-color);
   color: var(--text-white);
-  padding: 32px 16px;
+  padding: 24px 16px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   z-index: 30;
@@ -44,7 +45,7 @@
 .header {
   border-bottom: 1px solid var(--tone-deep-color);
   text-align: center;
-  font-size: 32px;
+  font-size: 24px;
   margin-bottom: 16px;
   padding-bottom: 16px;
 }
@@ -86,7 +87,7 @@
 }
 
 .user-wrapper {
-  width: 80%;
+  width: 100%;
   background-color: var(--tone-down-color);
   padding: 8px 16px;
   border-radius: 8px;
@@ -145,4 +146,26 @@
 }
 .input-field .input:disabled {
   background-color: var(--tone-down-color);
+}
+
+.list-button {
+  width: 100%;
+  background-color: inherit;
+  color: var(--text-white);
+  border: none;
+  font-size: 16px;
+  padding: 8px;
+}
+.list-button:not(:last-of-type) {
+  margin-bottom: 4px;
+}
+
+.list-button:hover {
+  border-radius: 4px;
+  background-color: var(--tone-down-color);
+}
+
+.list-button:disabled {
+  background: none;
+  color: #777777;
 }

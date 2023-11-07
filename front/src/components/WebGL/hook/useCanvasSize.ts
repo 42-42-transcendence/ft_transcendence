@@ -1,18 +1,20 @@
 import { useEffect, RefObject } from 'react';
 import { debounce } from 'lodash'; // lodash의 debounce 함수 사용
+import data from '../interface/gameData';
 
-function useCanvasSize(canvasRef: RefObject<HTMLCanvasElement>) {
+function useCanvasSize(canvasRef : RefObject<HTMLCanvasElement>) {
   const ratio = 4.0 / 3.0;
 
-  // 창 크기가 변할 때 실행될 함수
-  const updateCanvasSize = debounce(() => {
-    if (canvasRef.current) {
-      canvasRef.current.width = window.innerWidth / 1.5;
-      canvasRef.current.height = canvasRef.current.width / ratio;
+// 창 크기가 변할 때 실행될 함수
+const updateCanvasSize = debounce(() => {
+	if (canvasRef.current) {
+    canvasRef.current.width = window.innerWidth / 1.5;
+    canvasRef.current.height = canvasRef.current.width / ratio;
 
-      // 렌더링 로직을 업데이트하는 코드 추가
-    }
-  }, 100); // 100ms 디바운스
+    if (!data.gl) return;
+    data.gl.viewport(0, 0, canvasRef.current.width, canvasRef.current.height);
+	}
+}, 10); // 디바운스
 
   useEffect(() => {
     window.addEventListener('resize', updateCanvasSize);

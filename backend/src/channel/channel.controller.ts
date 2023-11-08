@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ChannelService } from './channel.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Channel } from './entities/channel.entity';
 
 @ApiTags('CHANNEL')
@@ -22,14 +22,39 @@ export class ChannelController {
     return (this.channelService.getAllChannels());
   }
 
+  @ApiOperation({
+    summary: '채널 생성'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Channel
+  })
   @Post()
-  create(@Body() createChannelDto: CreateChannelDto) {
-    return this.channelService.create(createChannelDto);
+  createChannel(@Body() createChannelDto: CreateChannelDto): Promise<Channel> {
+    return (this.channelService.createChennel(createChannelDto));
   }
 
+  @ApiOperation({
+    summary: '채널 id 검색'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Channel
+  })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.channelService.findOne(+id);
+  getChannelById(@Param('id') id: number): Promise<Channel> {
+    return this.channelService.getChannelById(id);
+  }
+
+  @ApiOperation({
+    summary: '채널 id 삭제'
+  })
+  @ApiOkResponse({
+    description: '성공',
+  })
+  @Delete(':id')
+  async deleteChannelById(@Param('id') id: number): Promise<void> {
+    await this.channelService.deleteChannelById(id);
   }
 
   @Patch(':id')
@@ -37,8 +62,5 @@ export class ChannelController {
     return this.channelService.update(+id, updateChannelDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.channelService.remove(+id);
-  }
+
 }

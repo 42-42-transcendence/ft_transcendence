@@ -3,7 +3,7 @@ import ftLogo from '../assets/42logo.svg';
 
 const LoginPage = () => {
   const clickHandler = async () => {
-    const res = await fetch('http://localhost:3000/login');
+    const res = await fetch('http://localhost:3000/api/user/login');
     const data = await res.json();
     console.log(data);
   };

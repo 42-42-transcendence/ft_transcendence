@@ -1,12 +1,11 @@
-import { useNavigate } from 'react-router-dom';
-
 import styles from '../styles/Login.module.css';
 import ftLogo from '../assets/42logo.svg';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const clickHandler = () => {
-    navigate('/two-factor-auth');
+  const clickHandler = async () => {
+    const res = await fetch('http://localhost:3000/login');
+    const data = await res.json();
+    console.log(data);
   };
 
   return (

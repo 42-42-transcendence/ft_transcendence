@@ -57,6 +57,9 @@ function shader () {
 		if (data.positionLoc === -1) {
 			throw new Error('Shader error');
 		}
+        // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/enableVertexAttribArray
+        // GPU에서 관리하는 attribute 변수를 활성화
+        gl.enableVertexAttribArray(data.positionLoc);
         gl.useProgram(shaderProgram);
 }
 

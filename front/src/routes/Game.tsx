@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import data from '../components/WebGL/interface/gameData';
 import useCanvasSize from '../components/WebGL/hook/useCanvasSize';
 import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
@@ -7,17 +8,18 @@ import usePress from "../components/WebGL/hook/usePress";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const textRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState(null);
     useCanvasSize(canvasRef);
     usePress();
-    
+
     useEffect(() => {
         try {
+            data.gameCanvas = canvasRef.current;
             /* webGL 초기화 */
-            initialize(canvasRef);
+            initialize();
             /* shader 세팅 */
             shader();
-
             /* 렌더링 */
             requestAnimationFrame(gameLoop);
             // render();

@@ -13,7 +13,7 @@ export class ChannelRepository extends Repository<Channel> {
 		return (await this.find());
 	}
 
-	async createChennel(createChannelDto: CreateChannelDto): Promise<Channel> {
+	async createChannel(createChannelDto: CreateChannelDto): Promise<Channel> {
 		const { title, password, type } = createChannelDto;
 
 		const channel = this.create({

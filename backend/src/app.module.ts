@@ -11,9 +11,12 @@ import { ChannelModule } from './channel/channel.module';
 import { ChatModule } from './chat/chat.module';
 import { GameModule } from './game/game.module';
 import { UserModule } from './user/user.module';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot(typeORMConfig),
     AchievementModule,
     ChannelModule,
@@ -22,7 +25,8 @@ import { UserModule } from './user/user.module';
     GameModule,
     RelationModule,
     UserModule,
-    UserAchievementModule
+    UserAchievementModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

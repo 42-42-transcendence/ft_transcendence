@@ -31,7 +31,7 @@ export class ChannelController {
   })
   @Post()
   createChannel(@Body() createChannelDto: CreateChannelDto): Promise<Channel> {
-    return (this.channelService.createChennel(createChannelDto));
+    return (this.channelService.createChannel(createChannelDto));
   }
 
   @ApiOperation({

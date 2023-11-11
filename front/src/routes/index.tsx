@@ -8,28 +8,22 @@ import DashboardPage from './Dashboard';
 import ProfilePage from './Profile';
 import FriendsPage from './Friends';
 import ChannelsPage from './Channels';
-import LoginPage from './Login';
+import LoginPage, { getTokenLoader } from './Login';
 import SettingProfilePage, {
   action as settingProfileAction,
 } from './SettingProfile';
 import GamePage from './Game';
 import TwoFactorAuthPage from './TwoFactorAuth';
 import ChattingPage from './Chatting';
-
-const routerLoader = async ({ request }: { request: Request }) => {
-  console.log('루트 loader');
-  return 1;
-};
-const routerAction = async ({ request }: { request: Request }) => {
-  console.log('루트 action');
-  return 1;
-};
+import store from '../store';
 
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    loader: routerLoader,
-    action: routerAction,
+    loader: () => {
+      if (store.getState().auth.token === '') return redirect('/login');
+      return null;
+    },
     children: [
       {
         path: '/',
@@ -41,7 +35,6 @@ const router = createBrowserRouter([
             // 임시 액션 딜레이
             action: async () => {
               await new Promise((res) => setTimeout(res, 1000));
-
               return redirect('/game/1');
             },
           },
@@ -122,12 +115,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <LoginPage /> },
+      { path: 'oauth', loader: getTokenLoader, element: <></> },
+    ],
   },
   {
     path: '/logout',
     action: () => {
-      console.log('logout!');
       return redirect('/login');
     },
   },

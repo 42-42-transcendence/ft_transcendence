@@ -1,11 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 import modalSlice from './modal';
+import authSlice from './auth';
 
+const rootReducer = combineReducers({
+  modal: modalSlice.reducer,
+  auth: authSlice.reducer,
+});
 const store = configureStore({
-  reducer: {
-    modal: modalSlice.reducer,
-  },
+  reducer: rootReducer,
 });
 
 export type RootStoreType = ReturnType<typeof store.getState>;

@@ -16,7 +16,9 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot(typeORMConfig),
     AchievementModule,
     ChannelModule,
@@ -26,7 +28,7 @@ import { AuthModule } from './auth/auth.module';
     RelationModule,
     UserModule,
     UserAchievementModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

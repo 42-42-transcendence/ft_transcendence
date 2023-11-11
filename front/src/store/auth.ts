@@ -23,7 +23,8 @@ const authSlice = createSlice({
     },
 
     logout: (state) => {
-      state = initialState;
+      state.token = '';
+      state.userID = '';
     },
   },
 });

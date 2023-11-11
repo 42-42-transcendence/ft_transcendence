@@ -30,6 +30,7 @@ const action = async ({ request }: ActionFunctionArgs) => {
   if (name.length < 4 || name.length > 8) {
     return json({ errorMessage: '닉네임 길이는 4~8자 입니다.' });
   }
+
   store.dispatch(authActions.setUserID(name));
   return redirect('/');
 };

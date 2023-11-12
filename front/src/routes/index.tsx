@@ -15,88 +15,45 @@ import SettingProfilePage, {
 import GamePage from './Game';
 import TwoFactorAuthPage from './TwoFactorAuth';
 import ChattingPage from './Chatting';
-
-const routerLoader = async ({ request }: { request: Request }) => {
-  console.log('루트 loader');
-  return 1;
-};
-const routerAction = async ({ request }: { request: Request }) => {
-  console.log('루트 action');
-  return 1;
-};
+import OAuth, { loader as oAuthLoader } from './OAuth';
+import ProtectedRouter from './ProtectedRouter';
 
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    loader: routerLoader,
-    action: routerAction,
+    element: <ProtectedRouter />,
     children: [
       {
         path: '/',
         element: <RootLayout />,
         children: [
           {
-            index: true,
+            path: '/',
             element: <MainPage />,
-            // 임시 액션 딜레이
             action: async () => {
               await new Promise((res) => setTimeout(res, 1000));
-
               return redirect('/game/1');
             },
           },
           {
-            path: '/dashboard',
-            children: [
-              { index: true, element: <DashboardPage /> },
-              { path: ':userID', element: <DashboardPage /> },
-            ],
+            path: '/dashboard/:userID',
+            element: <DashboardPage />,
           },
           {
             path: '/channels',
             element: <ChannelsPage />,
-            action: async ({ request }) => {
-              const data = await request.formData();
-              console.log(data.get('room-type'));
-              console.log(data.get('room-name'));
-              console.log(data.get('room-password'));
-              return null;
-            },
           },
           {
             path: '/chatting/:mode/:chatID',
             element: <ChattingPage />,
-            action: async ({ request }) => {
-              const data = await request.formData();
-              if (request.method === 'POST') {
-                console.log(data.get('name'));
-              }
-              if (request.method === 'PATCH') {
-                console.log(data.get('room-type'));
-                console.log(data.get('room-name'));
-                console.log(data.get('room-password'));
-              }
-              if (request.method === 'DELETE') {
-                console.log('channel delete');
-              }
-              return null;
-            },
           },
           {
             path: '/friends',
             element: <FriendsPage />,
-            action: async ({ request }) => {
-              const data = await request.formData();
-              console.log(data.get('name'));
-              return null;
-            },
           },
           {
-            path: '/profile',
-            children: [
-              { index: true, element: <ProfilePage /> },
-              { path: ':userID', element: <ProfilePage /> },
-            ],
+            path: '/profile/:userID',
+            element: <ProfilePage />,
           },
         ],
       },
@@ -125,11 +82,9 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: '/logout',
-    action: () => {
-      console.log('logout!');
-      return redirect('/login');
-    },
+    path: '/oauth',
+    element: <OAuth />,
+    loader: oAuthLoader,
   },
 ]);
 

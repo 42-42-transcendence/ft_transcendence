@@ -17,7 +17,7 @@
   color: #777777;
 }
 
-.login button {
+.login a {
   margin-top: 32px;
   width: 240px;
 
@@ -31,11 +31,13 @@
   align-items: center;
 }
 
-.login button img {
+.login a img {
   width: 24px;
 }
-.login button span {
+
+.login a span {
   color: white;
   flex: 1;
   font-size: 24px;
+  text-align: center;
 }

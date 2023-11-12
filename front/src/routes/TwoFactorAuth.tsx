@@ -5,6 +5,7 @@ const TwoFactorAuthPage = () => {
   const clickHandler = () => {
     navigate('/setting-profile');
   };
+
   return (
     <main>
       <h1>2차 인증 페이지</h1>

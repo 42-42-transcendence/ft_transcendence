@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from './entities/channel.entity';
 import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
@@ -14,8 +13,8 @@ export class ChannelService {
     return (this.channelRepository.getAllChannels());
   }
 
-  createChennel(createChannelDto: CreateChannelDto): Promise<Channel> {
-    return (this.channelRepository.createChennel(createChannelDto));
+  createChannel(createChannelDto: CreateChannelDto): Promise<Channel> {
+    return (this.channelRepository.createChannel(createChannelDto));
   }
 
   getChannelById(id: number): Promise<Channel> {

@@ -36,3 +36,4 @@ backend/.idea
 !.vscode/extensions.json
 
 data/
+backend/.env

@@ -17,11 +17,11 @@ export class ChannelMember {
   })
   role: string;
 
-  @ManyToOne(() => User, (user) => user.channelMembers)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  // @ManyToOne(() => User, (user) => user.channelMembers)
+  // @JoinColumn({ name: 'userId' })
+  // user: User;
 
-  @ManyToOne(() => Channel, (channel) => channel.channelMembers)
-  @JoinColumn({ name: 'channelId' })
-  channel: Channel;
+  // @ManyToOne(() => Channel, (channel) => channel.channelMembers)
+  // @JoinColumn({ name: 'channelId' })
+  // channel: Channel;
 }

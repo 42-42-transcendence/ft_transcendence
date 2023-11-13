@@ -13,6 +13,6 @@ export class Achievement {
   @Column()
   description: string;
 
-  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.user)
-  userAchievements: UserAchievement[];
+  // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.user)
+  // userAchievements: UserAchievement[];
 }

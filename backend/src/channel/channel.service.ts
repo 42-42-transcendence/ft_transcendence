@@ -9,8 +9,8 @@ import { ChannelRepository } from './channel.repository';
 export class ChannelService {
   constructor(private channelRepository: ChannelRepository) {}
 
-  getAllChannels(): Promise<Channel[]> {
-    return (this.channelRepository.getAllChannels());
+  async getAllChannels(): Promise<Channel[]> {
+    return (await this.channelRepository.getAllChannels());
   }
 
   createChannel(createChannelDto: CreateChannelDto): Promise<Channel> {
@@ -25,8 +25,8 @@ export class ChannelService {
     await this.channelRepository.deleteChannelById(id);
   }
 
-  update(id: number, updateChannelDto: UpdateChannelDto) {
-    return `This action updates a #${id} channel`;
+  async createDummy() {
+    await this.channelRepository.createDummy();
   }
 
 

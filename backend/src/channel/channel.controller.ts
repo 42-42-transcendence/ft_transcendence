@@ -8,7 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard())
 export class ChannelController {
   constructor(private readonly channelService: ChannelService) {}
 

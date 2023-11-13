@@ -2,6 +2,8 @@ import { DataSource, Repository } from "typeorm";
 import { Channel } from "./entities/channel.entity";
 import { CreateChannelDto } from "./dto/create-channel.dto";
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { faker } from "@faker-js/faker";
+import { ChannelTypeEnum } from "./enums/channelType.enum";
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {
@@ -41,5 +43,15 @@ export class ChannelRepository extends Repository<Channel> {
 
 		if (result.affected === 0)
 			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${id}`);
+	}
+
+	async createDummy() {
+		const dummy = this.create({
+			title: faker.company.name(),
+			total: faker.number.int({ min: 1, max: 10 }),
+			password: '',
+			type: ChannelTypeEnum.PUBLIC
+		})
+		await this.save(dummy);
 	}
 }

@@ -8,11 +8,15 @@ type Props = {
   image: string;
   className?: string;
   children?: React.ReactNode;
+  clickHandler?: (e: React.MouseEvent<HTMLButtonElement> | undefined) => void;
 };
 
-const UserItem = ({ id, image, className, children }: Props) => {
+const UserItem = ({ id, image, className, children, clickHandler }: Props) => {
   return (
-    <CardButton className={`${styles.item} ${className || ''}`}>
+    <CardButton
+      className={`${styles.item} ${className || ''}`}
+      clickHandler={clickHandler}
+    >
       <AvatarImage imageURI={image} radius="30%" />
       <div className={styles.info}>
         <div className={styles.name}>{id}</div>

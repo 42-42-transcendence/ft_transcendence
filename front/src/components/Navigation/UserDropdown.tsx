@@ -1,16 +1,22 @@
-import { useNavigate, useSubmit } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from '../../styles/Dropdown.module.css';
+import { RootStoreType } from '../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { actions as authActions } from '../../store/auth';
 
 const UserDropdown = () => {
-  const submit = useSubmit();
+  const auth = useSelector((state: RootStoreType) => state.auth);
+  const dispatch = useDispatch();
+
   const navigate = useNavigate();
 
   const navigateHandler = () => {
-    navigate('/profile');
+    navigate(`/profile/${auth.userID}`);
   };
 
   const logoutHandler = () => {
-    submit(null, { action: '/logout', method: 'POST' });
+    dispatch(authActions.logout());
+    navigate('/login');
   };
 
   return (

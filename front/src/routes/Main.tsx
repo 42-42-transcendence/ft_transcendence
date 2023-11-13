@@ -1,4 +1,4 @@
-import GameModeForm from '../components/GameMode/GameModeForm';
+import GameModeForm from '../components/GameModeForm';
 
 import styles from '../styles/Main.module.css';
 

@@ -1,13 +1,24 @@
 import CardButton from '../../UI/CardButton';
 import styles from '../../styles/Profile.module.css';
+import useOpenModal from '../Modal/useOpenModal';
 
 type Props = {
   title: string;
+  description: string;
   isAchieved: boolean;
+  onShowDetail: (title: string, description: string) => void;
 };
-const AchievementItem = ({ title, isAchieved }: Props) => {
+
+const AchievementItem = ({
+  title,
+  description,
+  isAchieved,
+  onShowDetail,
+}: Props) => {
+  const openModal = useOpenModal('showAchievementDetail');
   const clickHandler = () => {
-    console.log('modal');
+    openModal();
+    onShowDetail(title, description);
   };
 
   const classes = `${styles.item} ${isAchieved ? styles.achieved : ''}`;
@@ -18,7 +29,7 @@ const AchievementItem = ({ title, isAchieved }: Props) => {
       clickHandler={clickHandler}
       disabled={!isAchieved}
     >
-      {title}
+      {isAchieved && title}
     </CardButton>
   );
 };

@@ -1,7 +1,7 @@
 import styles from '../../styles/Chatting.module.css';
 import ChattingMemberItem from './ChattingMemberItem';
 
-type User = {
+type Member = {
   id: string;
   image: string;
   role: 'owner' | 'staff' | 'member';
@@ -9,10 +9,11 @@ type User = {
 };
 
 type Props = {
-  members: User[];
+  members: Member[];
+  onActive: (member: Member) => void;
 };
 
-const ChattingMembers = ({ members }: Props) => {
+const ChattingMemberList = ({ members, onActive }: Props) => {
   const memberItemList = members.map((member) => (
     <ChattingMemberItem
       key={member.id}
@@ -20,8 +21,9 @@ const ChattingMembers = ({ members }: Props) => {
       image={member.image}
       role={member.role}
       isMuted={member.isMuted}
+      onActive={onActive}
     />
   ));
   return <ul className={styles.members}>{memberItemList}</ul>;
 };
-export default ChattingMembers;
+export default ChattingMemberList;

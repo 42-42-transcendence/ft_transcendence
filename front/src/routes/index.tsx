@@ -15,43 +15,45 @@ import SettingProfilePage, {
 import GamePage from './Game';
 import TwoFactorAuthPage from './TwoFactorAuth';
 import ChattingPage from './Chatting';
-
-const routerLoader = async ({ request }: { request: Request }) => {
-  console.log('루트 loader');
-  return 1;
-};
-const routerAction = async ({ request }: { request: Request }) => {
-  console.log('루트 action');
-  return 1;
-};
+import OAuth, { loader as oAuthLoader } from './OAuth';
+// import ProtectedRouter from './ProtectedRouter';
 
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    loader: routerLoader,
-    action: routerAction,
+    // element: <ProtectedRouter />,
     children: [
       {
         path: '/',
         element: <RootLayout />,
         children: [
-          { index: true, element: <MainPage /> },
           {
-            path: '/dashboard',
-            children: [
-              { index: true, element: <DashboardPage /> },
-              { path: ':userID', element: <DashboardPage /> },
-            ],
+            path: '/',
+            element: <MainPage />,
+            action: async () => {
+              await new Promise((res) => setTimeout(res, 1000));
+              return redirect('/game/1');
+            },
           },
-          { path: '/channels', element: <ChannelsPage /> },
-          { path: '/chatting/:mode/:chatID', element: <ChattingPage /> },
-          { path: '/friends', element: <FriendsPage /> },
           {
-            path: '/profile',
-            children: [
-              { index: true, element: <ProfilePage /> },
-              { path: ':userID', element: <ProfilePage /> },
-            ],
+            path: '/dashboard/:userID',
+            element: <DashboardPage />,
+          },
+          {
+            path: '/channels',
+            element: <ChannelsPage />,
+          },
+          {
+            path: '/chatting/:mode/:chatID',
+            element: <ChattingPage />,
+          },
+          {
+            path: '/friends',
+            element: <FriendsPage />,
+          },
+          {
+            path: '/profile/:userID',
+            element: <ProfilePage />,
           },
         ],
       },
@@ -80,11 +82,9 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: '/logout',
-    action: () => {
-      console.log('logout!');
-      return redirect('/login');
-    },
+    path: '/oauth',
+    element: <OAuth />,
+    loader: oAuthLoader,
   },
 ]);
 

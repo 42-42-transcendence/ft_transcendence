@@ -3,13 +3,13 @@ import { vec2 } from 'gl-matrix';
 let data: gameData = {
 	paddle: [
 		{
-			position: vec2.fromValues(-0.95, 0),
+			position: vec2.fromValues(-0.96, 0),
 			paddleSpeed: 2.0,
 			width: 0.1, // 패들의 폭
-			height: 1.5, // 패들의 높이
+			height: 0.5, // 패들의 높이
 		},
 		{
-			position: vec2.fromValues(0.95, 0),
+			position: vec2.fromValues(0.96, 0),
 			paddleSpeed: 2.0,
 			width: 0.1, // 패들의 폭
 			height: 1.5, // 패들의 높이
@@ -29,11 +29,16 @@ let data: gameData = {
 	gl: null,
 	paddleBuffer: null,
 	ballBuffer: null,
+	lineBuffer: null,
 	positionLoc: 0,
+	viewPortLoc: null,
 	lastTime: 0,
 	isFirstRender: true,
-	textCanvas: null,
-	gameCanvas: null,
+	profileRef: [null, null],
+	scoreRef: [null, null],
+	canvasRef: null,
+	socket: null,
+	program: [null, null],
 };
 
 export default data;

@@ -8,14 +8,21 @@ import usePress from "../components/WebGL/hook/usePress";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const textRef = useRef<HTMLCanvasElement>(null);
+    const profileRef1 = useRef<HTMLDivElement>(null);
+    const scoreRef1 = useRef<HTMLDivElement>(null);
+    const profileRef2 = useRef<HTMLDivElement>(null);
+    const scoreRef2 = useRef<HTMLDivElement>(null);
     const [error, setError] = useState(null);
-    useCanvasSize(canvasRef);
+    useCanvasSize();
     usePress();
 
     useEffect(() => {
         try {
-            data.gameCanvas = canvasRef.current;
+            data.canvasRef = canvasRef.current;
+            data.profileRef[0] = profileRef1.current;
+            data.scoreRef[0] = scoreRef1.current;
+            data.profileRef[1] = profileRef2.current;
+            data.scoreRef[1] = scoreRef2.current;
             /* webGL 초기화 */
             initialize();
             /* shader 세팅 */
@@ -38,13 +45,17 @@ const GamePage = () => {
 
     return (
         <main>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%'}}>
+                <div ref={profileRef1} style={{position: "absolute"}}> player1 </div>
+                <div ref={scoreRef1} style={{position: "absolute"}}> 0 </div>
                 <canvas
                     ref={canvasRef}
                     width="600"
                     height={window.innerHeight}
                     style={{ backgroundColor: 'black', boxShadow: '0 4px 15px red' }}
                 ></canvas>
+                <div ref={scoreRef2} style={{position: "absolute"}}> 0 </div>
+                <div ref={profileRef2} style={{position: "absolute"}}> player2 </div>
             </div>
         </main>
     );

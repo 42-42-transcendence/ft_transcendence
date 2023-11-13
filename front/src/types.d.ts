@@ -21,7 +21,6 @@ type KeyPress = {
 	up: boolean;
 	down: boolean;
 };
-
 interface gameData {
 	paddle: Paddle[];
 	ball: Ball;
@@ -30,9 +29,14 @@ interface gameData {
 	gl: WebGLRenderingContext | null;
 	paddleBuffer: WebGLBuffer | null;
 	ballBuffer: WebGLBuffer | null;
+	lineBuffer: WebGLBuffer | null;
 	positionLoc: number;
+	viewPortLoc: WebGLUniformLocation | null;
 	lastTime: number;
 	isFirstRender: boolean;
-	textCanvas: HTMLCanvasElement | null;
-	gameCanvas: HTMLCanvasElement | null;
+	canvasRef: HTMLCanvasElement | null;
+	socket: number | null;
+	profileRef: (HTMLDivElement | null)[];
+	scoreRef: (HTMLDivElement | null)[];
+	program: (WebGLProgram | null)[];
 }

@@ -1,8 +1,8 @@
 import data from '../interface/gameData';
+import usePress from "../hook/usePress";
 
 export function render() {
 	if (!data.gl) return;
-	// const { data.gl, data.paddle, data.ball, positionLoc} = data;
 	
 	data.gl.clear(data.gl.COLOR_BUFFER_BIT | data.gl.DEPTH_BUFFER_BIT);
 
@@ -38,23 +38,48 @@ export function render() {
 		ball.position[0] - ball.radius, ball.position[1] - ball.radius,   // 3
 		ball.position[0] + ball.radius, ball.position[1] - ball.radius,    // 4
 	]);
+	// 경계선
+	const lineSize = 0.04;
+	const lineVertices = new Float32Array([
+		-lineSize, 1,
+		lineSize, 1,
+		-lineSize, -1,
+
+		lineSize, 1,
+		-lineSize, -1,
+		lineSize, -1,
+	]);
 
 	if (data.isFirstRender) {
-		data.gl.bufferData(data.gl.ARRAY_BUFFER, paddleVertices, data.gl.STATIC_DRAW);
-		data.isFirstRender = false;
-	} else {
-		data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, paddleVertices);
-	}
+		data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
+		data.gl.bufferData(data.gl.ARRAY_BUFFER, paddleVertices, data.gl.DYNAMIC_DRAW);
 
+		data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
+		data.gl.bufferData(data.gl.ARRAY_BUFFER, ballVertices, data.gl.DYNAMIC_DRAW);
+
+		data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.lineBuffer);
+		data.gl.bufferData(data.gl.ARRAY_BUFFER, lineVertices, data.gl.STATIC_DRAW);
+
+		data.isFirstRender = false;
+		return ;
+	}
+	data.gl.useProgram(data.program[1]);
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.lineBuffer);
+	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, lineVertices);
+	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
+	if (data.canvasRef)
+		data.gl.uniform2f(data.viewPortLoc, data.canvasRef.clientWidth, data.canvasRef.clientHeight);
+	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+
+	data.gl.useProgram(data.program[0]);
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
+	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, paddleVertices);
 	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
 	data.gl.drawArrays(data.gl.TRIANGLES, 0, 12);
 
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
 	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, ballVertices);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
-
-	// 공 렌더링
 	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
 	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
 }
-
 export default render;

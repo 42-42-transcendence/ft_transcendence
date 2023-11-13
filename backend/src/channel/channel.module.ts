@@ -6,12 +6,15 @@ import { Channel } from './entities/channel.entity';
 import { ChannelRepository } from './channel.repository';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Channel])
+    TypeOrmModule.forFeature([Channel]),
+    AuthModule
   ],
   controllers: [ChannelController],
-  providers: [ChannelService, ChannelRepository, JwtStrategy, PassportModule],
+  providers: [ChannelService, ChannelRepository],
 })
 export class ChannelModule {}

@@ -12,7 +12,7 @@ import { Suspense } from 'react';
 
 type oAuthResponseData = {
   jwtToken: string;
-  nickname: string;
+  userName: string;
 };
 
 type loaderData = {
@@ -27,8 +27,9 @@ const OAuth = () => {
     <Suspense fallback={<h1 style={{ textAlign: 'center' }}>...login...</h1>}>
       <Await resolve={data.oAuthData}>
         {(auth) => {
+          console.log(auth);
           dispatch(authActions.setAuthToken(auth.jwtToken));
-          dispatch(authActions.setUserID(auth.nickname));
+          dispatch(authActions.setUserID(auth.userName));
           return (
             <Navigate
               // to={auth.isSignUp ? '/' : '/setting-profile'}

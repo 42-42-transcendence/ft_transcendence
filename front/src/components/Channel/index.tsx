@@ -5,6 +5,7 @@ import ChannelList from './ChannelList';
 import styles from '../../styles/Channel.module.css';
 import useModalState from '../Modal/useModalState';
 import CreatingChatRoomModal from '../Modal/CreatingChatRoomModal';
+import ChannelIconList from './ChannelIconList';
 
 const Channel = () => {
   const [selectedOption, setSelectedOption] = useState<string>('public');
@@ -22,6 +23,7 @@ const Channel = () => {
           onChangeOption={changeOptionHandler}
         />
         <ChannelList selectedOption={selectedOption} />
+        <ChannelIconList />
       </div>
       {showCreatingChatRoom && <CreatingChatRoomModal />}
     </>

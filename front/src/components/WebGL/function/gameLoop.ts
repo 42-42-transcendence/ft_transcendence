@@ -3,13 +3,14 @@ import { render } from './render';
 import update from "./update";
 
 export function gameLoop(timeStamp: number) {
-	// 60 프레임으로 고정
-	if (timeStamp < data.lastTime + (1000 / 60)) {
-		requestAnimationFrame(gameLoop);
-		return;
-	}
+	let delta = (timeStamp - data.lastTime) / 1000.0;
+	// if (timeStamp < data.lastTime + (1000 / 120)) {
+	// 	requestAnimationFrame(gameLoop);
+	// 	return;
+	// }
 	render();
-	update();
+	// s docket.emit('update', delta, update);
+	update(delta);
 	data.lastTime = timeStamp;
 	requestAnimationFrame(gameLoop);
 }

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { Auth } from "./entities/auth.entity";
+import { User } from "src/user/entities/user.entity";
 
 @Injectable()
 export class AuthRepository extends Repository<Auth> {
@@ -18,6 +19,12 @@ export class AuthRepository extends Repository<Auth> {
 		})
 		const result = await this.save(auth);
 
+		return (result);
+	}
+
+	async relationAuthUser(auth: Auth, user: User): Promise<Auth>{
+		auth.user = user;
+		const result = await this.save(auth);
 		return (result);
 	}
 }

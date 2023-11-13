@@ -5,11 +5,13 @@ import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { IsNull } from 'typeorm';
+import { UserRepository } from 'src/user/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private authRepository: AuthRepository,
+    private userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -17,7 +19,7 @@ export class AuthService {
     const client_id = process.env.AUTH_ID;
     const client_secret = process.env.AUTH_SECRET;
     const grant_type = 'authorization_code';
-    const redirect_uri = 'http://localhost:3000/login/oauth';
+    const redirect_uri = 'http://localhost:3000/oauth';
 
     const authUrl = 'https://api.intra.42.fr/oauth/token';
     const data = { code, grant_type, client_id, client_secret, redirect_uri };
@@ -32,7 +34,7 @@ export class AuthService {
     }
   }
 
-  async requestIntraUID(accessToken: string): Promise<string> {
+  async requestIntraUID(accessToken: string): Promise<{ intraUID: string, intraName: string }> {
     const url = 'https://api.intra.42.fr/v2/me';
 
     try {
@@ -41,20 +43,32 @@ export class AuthService {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (res.status === HttpStatus.OK) return res.data.id;
+
+      if (res.status === HttpStatus.OK) {
+        const intraUID = res.data.id;
+        const intraName = res.data.login;
+        return { intraUID, intraName };
+      }
+
     } catch (e) {
       console.log('bbbbbbbb', e);
     }
   }
 
-  async isSignUp(intraUID: string): Promise<boolean> {
+  // 본래 회원가입 되어있는지 아닌지(user 객체가 있는지 없는지)를 확인하여 boolean값을 반환하는 메소드
+  // 현재는 임시 테스트로 username을 반환하게 했음
+  async isSignup(intraUID: string, intraName: string): Promise<string> {
     const auth = await this.authRepository.getAuthByIntraID(intraUID);
 
     if (!auth) {
-      this.authRepository.createAuth(intraUID);
-      return false;
+      const newAuth = await this.authRepository.createAuth(intraUID);
+      const newUser = await this.userRepository.createUser(intraName);
+      const updataAuth = await this.authRepository.relationAuthUser(newAuth, newUser);
+      // return false;
+      return (updataAuth.user.nickname);
     }
-    return true;
+
+    return (auth.user.nickname);
   }
 
   async createJWT(intraUID: string): Promise<string> {

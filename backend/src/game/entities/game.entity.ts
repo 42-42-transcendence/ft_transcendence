@@ -1,6 +1,7 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { GameTypeEnum } from '../enums/gameType.enum';
 import { GameModeEnum } from '../enums/gameMode.enum';
+import { User } from 'src/user/entities/user.entity';
 
 export class Game {
   @PrimaryGeneratedColumn()
@@ -26,10 +27,10 @@ export class Game {
   winnerId: number;
 
   // @ManyToOne(() => User)
-  // @JoinColumn({ name: 'playerOneId' })
+  // @JoinColumn({ referencedColumnName: 'userID', name: 'playerOneId' })
   // playerOne: User;
-  //
+  
   // @ManyToOne(() => User)
-  // @JoinColumn({ name: 'playerTwoId' })
+  // @JoinColumn({ referencedColumnName: 'userID', name: 'playerOneId' })
   // playerTwo: User;
 }

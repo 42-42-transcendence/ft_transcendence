@@ -4,6 +4,7 @@ import { ChannelMember } from '../../channel-member/entities/channel-member.enti
 import { Chat } from '../../chat/entities/chat.entity';
 import { Relation } from '../../relation/entities/relation.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
+import { Game } from 'src/game/entities/game.entity';
 
 @Entity()
 export class User {
@@ -16,39 +17,39 @@ export class User {
   })
   nickname: string;
 
-  @Column({ nullable: false })
-  isSecondAuth: boolean;
+  // @Column({ nullable: false })
+  // isSecondAuth: boolean;
 
-  @Column({
-    nullable: false,
-    default: '/Users/jwee/ft_transcendence/backend/defaultImage.jpeg',
-  })
-  avatar: string;
+  // @Column({
+  //   nullable: false,
+  //   default: '/Users/jwee/ft_transcendence/backend/defaultImage.jpeg',
+  // })
+  // avatar: string;
 
-  @Column({ nullable: false })
-  point: number;
+  // @Column({ nullable: false })
+  // point: number;
 
   @OneToOne(() => Auth, (auth) => auth.user)
   auth: Auth
 
-  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
-  userAchievements: UserAchievement[];
+  // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
+  // userAchievements: UserAchievement[];
 
-  @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
-  channelMembers: ChannelMember[];
+  // @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
+  // channelMembers: ChannelMember[];
 
-  @OneToMany(() => Chat, (chat) => chat.channel)
-  chats: Chat[];
+  // @OneToMany(() => Chat, (chat) => chat.channel)
+  // chats: Chat[];
 
-  @OneToMany(() => Relation, (relation) => relation.requester)
-  initiatedRelations: Relation[];
+  // @OneToMany(() => Relation, (relation) => relation.requester)
+  // initiatedRelations: Relation[];
 
-  @OneToMany(() => Relation, (relation) => relation.responder)
-  receivedRelations: Relation[];
+  // @OneToMany(() => Relation, (relation) => relation.responder)
+  // receivedRelations: Relation[];
 
   // @OneToMany(() => Game, (game) => game.playerOne)
   // initiatedGames: Game[];
-  //
+  
   // @OneToMany(() => Game, (game) => game.playerTwo)
   // joinedGames: Game[];
 }

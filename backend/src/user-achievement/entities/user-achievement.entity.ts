@@ -12,11 +12,11 @@ export class UserAchievement {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.userAchievements)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  // @ManyToOne(() => User, (user) => user.userAchievements)
+  // @JoinColumn({ name: 'userId' })
+  // user: User;
 
-  @ManyToOne(() => Achievement, (achievement) => achievement.userAchievements, { cascade: true })
-  @JoinColumn({ name: 'achievementId' })
-  achievement: Achievement;
+  // @ManyToOne(() => Achievement, (achievement) => achievement.userAchievements, { cascade: true })
+  // @JoinColumn({ name: 'achievementId' })
+  // achievement: Achievement;
 }

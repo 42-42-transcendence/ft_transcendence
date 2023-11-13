@@ -10,17 +10,15 @@ import { ApiTags } from '@nestjs/swagger';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // 본래 token과 isSignUp이라는 boolean값을 반환해야함
   @Post()
-  async userAuth(@Body('code') code: string): Promise<{ jwtToken: string; isSignUp: boolean }> {
+  async userAuth(@Body('code') code: string): Promise<{ jwtToken: string; userName: string }> {
     const accessToken = await this.authService.createAuthToken(code);
-    console.log('1', accessToken);
-    const intraUID = await this.authService.requestIntraUID(accessToken);
-    console.log('2', intraUID);
+    const { intraUID, intraName }= await this.authService.requestIntraUID(accessToken);
     const jwtToken = await this.authService.createJWT(intraUID);
-    console.log('3', jwtToken);
-    const isSignUp = await this.authService.isSignUp(intraUID);
+    const userName = await this.authService.isSignup(intraUID, intraName);
 
-    return { jwtToken, isSignUp };
+    return { jwtToken, userName };
   }
 
   @Post('signup')

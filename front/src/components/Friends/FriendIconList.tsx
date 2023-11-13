@@ -1,7 +1,7 @@
 import plusIcon from '../../assets/plus-icon.svg';
 import refreshIcon from '../../assets/refresh-icon.svg';
 import styles from '../../styles/Friends.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 const FriendIconList = () => {
   const openHandler = useOpenModal('showAddFriend');

@@ -2,13 +2,13 @@ import ToggleRadioButton from '../../UI/ToggleRadioButton';
 import styles from '../../styles/Channel.module.css';
 
 type Props = {
-  selectedOption: string;
-  onChangeOption: (option: string) => void;
+  selectedFilter: string;
+  onChangeFilter: (option: string) => void;
 };
 
 const filterOptionList = ['public', 'private', 'direct'];
 
-const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
+const ChannelSidebar = ({ selectedFilter, onChangeFilter }: Props) => {
   const optionRadioList = filterOptionList.map((option, index) => (
     <ToggleRadioButton
       key={option}
@@ -16,9 +16,9 @@ const ChannelSidebar = ({ selectedOption, onChangeOption }: Props) => {
       id={option}
       value={option}
       title={option.toLocaleUpperCase()}
-      isChecked={option === selectedOption}
+      isChecked={option === selectedFilter}
       defaultChecked={index === 0}
-      onActive={onChangeOption}
+      onActive={onChangeFilter}
     />
   ));
 

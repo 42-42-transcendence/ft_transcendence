@@ -3,7 +3,7 @@ import ChattingMemberList from './ChattingMemberList';
 
 import styles from '../../styles/Chatting.module.css';
 import ChattingSettingList from './ChattingSettingList';
-import useModalState from '../Modal/useModalState';
+import useModalState from '../../store/Modal/useModalState';
 import ChatExitConfirmModal from '../Modal/ChatExitConfirmModal';
 import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';

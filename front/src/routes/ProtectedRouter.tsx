@@ -1,11 +1,10 @@
-import { useSelector } from 'react-redux';
-import { RootStoreType } from '../store';
 import { Navigate, Outlet } from 'react-router-dom';
+import useAuthState from '../store/Auth/useAuthState';
 
 const ProtectedRouter = () => {
-  const auth = useSelector((state: RootStoreType) => state.auth);
+  const authState = useAuthState();
 
-  if (!auth.token) {
+  if (!authState.token) {
     return <Navigate to="/login" />;
   } else {
     return <Outlet />;

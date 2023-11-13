@@ -3,7 +3,7 @@ import addUserIcon from '../../assets/add-user-icon.svg';
 import exitIcon from '../../assets/exit-icon.svg';
 
 import styles from '../../styles/Chatting.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 const ChattingSettingList = () => {
   const openConfigModalHandler = useOpenModal('showChatRoomConfig');

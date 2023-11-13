@@ -1,9 +1,13 @@
 import plusIcon from '../../assets/plus-icon.svg';
 import refreshIcon from '../../assets/refresh-icon.svg';
 import styles from '../../styles/Channel.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
-const ChannelIconList = () => {
+type Props = {
+  onRefreshHandler: () => void;
+};
+
+const ChannelIconList = ({ onRefreshHandler }: Props) => {
   const openHandler = useOpenModal('showCreatingChatRoom');
 
   return (
@@ -14,7 +18,7 @@ const ChannelIconList = () => {
         </button>
       </li>
       <li>
-        <button className={styles.icon}>
+        <button className={styles.icon} onClick={onRefreshHandler}>
           <img src={refreshIcon} alt="refresh channel icon" />
         </button>
       </li>

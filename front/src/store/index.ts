@@ -1,7 +1,7 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
-import modalSlice from './modal';
-import authSlice from './auth';
+import modalSlice from './Modal/modal';
+import authSlice from './Auth/auth';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 

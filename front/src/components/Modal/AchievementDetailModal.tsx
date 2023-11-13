@@ -1,5 +1,5 @@
 import Modal from '../../UI/Modal';
-import useCloseModal from './useCloseModal';
+import useCloseModal from '../../store/Modal/useCloseModal';
 
 import styles from '../../styles/Modal.module.css';
 

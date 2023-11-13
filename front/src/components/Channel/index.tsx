@@ -1,32 +1,72 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ChannelSidebar from './ChannelSidebar';
 import ChannelList from './ChannelList';
 
 import styles from '../../styles/Channel.module.css';
-import useModalState from '../Modal/useModalState';
+import useModalState from '../../store/Modal/useModalState';
 import CreatingChatRoomModal from '../Modal/CreatingChatRoomModal';
 import ChannelIconList from './ChannelIconList';
+import useRequest from '../../http/useRequest';
+
+type ChannelType = {
+  id: string;
+  title: string;
+  type: 'public' | 'private' | 'direct';
+  total?: number;
+  password?: string;
+};
+
+const url = 'http://localhost:3001/api/channel';
+const options = {
+  method: 'GET',
+};
 
 const Channel = () => {
-  const [selectedOption, setSelectedOption] = useState<string>('public');
+  const { isLoading, error, request } = useRequest<ChannelType[]>();
+
   const showCreatingChatRoom = useModalState('showCreatingChatRoom');
 
-  const changeOptionHandler = (option: string) => {
-    setSelectedOption(option);
+  const [selectedFilter, setSelectedFilter] = useState<string>('public');
+  const [channels, setChannels] = useState<ChannelType[]>([]);
+
+  const changeFilterHandler = (filter: string) => {
+    setSelectedFilter(filter);
   };
+
+  const setRequestData = useCallback(async () => {
+    const channels = await request(url, options);
+
+    setChannels(channels || []);
+  }, [request]);
+
+  const refreshChannelHandler = () => {
+    setRequestData();
+  };
+
+  useEffect(() => {
+    setRequestData();
+  }, [setRequestData]);
 
   return (
     <>
       <div className={styles.container}>
         <ChannelSidebar
-          selectedOption={selectedOption}
-          onChangeOption={changeOptionHandler}
+          selectedFilter={selectedFilter}
+          onChangeFilter={changeFilterHandler}
         />
-        <ChannelList selectedOption={selectedOption} />
-        <ChannelIconList />
+        <ChannelList
+          filteredChannels={channels.filter(
+            (channel) => channel.type === selectedFilter
+          )}
+          isLoading={isLoading}
+          error={error}
+        />
+        <ChannelIconList onRefreshHandler={refreshChannelHandler} />
       </div>
       {showCreatingChatRoom && <CreatingChatRoomModal />}
     </>
   );
 };
+
+export type { ChannelType };
 export default Channel;

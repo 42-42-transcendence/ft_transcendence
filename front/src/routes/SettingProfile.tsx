@@ -1,7 +1,7 @@
 import { ActionFunctionArgs, json, redirect } from 'react-router-dom';
 import SettingProfileForm from '../components/SettingProfile/SettingProfileForm';
 import store from '../store';
-import { actions as authActions } from '../store/auth';
+import { actions as authActions } from '../store/Auth/auth';
 
 const SettingProfilePage = () => {
   return (

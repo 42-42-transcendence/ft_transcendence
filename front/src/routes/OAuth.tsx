@@ -7,7 +7,7 @@ import {
   defer,
   Await,
 } from 'react-router-dom';
-import { actions as authActions } from '../store/auth';
+import { actions as authActions } from '../store/Auth/auth';
 import { Suspense } from 'react';
 
 type oAuthResponseData = {

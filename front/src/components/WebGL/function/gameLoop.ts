@@ -9,7 +9,6 @@ export function gameLoop(timeStamp: number) {
 	// 	return;
 	// }
 	render();
-	// s docket.emit('update', delta, update);
 	update(delta);
 	data.lastTime = timeStamp;
 	requestAnimationFrame(gameLoop);

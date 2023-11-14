@@ -1,6 +1,43 @@
 import data from '../interface/gameData';
 import usePress from "../hook/usePress";
 
+function initializeBuffer(buffer: WebGLBuffer | null,vertices: Float32Array) {
+if (!data.gl)
+		throw new Error('data.gl is null');
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, buffer);
+	data.gl.bufferData(data.gl.ARRAY_BUFFER, vertices, data.gl.DYNAMIC_DRAW);
+}
+function drawPaddle(paddleVertices: Float32Array) {
+	if (!data.gl)
+		throw new Error('data.gl is null');
+	data.gl.useProgram(data.program[0]);
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
+	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, paddleVertices);
+	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
+	data.gl.drawArrays(data.gl.TRIANGLES, 0, 12);
+}
+
+function drawBall(ballVertices: Float32Array) {
+	if (!data.gl)
+		throw new Error('data.gl is null');
+	data.gl.useProgram(data.program[0]);
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
+	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, ballVertices);
+	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
+	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+}
+
+function drawLine(lineVertices: Float32Array) {
+	if (!data.gl)
+		throw new Error('data.gl is null');
+	data.gl.useProgram(data.program[1]);
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.lineBuffer);
+	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, lineVertices);
+	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
+	if (data.canvasRef)
+		data.gl.uniform2f(data.viewPortLoc, data.canvasRef.clientWidth, data.canvasRef.clientHeight);
+	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+}
 export function render() {
 	if (!data.gl) return;
 	
@@ -51,35 +88,15 @@ export function render() {
 	]);
 
 	if (data.isFirstRender) {
-		data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
-		data.gl.bufferData(data.gl.ARRAY_BUFFER, paddleVertices, data.gl.DYNAMIC_DRAW);
-
-		data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
-		data.gl.bufferData(data.gl.ARRAY_BUFFER, ballVertices, data.gl.DYNAMIC_DRAW);
-
-		data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.lineBuffer);
-		data.gl.bufferData(data.gl.ARRAY_BUFFER, lineVertices, data.gl.STATIC_DRAW);
+		initializeBuffer(data.paddleBuffer, paddleVertices);
+		initializeBuffer(data.ballBuffer, ballVertices);
+		initializeBuffer(data.lineBuffer, lineVertices);
 
 		data.isFirstRender = false;
 		return ;
 	}
-	data.gl.useProgram(data.program[1]);
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.lineBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, lineVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	if (data.canvasRef)
-		data.gl.uniform2f(data.viewPortLoc, data.canvasRef.clientWidth, data.canvasRef.clientHeight);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
-
-	data.gl.useProgram(data.program[0]);
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, paddleVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 12);
-
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, ballVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+	drawLine(lineVertices);
+	drawBall(ballVertices);
+	drawPaddle(paddleVertices);
 }
 export default render;

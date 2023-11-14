@@ -8,9 +8,9 @@ import { ApiProperty, ApiTags } from '@nestjs/swagger';
 export class Channel {
 
   @ApiProperty({
-    description: '채널 Id',
-    example: '1',
-    required: true
+    description: 'Channel ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    type: 'string'
   })
   @PrimaryGeneratedColumn('uuid')
   channelID: string;
@@ -18,7 +18,7 @@ export class Channel {
   @ApiProperty({
     description: '채널 이름',
     example: 'Channel Title',
-    required: true
+    type: 'string'
   })
   @Column({ nullable: false })
   title: string;
@@ -26,7 +26,7 @@ export class Channel {
   @ApiProperty({
     description: '채널 인원수',
     example: '10',
-    required: true,
+    type: 'number',
     default: 0
   })
   @Column({
@@ -38,7 +38,7 @@ export class Channel {
   @ApiProperty({
     description: '채널 비밀번호',
     example: 'qwer1234',
-    required: true,
+    type: 'string',
     default: ''
   })
   @Column({ nullable: false })
@@ -47,7 +47,7 @@ export class Channel {
   @ApiProperty({
     description: '채널 타입',
     example: 'public',
-    required: true,
+    type: 'enum',
     default: ChannelTypeEnum.PUBLIC
   })
   @Column({

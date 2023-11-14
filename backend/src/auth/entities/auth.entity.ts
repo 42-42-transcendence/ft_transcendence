@@ -10,8 +10,8 @@ export class Auth {
 	@Column({ nullable: false })
 	intraUID: string;
 
-	@OneToOne(() => User, { nullable: true, eager: true })
+	@OneToOne(() => User, { nullable: true})
 	@JoinColumn({ referencedColumnName: 'userID' })
-	userFK: User;
+	userFK: Promise<User>;
 
 }

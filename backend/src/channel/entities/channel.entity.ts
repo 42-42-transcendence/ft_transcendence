@@ -12,8 +12,8 @@ export class Channel {
     example: '1',
     required: true
   })
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  channelID: string;
 
   @ApiProperty({
     description: '채널 이름',
@@ -58,8 +58,8 @@ export class Channel {
   type: ChannelTypeEnum;
 
 
-  // @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel)
-  // channelMembers: ChannelMember[];
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.channelFK)
+  channelMembers: ChannelMember[];
 
   // @OneToMany(() => Chat, (chat) => chat.channel)
   // chats: Chat[];

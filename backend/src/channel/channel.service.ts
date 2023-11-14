@@ -17,12 +17,12 @@ export class ChannelService {
     return (this.channelRepository.createChannel(createChannelDto));
   }
 
-  getChannelById(id: number): Promise<Channel> {
-    return (this.channelRepository.getChannelById(id));
+  getChannelById(channelID: string): Promise<Channel> {
+    return (this.channelRepository.getChannelById(channelID));
   }
 
-  async deleteChannelById(id: number): Promise<void> {
-    await this.channelRepository.deleteChannelById(id);
+  async deleteChannelById(channelID: string): Promise<void> {
+    await this.channelRepository.deleteChannelById(channelID);
   }
 
   async createDummy() {

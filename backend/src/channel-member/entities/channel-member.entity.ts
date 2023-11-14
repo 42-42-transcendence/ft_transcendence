@@ -1,14 +1,21 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Channel } from '../../channel/entities/channel.entity';
 import { ChannelMemberRole } from '../enums/channelMemberRole.enum';
 
 @Entity()
 export class ChannelMember {
-  @PrimaryColumn()
-  userId: number;
-  @PrimaryColumn()
-  channelId: number;
+
+  @PrimaryGeneratedColumn('uuid')
+  channelMemberID: string
+
+  @ManyToOne(() => Channel, (channel) => channel.channelMembers, { eager: true })
+  @JoinColumn({ referencedColumnName: 'channelID' })
+  channelFK: Channel;
+
+  @ManyToOne(() => User, (user) => user.channelMembers, { eager: true })
+  @JoinColumn({ referencedColumnName: 'userID' })
+  userFK: User;
 
   @Column({
     type: 'enum',
@@ -17,11 +24,4 @@ export class ChannelMember {
   })
   role: string;
 
-  // @ManyToOne(() => User, (user) => user.channelMembers)
-  // @JoinColumn({ name: 'userId' })
-  // user: User;
-
-  // @ManyToOne(() => Channel, (channel) => channel.channelMembers)
-  // @JoinColumn({ name: 'channelId' })
-  // channel: Channel;
 }

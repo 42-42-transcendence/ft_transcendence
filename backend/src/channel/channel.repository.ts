@@ -29,20 +29,20 @@ export class ChannelRepository extends Repository<Channel> {
 		return (channel);
 	}
 
-	async getChannelById(id: number): Promise<Channel> {
-		const channel = await this.findOneBy({id});
+	async getChannelById(channelID: string): Promise<Channel> {
+		const channel = await this.findOneBy({ channelID });
 
 		if (!channel)
-			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${id}`);
+			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
 		return (channel);
 	}
 
-	async deleteChannelById(id: number): Promise<void> {
-		const result = await this.delete(id);
+	async deleteChannelById(channelID: string): Promise<void> {
+		const result = await this.delete(channelID);
 
 		if (result.affected === 0)
-			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${id}`);
+			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 	}
 
 	async createDummy() {

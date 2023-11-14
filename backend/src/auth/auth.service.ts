@@ -65,10 +65,10 @@ export class AuthService {
       const newUser = await this.userRepository.createUser(intraName);
       const updataAuth = await this.authRepository.relationAuthUser(newAuth, newUser);
       // return false;
-      return (updataAuth.user.nickname);
+      return ((await updataAuth.userFK).nickname);
     }
 
-    return (auth.user.nickname);
+    return ((await auth.userFK).nickname);
   }
 
   async createJWT(intraUID: string): Promise<string> {

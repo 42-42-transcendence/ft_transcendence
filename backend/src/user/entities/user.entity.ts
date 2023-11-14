@@ -8,8 +8,9 @@ import { Game } from 'src/game/entities/game.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  userID: number;
+
+  @PrimaryGeneratedColumn('uuid')
+  userID: string;
 
   @Column({
     nullable: false,
@@ -29,14 +30,14 @@ export class User {
   // @Column({ nullable: false })
   // point: number;
 
-  @OneToOne(() => Auth, (auth) => auth.user)
+  @OneToOne(() => Auth, (auth) => auth.userFK)
   auth: Auth
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   // userAchievements: UserAchievement[];
 
-  // @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
-  // channelMembers: ChannelMember[];
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.userFK)
+  channelMembers: ChannelMember[];
 
   // @OneToMany(() => Chat, (chat) => chat.channel)
   // chats: Chat[];
@@ -49,7 +50,7 @@ export class User {
 
   // @OneToMany(() => Game, (game) => game.playerOne)
   // initiatedGames: Game[];
-  
+
   // @OneToMany(() => Game, (game) => game.playerTwo)
   // joinedGames: Game[];
 }

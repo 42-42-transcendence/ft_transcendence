@@ -53,8 +53,8 @@ export class ChannelController {
     type: Channel
   })
   @Get(':id')
-  getChannelById(@Param('id') id: number): Promise<Channel> {
-    return this.channelService.getChannelById(id);
+  getChannelById(@Param('id') channelID: string): Promise<Channel> {
+    return this.channelService.getChannelById(channelID);
   }
 
   @ApiOperation({
@@ -64,8 +64,8 @@ export class ChannelController {
     description: '성공',
   })
   @Delete(':id')
-  async deleteChannelById(@Param('id') id: number): Promise<void> {
-    await this.channelService.deleteChannelById(id);
+  async deleteChannelById(@Param('id') channelID: string): Promise<void> {
+    await this.channelService.deleteChannelById(channelID);
   }
 
 }

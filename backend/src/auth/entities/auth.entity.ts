@@ -3,13 +3,15 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "ty
 
 @Entity()
 export class Auth {
-	@PrimaryGeneratedColumn()
-	authID: number;
+
+	@PrimaryGeneratedColumn('uuid')
+	authID: string;
 
 	@Column({ nullable: false })
 	intraUID: string;
 
 	@OneToOne(() => User, { nullable: true, eager: true })
 	@JoinColumn({ referencedColumnName: 'userID' })
-	user: User;
+	userFK: User;
+
 }

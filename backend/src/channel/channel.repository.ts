@@ -4,6 +4,7 @@ import { CreateChannelDto } from "./dto/create-channel.dto";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { faker } from "@faker-js/faker";
 import { ChannelTypeEnum } from "./enums/channelType.enum";
+import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {
@@ -53,5 +54,11 @@ export class ChannelRepository extends Repository<Channel> {
 			type: ChannelTypeEnum.PUBLIC
 		})
 		await this.save(dummy);
+	}
+
+	async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
+		const channel = await this.getChannelById(channelID);
+
+		return (await channel.channelMembers);
 	}
 }

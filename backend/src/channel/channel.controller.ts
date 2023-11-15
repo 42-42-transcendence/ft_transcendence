@@ -9,6 +9,7 @@ import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
+import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -71,6 +72,18 @@ export class ChannelController {
   @Get(':id')
   getChannelById(@Param('id') channelID: string): Promise<Channel> {
     return this.channelService.getChannelById(channelID);
+  }
+
+  @ApiOperation({
+    summary: '채널 내 멤버 전체 조회'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: [ChannelMember]
+  })
+  @Get(':id/members')
+  getJoinChannelMembers(@Param('id') channelID: string): Promise<ChannelMember[]> {
+    return (this.channelService.getJoinChannelMembers(channelID));
   }
 
   @ApiOperation({

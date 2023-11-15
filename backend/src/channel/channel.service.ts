@@ -4,7 +4,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { Channel } from './entities/channel.entity';
 import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
-import { ChannelMemberRepository } from 'src/channel-member/channel-member.repository';
+import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 
 @Injectable()
 export class ChannelService {
@@ -30,5 +30,8 @@ export class ChannelService {
     await this.channelRepository.createDummy();
   }
 
+  async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
+    return (this.channelRepository.getJoinChannelMembers(channelID));
+  }
 
 }

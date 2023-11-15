@@ -8,6 +8,7 @@ import { useState } from 'react';
 type Props = {
   onRefreshChannel: () => void;
 };
+
 const CreatingChatRoomModal = ({ onRefreshChannel }: Props) => {
   const closeHandler = useCloseModal();
 
@@ -17,7 +18,7 @@ const CreatingChatRoomModal = ({ onRefreshChannel }: Props) => {
 
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const { isLoading, error, request } = useRequest<string>();
+  const { isLoading, error, request } = useRequest();
 
   const changeTypeHandler = (e: React.MouseEvent<HTMLInputElement>) => {
     setEnteredType(e.currentTarget.value);
@@ -48,11 +49,14 @@ const CreatingChatRoomModal = ({ onRefreshChannel }: Props) => {
       password: enteredPassword,
     };
 
-    const response = await request('http://localhost:3001/api/channel', {
-      method: 'POST',
-      body: JSON.stringify(bodyData),
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const response = await request<string>(
+      'http://localhost:3001/api/channel',
+      {
+        method: 'POST',
+        body: JSON.stringify(bodyData),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
 
     if (response === null) {
       setErrorMessage(error);

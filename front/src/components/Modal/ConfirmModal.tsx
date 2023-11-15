@@ -2,25 +2,24 @@ import Modal from '../../UI/Modal';
 import useCloseModal from '../../store/Modal/useCloseModal';
 
 import styles from '../../styles/Modal.module.css';
-import { useNavigate } from 'react-router-dom';
 
-const ChatExitConfirmModal = () => {
+type Props = {
+  title: string;
+  message: string;
+  acceptHandler: () => void;
+};
+
+const ConfirmModal = ({ title, message, acceptHandler }: Props) => {
   const closeHandler = useCloseModal();
-  const navigate = useNavigate();
-
-  const exitHandler = () => {
-    navigate('/channels');
-    closeHandler();
-  };
 
   return (
     <Modal onClose={closeHandler}>
-      <div className={styles.header}>채널 나가기</div>
-      <div className={styles.wrapper}>정말로 나가시겠습니까?</div>
+      <div className={styles.header}>{title}</div>
+      <div className={styles.wrapper}>{message}</div>
       <div className={styles.footer}>
         <button
           className={`${styles['footer-button']} ${styles.confirm}`}
-          onClick={exitHandler}
+          onClick={acceptHandler}
         >
           OK
         </button>
@@ -34,4 +33,4 @@ const ChatExitConfirmModal = () => {
     </Modal>
   );
 };
-export default ChatExitConfirmModal;
+export default ConfirmModal;

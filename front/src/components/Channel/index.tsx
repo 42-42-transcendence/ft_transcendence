@@ -22,7 +22,7 @@ const options = {
 };
 
 const Channel = () => {
-  const { isLoading, error, request } = useRequest<ChannelType[]>();
+  const { isLoading, error, request } = useRequest();
 
   const showCreatingChatRoom = useModalState('showCreatingChatRoom');
 
@@ -34,7 +34,7 @@ const Channel = () => {
   };
 
   const setRequestData = useCallback(async () => {
-    const channels = await request(url, options);
+    const channels = await request<ChannelType[]>(url, options);
 
     setChannels(channels?.reverse() || []);
   }, [request]);

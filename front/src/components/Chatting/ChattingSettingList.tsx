@@ -8,7 +8,7 @@ import useOpenModal from '../../store/Modal/useOpenModal';
 const ChattingSettingList = () => {
   const openConfigModalHandler = useOpenModal('showChatRoomConfig');
   const openInvitationModalHandler = useOpenModal('showChatInvitation');
-  const openExitModalHandler = useOpenModal('showChatExitConfirm');
+  const openExitModalHandler = useOpenModal('showConfirmModal');
 
   return (
     <ul className={styles['setting-icon-list']}>

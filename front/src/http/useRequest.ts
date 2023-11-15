@@ -12,21 +12,23 @@ const useRequest = <T>() => {
       setError('');
       try {
         const response = await fetch(url, {
+          ...options,
           headers: {
+            ...options.headers,
             Authorization: 'Bearer ' + authState.token,
           },
-          ...options,
         });
 
-        // yet: 접근 권한 여부를 요청시마다 갱신이 필요함
+        // 접근 권한 여부를 요청시마다 갱신이 필요함
         if (!response.ok) {
-          throw new Error('Request Failed - ' + response.status);
+          const errorMessage = await response.text();
+          throw new Error(errorMessage);
         }
 
         return await response.json();
       } catch (e) {
-        if (typeof e === 'string') setError('Error: ' + e);
-        else if (e instanceof Error) setError('Error: ' + e.message);
+        if (typeof e === 'string') setError(e);
+        else if (e instanceof Error) setError(e.message);
         return null;
       } finally {
         setIsLoading(false);

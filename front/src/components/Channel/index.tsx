@@ -36,7 +36,7 @@ const Channel = () => {
   const setRequestData = useCallback(async () => {
     const channels = await request(url, options);
 
-    setChannels(channels || []);
+    setChannels(channels?.reverse() || []);
   }, [request]);
 
   const refreshChannelHandler = () => {
@@ -63,7 +63,9 @@ const Channel = () => {
         />
         <ChannelIconList onRefreshHandler={refreshChannelHandler} />
       </div>
-      {showCreatingChatRoom && <CreatingChatRoomModal />}
+      {showCreatingChatRoom && (
+        <CreatingChatRoomModal onRefreshChannel={refreshChannelHandler} />
+      )}
     </>
   );
 };

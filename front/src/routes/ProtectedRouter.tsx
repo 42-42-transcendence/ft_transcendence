@@ -6,6 +6,8 @@ const ProtectedRouter = () => {
 
   if (!authState.token) {
     return <Navigate to="/login" />;
+  } else if (!authState.userID) {
+    return <Navigate to="/setting-profile" />;
   } else {
     return <Outlet />;
   }

@@ -1,19 +1,26 @@
 import data from '../interface/gameData';
 import { vec2 } from 'gl-matrix';
-import {each} from "lodash";
 
+const tempVec2 = vec2.create();
+function updateScore() {
+	if (!data.scoreRef[0] || !data.scoreRef[1]) return;
+	data.scoreRef[0].innerText = String(data.scores[0]);
+	data.scoreRef[1].innerText = String(data.scores[1]);
+}
 function update(delta: number) {
 	const ball = data.ball;
 	const paddle = data.paddle;
 
-	vec2.add(ball.position, ball.position, vec2.scale(vec2.create(), ball.direction, ball.velocity * delta));
+	vec2.add(ball.position, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta));
 
 	/* 패들 & 공 충돌 감지 */
 	for (let i = 0; i < 2; i++) {
-		let paddleTop = paddle[i].position[1] + paddle[i].height / 2.0;
-		let paddleBottom = paddle[i].position[1] - paddle[i].height / 2.0;
-		let paddleLeft = paddle[i].position[0] - paddle[i].width / 2.0;
-		let paddleRight = paddle[i].position[0] + paddle[i].width / 2.0;
+		const paddleHeightHalf = paddle[i].height / 2.0;
+		const paddleWidthHalf = paddle[i].width / 2.0;
+		let paddleTop = paddle[i].position[1] + paddleHeightHalf;
+		let paddleBottom = paddle[i].position[1] - paddleHeightHalf;
+		let paddleLeft = paddle[i].position[0] - paddleWidthHalf;
+		let paddleRight = paddle[i].position[0] + paddleWidthHalf;
 
 		const BallTop = ball.position[1] + ball.radius;
 		const BallBottom = ball.position[1] - ball.radius;
@@ -32,19 +39,20 @@ function update(delta: number) {
 	/* 공이 라인을 넘어가는지 확인 */
 	if (ball.position[0] + ball.radius > 1.0 || ball.position[0] - ball.radius < -1.0) {
 		if (ball.position[0] + ball.radius > 1.0) {
-			if (!data.scoreRef[0]) return;
-			data.scoreRef[0].innerText = String(++data.scores[0]);
+			++data.scores[0];
 		} else {
-			if (!data.scoreRef[1]) return;
-			data.scoreRef[1].innerText = String(++data.scores[1]);
+			++data.scores[1];
 		}
+		updateScore();
 		ball.position[0] = 0;
 		ball.position[1] = 0;
 		ball.direction = vec2.fromValues(1.0, 0);
 	}
 
 	if (data.scores[0] === 5 || data.scores[1] === 5) {
-		// 게임 종료 조건.
+		data.scores[0] = 0;
+		data.scores[1] = 0;
+		updateScore();
 	}
 
 	/* 공이 위, 아래 벽을 넘어가는지 확인 */

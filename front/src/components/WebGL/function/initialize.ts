@@ -1,5 +1,4 @@
 import data from '../interface/gameData';
-import { RefObject } from 'react';
 
 function initialize() {
 	if (data.canvasRef === null) return;

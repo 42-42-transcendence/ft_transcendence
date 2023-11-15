@@ -1,5 +1,4 @@
 import data from '../interface/gameData';
-import usePress from "../hook/usePress";
 
 function initializeBuffer(buffer: WebGLBuffer | null,vertices: Float32Array) {
 if (!data.gl)
@@ -99,4 +98,3 @@ export function render() {
 	drawBall(ballVertices);
 	drawPaddle(paddleVertices);
 }
-export default render;

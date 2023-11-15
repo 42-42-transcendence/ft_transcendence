@@ -8,8 +8,8 @@ export function gameLoop(timeStamp: number) {
 	// 	requestAnimationFrame(gameLoop);
 	// 	return;
 	// }
-	render();
 	update(delta);
+	render();
 	data.lastTime = timeStamp;
 	requestAnimationFrame(gameLoop);
 }

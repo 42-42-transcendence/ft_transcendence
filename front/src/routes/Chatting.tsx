@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import ChatPasswordModal from '../components/Modal/ChatPasswordModal';
 import useOpenModal from '../store/Modal/useOpenModal';
 import useModalState from '../store/Modal/useModalState';
+import BackLink from '../UI/BackLink';
 
 type RequestPasswordRequired = {
   isPasswordRequired: boolean;
@@ -65,7 +66,13 @@ const ChattingPage = () => {
   }, [request, openModalHandler, requestAuthenticated, params]);
 
   let contents: React.ReactNode = '';
-  if (error) contents = <h1>해당 채팅방에 접근할 수 없습니다.</h1>;
+  if (error)
+    contents = (
+      <>
+        <h1>해당 채팅방에 접근할 수 없습니다.</h1>
+        <BackLink title="채널목록보기" redirect="/channels" />
+      </>
+    );
   else if (isLoading) contents = <h1>..Check Access Authentication..</h1>;
   else if (showChatPassword)
     contents = <ChatPasswordModal onPassowrdSubmit={requestAuthenticated} />;

@@ -23,9 +23,9 @@ export class AuthRepository extends Repository<Auth> {
 	}
 
 	async relationAuthUser(auth: Auth, user: User): Promise<Auth> {
-
-		auth.userFK = Promise.resolve(user);
+		auth.user = Promise.resolve(user);
 		const result = await this.save(auth);
+
 		return (result);
 	}
 }

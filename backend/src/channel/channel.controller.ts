@@ -5,12 +5,19 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Channel } from './entities/channel.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { GetAuth } from 'src/auth/get-auth.decorator';
+import { Auth } from 'src/auth/entities/auth.entity';
+import { ChannelMemberService } from 'src/channel-member/channel-member.service';
+import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
 @UseGuards(AuthGuard())
 export class ChannelController {
-  constructor(private readonly channelService: ChannelService) {}
+  constructor(
+    private channelService: ChannelService,
+    private channelMemberService: ChannelMemberService
+  ) {}
 
   // 임시로 채널이 없으면 더미를 생성하게 함
   @ApiOperation({
@@ -41,8 +48,17 @@ export class ChannelController {
     type: Channel
   })
   @Post()
-  createChannel(@Body() createChannelDto: CreateChannelDto): Promise<Channel> {
-    return (this.channelService.createChannel(createChannelDto));
+  async createChannel(
+    @GetAuth() auth: Auth,
+    @Body() createChannelDto: CreateChannelDto
+  ): Promise<Channel> {
+    const user = await auth.user;
+    const channel = await this.channelService.createChannel(createChannelDto);
+    const role = ChannelMemberRole.OWNER;
+
+    await this.channelMemberService.relationChannelMember({ channel, user, role });
+
+    return (channel);
   }
 
   @ApiOperation({

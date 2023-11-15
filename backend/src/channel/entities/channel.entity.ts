@@ -58,8 +58,8 @@ export class Channel {
   type: ChannelTypeEnum;
 
 
-  @OneToMany(() => ChannelMember, (channelMember) => channelMember.channelFK)
-  channelMembers: ChannelMember[];
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel)
+  channelMembers: Promise<ChannelMember[]>;
 
   // @OneToMany(() => Chat, (chat) => chat.channel)
   // chats: Chat[];

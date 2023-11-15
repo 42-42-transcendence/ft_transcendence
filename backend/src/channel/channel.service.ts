@@ -4,6 +4,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { Channel } from './entities/channel.entity';
 import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
+import { ChannelMemberRepository } from 'src/channel-member/channel-member.repository';
 
 @Injectable()
 export class ChannelService {
@@ -13,7 +14,7 @@ export class ChannelService {
     return (await this.channelRepository.getAllChannels());
   }
 
-  createChannel(createChannelDto: CreateChannelDto): Promise<Channel> {
+  async createChannel(createChannelDto: CreateChannelDto): Promise<Channel> {
     return (this.channelRepository.createChannel(createChannelDto));
   }
 

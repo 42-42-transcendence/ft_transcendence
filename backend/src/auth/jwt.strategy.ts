@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { AuthRepository } from "./auth.repository";
+import { Auth } from "./entities/auth.entity";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,15 +15,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 		})
 	}
 
-	async validate(payload) {
+	// 유효한 토큰이면 해당 유저의 auth객체를 반환한다
+	async validate(payload): Promise<Auth> {
 		const { intraUID } = payload;
-		const authUser = await this.authRepository.findOneBy({ intraUID });
+		const auth = await this.authRepository.findOneBy({ intraUID });
 
-		if (!authUser) {
+		if (!auth) {
 			throw new UnauthorizedException(`token이 유효하지 않습니다.`);
 		}
 
-		return (authUser);
+		return (auth);
 	}
 
 }

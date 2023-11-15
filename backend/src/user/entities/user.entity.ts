@@ -42,13 +42,13 @@ export class User {
   // @Column({ nullable: false })
   // point: number;
 
-  @OneToOne(() => Auth, (auth) => auth.userFK)
-  auth: Auth
+  @OneToOne(() => Auth, (auth) => auth.user)
+  auth: Promise<Auth>
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   // userAchievements: UserAchievement[];
 
-  @OneToMany(() => ChannelMember, (channelMember) => channelMember.userFK)
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
   channelMembers: ChannelMember[];
 
   // @OneToMany(() => Chat, (chat) => chat.channel)

@@ -1,26 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChannelMemberDto } from './dto/create-channel-member.dto';
-import { UpdateChannelMemberDto } from './dto/update-channel-member.dto';
+import { RelationChannelMemberDto } from './dto/relation-channel-member.dto';
+import { ChannelMemberRepository } from './channel-member.repository';
 
 @Injectable()
 export class ChannelMemberService {
-  create(createChannelMemberDto: CreateChannelMemberDto) {
-    return 'This action adds a new channelMember';
+  constructor(private channelMemberRepository: ChannelMemberRepository) {}
+
+  async relationChannelMember(relationChannelMemberDto: RelationChannelMemberDto) {
+    return (this.channelMemberRepository.relationChannelMember(relationChannelMemberDto));
   }
 
-  findAll() {
-    return `This action returns all channelMember`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} channelMember`;
-  }
-
-  update(id: number, updateChannelMemberDto: UpdateChannelMemberDto) {
-    return `This action updates a #${id} channelMember`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} channelMember`;
-  }
 }

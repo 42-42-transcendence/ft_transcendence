@@ -1,13 +1,12 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Channel } from '../../channel/entities/channel.entity';
 
 @Entity()
 export class Chat {
-  @PrimaryColumn()
-  userId: number;
-  @PrimaryColumn()
-  channelId: number;
+
+  @PrimaryGeneratedColumn('uuid')
+  chatID: string;
 
   @Column()
   content: string;
@@ -15,11 +14,11 @@ export class Chat {
   @CreateDateColumn()
   createdAt: Date;
 
-  // @ManyToOne(() => User, (user) => user.channelMembers)
-  // @JoinColumn({ name: 'userId' })
-  // user: User;
+  // unique 하지 않으면 referencedColumnName을 지정할 수 없다
+  @ManyToOne(() => User, (user) => user.chats)
+  @JoinColumn({ referencedColumnName: 'nickname' })
+  user: User;
 
-  // @ManyToOne(() => Channel, (channel) => channel.channelMembers)
-  // @JoinColumn({ name: 'channelId' })
-  // channel: Channel;
+  @ManyToOne(() => Channel, (channel) => channel.chats)
+  channel: Channel;  
 }

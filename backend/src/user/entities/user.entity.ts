@@ -51,8 +51,8 @@ export class User {
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
   channelMembers: Promise<ChannelMember[]>;
 
-  // @OneToMany(() => Chat, (chat) => chat.channel)
-  // chats: Chat[];
+  @OneToMany(() => Chat, (chat) => chat.user)
+  chats: Promise<Chat[]>;
 
   // @OneToMany(() => Relation, (relation) => relation.requester)
   // initiatedRelations: Relation[];

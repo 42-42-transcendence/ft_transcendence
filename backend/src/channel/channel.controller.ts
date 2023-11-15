@@ -121,6 +121,7 @@ export class ChannelController {
     const role = ChannelMemberRole.GUEST;
 
     await this.channelMemberService.relationChannelMember({ channel, user, role });
+    await channel.chats;
     return (channel);
   }
 

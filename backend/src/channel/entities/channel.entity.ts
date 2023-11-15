@@ -61,6 +61,6 @@ export class Channel {
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel)
   channelMembers: Promise<ChannelMember[]>;
 
-  // @OneToMany(() => Chat, (chat) => chat.channel)
-  // chats: Chat[];
+  @OneToMany(() => Chat, (chat) => chat.channel)
+  chats: Promise<Chat[]>;
 }

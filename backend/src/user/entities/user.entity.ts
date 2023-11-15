@@ -49,7 +49,7 @@ export class User {
   // userAchievements: UserAchievement[];
 
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
-  channelMembers: ChannelMember[];
+  channelMembers: Promise<ChannelMember[]>;
 
   // @OneToMany(() => Chat, (chat) => chat.channel)
   // chats: Chat[];

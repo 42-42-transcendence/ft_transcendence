@@ -1,6 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { User } from "./entities/user.entity";
+import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -15,5 +16,19 @@ export class UserRepository extends Repository<User> {
 		const result = await this.save(user);
 
 		return (result);
+	}
+
+	async getUserById(userID: string): Promise<User> {
+		const user = await this.findOneBy({ userID });
+
+		if (!user)
+			throw new NotFoundException(`해당 user를 찾을 수 없습니다: ${userID}`);
+		return (user);
+	}
+
+	async getJoinChannels(userID: string): Promise<ChannelMember[]> {
+		const user = await this.getUserById(userID);
+
+		return (await user.channelMembers);
 	}
 }

@@ -2,6 +2,7 @@
 
 export enum ChannelTypeEnum {
   PUBLIC = 'public',
+  PROTECTED = 'protected',
   PRIVATE = 'private',
   DM = 'dm',
 }

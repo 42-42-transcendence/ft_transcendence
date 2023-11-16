@@ -5,8 +5,8 @@ import GameModeSelectionList from './GameModeSelectionList';
 import CardButton from '../../UI/CardButton';
 import GameMatchingModal from '../Modal/GameMatchingModal';
 
-import useModalState from '../Modal/useModalState';
-import useOpenModal from '../Modal/useOpenModal';
+import useModalState from '../../store/Modal/useModalState';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 const GameModeForm = () => {
   const showGameMatching = useModalState('showGameMatching');

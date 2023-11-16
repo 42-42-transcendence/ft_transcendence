@@ -4,7 +4,8 @@ import useCanvasSize from '../components/WebGL/hook/useCanvasSize';
 import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
 import initialize from '../components/WebGL/function/initialize';
-import usePress from "../components/WebGL/hook/usePress";
+import usePress from '../components/WebGL/hook/usePress';
+import useCloseModal from '../store/Modal/useCloseModal';
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);

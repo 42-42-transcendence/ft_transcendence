@@ -3,9 +3,10 @@ import { useState } from 'react';
 import styles from '../../styles/Friends.module.css';
 import FriendList from './FriendList';
 import FriendsSidebar from './FriendsSidebar';
-import useModalState from '../Modal/useModalState';
+import useModalState from '../../store/Modal/useModalState';
 import AddFriendModal from '../Modal/AddFriendModal';
 import FriendDetailModal from '../Modal/FriendDetailModal';
+import FriendIconList from './FriendIconList';
 
 type Friend = {
   id: string;
@@ -46,6 +47,7 @@ const Friends = () => {
         selectedOption={selectedOption}
         onActive={activeFriendHandler}
       />
+      <FriendIconList />
       {showAddFriend && <AddFriendModal />}
       {showFriendDetail && (
         <FriendDetailModal friend={activedFriend as Friend} />

@@ -3,7 +3,7 @@ import AvatarImage from '../../UI/AvatarImage';
 import Card from '../../UI/Card';
 
 import styles from '../../styles/Profile.module.css';
-import useModalState from '../Modal/useModalState';
+import useModalState from '../../store/Modal/useModalState';
 import AchievementItem from './AchievementItem';
 import AchievementDetailModal from '../Modal/AchievementDetailModal';
 

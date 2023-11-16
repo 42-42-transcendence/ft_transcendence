@@ -1,24 +1,17 @@
 import styles from '../../styles/Channel.module.css';
 import lockIcon from '../../assets/lock-icon.svg';
 import { Link } from 'react-router-dom';
+import { ChannelType } from '.';
 
-type Props = {
-  id: string;
-  title: string;
-  mode: 'public' | 'private' | 'direct';
-  total?: number;
-  password?: boolean;
-};
-
-const ChannelItem = ({ id, title, mode, total, password }: Props) => {
+const ChannelItem = ({ id, title, type, total, password }: ChannelType) => {
   return (
-    <Link to={`/chatting/${mode}/${id}`}>
+    <Link to={`/chatting/${type}/${id}`}>
       <li className={styles.item}>
         <div className={styles.title}>
           <div>{title}</div>
           {password && <img src={lockIcon} alt="lock icon" />}
         </div>
-        <div>{mode !== 'direct' && total && `${total}/10`}</div>
+        <div>{type !== 'direct' && total && `${total}/10`}</div>
       </li>
     </Link>
   );

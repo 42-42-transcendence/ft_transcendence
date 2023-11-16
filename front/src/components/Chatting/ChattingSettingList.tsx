@@ -3,12 +3,12 @@ import addUserIcon from '../../assets/add-user-icon.svg';
 import exitIcon from '../../assets/exit-icon.svg';
 
 import styles from '../../styles/Chatting.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 const ChattingSettingList = () => {
   const openConfigModalHandler = useOpenModal('showChatRoomConfig');
   const openInvitationModalHandler = useOpenModal('showChatInvitation');
-  const openExitModalHandler = useOpenModal('showChatExitConfirm');
+  const openExitModalHandler = useOpenModal('showConfirmModal');
 
   return (
     <ul className={styles['setting-icon-list']}>

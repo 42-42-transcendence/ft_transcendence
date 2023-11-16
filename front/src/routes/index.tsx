@@ -16,12 +16,12 @@ import GamePage from './Game';
 import TwoFactorAuthPage from './TwoFactorAuth';
 import ChattingPage from './Chatting';
 import OAuth, { loader as oAuthLoader } from './OAuth';
-import ProtectedRouter from './ProtectedRouter';
+// import ProtectedRouter from './ProtectedRouter';
 
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    element: <ProtectedRouter />,
+    // element: <ProtectedRouter />,
     children: [
       {
         path: '/',

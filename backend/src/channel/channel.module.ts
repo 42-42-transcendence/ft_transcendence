@@ -7,11 +7,13 @@ import { ChannelRepository } from './channel.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { ChannelMemberRepository } from 'src/channel-member/channel-member.repository';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
+import { EventsModule } from 'src/events/events.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Channel]),
-    AuthModule
+    AuthModule,
+    EventsModule
   ],
   controllers: [ChannelController],
   providers: [

@@ -18,7 +18,7 @@ import { ChannelTypeEnum } from './enums/channelType.enum';
 export class ChannelController {
   constructor(
     private channelService: ChannelService,
-    private channelMemberService: ChannelMemberService
+    private channelMemberService: ChannelMemberService,
   ) {}
 
   // 임시로 채널이 없으면 더미를 생성하게 함
@@ -76,7 +76,7 @@ export class ChannelController {
   async checkJoinChannel(@Param('id') channelID: string): Promise<boolean> {
     const channel = await this.channelService.getChannelById(channelID);
 
-    if (channel.type === ChannelTypeEnum.PUBLIC) {
+    if (channel.password !== '') {
       return (true);
     }
     return (false);
@@ -98,10 +98,18 @@ export class ChannelController {
   ): Promise<boolean> {
     const channel = await this.channelService.getChannelById(channelID);
 
-    if (channel.password === password) {
-      return (true);
+    if (channel.type === ChannelTypeEnum.PRIVATE)
+      return (false);
+
+    if (channel.type === ChannelTypeEnum.DM)
+      return (false);
+
+    if (channel.type === ChannelTypeEnum.PUBLIC) {
+      if (channel.password !== password) {
+        return (false);
+      }
     }
-    return (false);
+    return (true);
   }
 
   @ApiOperation({

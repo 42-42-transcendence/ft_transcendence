@@ -5,13 +5,25 @@ import { Chat } from '../../chat/entities/chat.entity';
 import { Relation } from '../../relation/entities/relation.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Game } from 'src/game/entities/game.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class User {
 
+  @ApiProperty({
+		description: 'User ID',
+		example: '550e8400-e29b-41d4-a716-446655440000',
+		type: 'string',
+	})
   @PrimaryGeneratedColumn('uuid')
   userID: string;
 
+  @ApiProperty({
+		description: '닉네임',
+		example: 'doohkim',
+		type: 'string',
+    uniqueItems: true
+	})
   @Column({
     nullable: false,
     unique: true,
@@ -30,14 +42,14 @@ export class User {
   // @Column({ nullable: false })
   // point: number;
 
-  @OneToOne(() => Auth, (auth) => auth.userFK)
-  auth: Auth
+  @OneToOne(() => Auth, (auth) => auth.user)
+  auth: Promise<Auth>
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   // userAchievements: UserAchievement[];
 
-  @OneToMany(() => ChannelMember, (channelMember) => channelMember.userFK)
-  channelMembers: ChannelMember[];
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
+  channelMembers: Promise<ChannelMember[]>;
 
   // @OneToMany(() => Chat, (chat) => chat.channel)
   // chats: Chat[];

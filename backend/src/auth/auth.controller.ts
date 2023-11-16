@@ -11,7 +11,7 @@ import { UserAuthResponseDto } from './dto/user-auth-response.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // 본래 token과 isSignUp이라는 boolean값을 반환해야함\
+  // 본래 token과 isSignUp이라는 boolean값을 반환해야함
   @ApiOperation({
     summary: 'JWT 토큰 발급 및 회원가입 유무 파악'
   })

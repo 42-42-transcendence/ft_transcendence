@@ -10,6 +10,7 @@ import { Auth } from 'src/auth/entities/auth.entity';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
+import { ChannelTypeEnum } from './enums/channelType.enum';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -61,6 +62,69 @@ export class ChannelController {
 
     return (channel);
   }
+
+  // public인 경우만 true인지, 아니면 다른 타입은 어떻게 되는지
+  // 아마 타입을 보내주는게 더 나을수도 있음
+  @ApiOperation({
+    summary: '채널 타입이 PUBLIC일 경우 true, 아니면 false'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<boolean>
+  })
+  @Get(':id/join')
+  async checkJoinChannel(@Param('id') channelID: string): Promise<boolean> {
+    const channel = await this.channelService.getChannelById(channelID);
+
+    if (channel.type === ChannelTypeEnum.PUBLIC) {
+      return (true);
+    }
+    return (false);
+  }
+
+  // 여기는 단순히 맞다고 확인만 해야하는지, 아니면 입장까지 된 상태로 해야하는건지
+  // 일단 단순 체크만 함
+  @ApiOperation({
+    summary: 'protected 채널의 패스워드가 맞으면 true, 아니면 false'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<boolean>
+  })
+  @Post(':id/join')
+  async checkProtectedChannelPassword(
+    @Param('id') channelID: string,
+    @Body('password') password: string
+  ): Promise<boolean> {
+    const channel = await this.channelService.getChannelById(channelID);
+
+    if (channel.password === password) {
+      return (true);
+    }
+    return (false);
+  }
+
+  @ApiOperation({
+    summary: 'channel-member 관계 만들고 channel 정보 리턴'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<Channel>
+  })
+  @Get(':id/join/auth')
+  async joinChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string
+  ): Promise<Channel> {
+    const channel = await this.channelService.getChannelById(channelID);
+    const user = await auth.user;
+    const role = ChannelMemberRole.GUEST;
+
+    await this.channelMemberService.relationChannelMember({ channel, user, role });
+    await channel.chats;
+    return (channel);
+  }
+
 
   @ApiOperation({
     summary: '채널 id 검색'

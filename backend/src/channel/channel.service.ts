@@ -5,6 +5,7 @@ import { Channel } from './entities/channel.entity';
 import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class ChannelService {
@@ -32,6 +33,10 @@ export class ChannelService {
 
   async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
     return (this.channelRepository.getJoinChannelMembers(channelID));
+  }
+
+  async joinChannel(user: User, channelID: string) {
+    
   }
 
 }

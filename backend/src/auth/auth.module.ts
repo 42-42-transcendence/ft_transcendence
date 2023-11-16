@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './jwt.strategy';
 import { UserRepository } from 'src/user/user.repository';
+import { EventsModule } from 'src/events/events.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UserRepository } from 'src/user/user.repository';
         signOptions: { expiresIn: 3600 * 24 },
       }),
     }),
+    EventsModule
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, JwtStrategy, UserRepository],

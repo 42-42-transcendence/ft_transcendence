@@ -1,7 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { ChannelMember } from "./entities/channel-member.entity";
-import { RelationChannelMemberDto } from "./dto/relation-channel-member.dto";
+import { ChannelMemberDto } from "./dto/channel-member.dto";
+import { ChannelMemberRole } from "./enums/channel-member-role.enum";
 
 @Injectable()
 export class ChannelMemberRepository extends Repository<ChannelMember> {
@@ -9,8 +10,8 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		super(ChannelMember, dataSource.createEntityManager());
 	}
 
-	async relationChannelMember(relationChannelMemberDto: RelationChannelMemberDto): Promise<ChannelMember> {
-		const { channel, user, role } = relationChannelMemberDto;
+	async relationChannelMember(ChannelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
+		const { channel, user, role } = ChannelMemberDto;
 
 		const channelMember = this.create({
 			channel,
@@ -19,6 +20,20 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		})
 
 		const result = await this.save(channelMember);
+		return (result);
+	}
+
+	async deleteChannelMember(channelMemberID: string) {
+		const result = await this.delete(channelMemberID);
+
+		if (result.affected === 0)
+			throw new NotFoundException('없는 channel-member 관계입니다.');
+	}
+
+	async updateChannelMemberRole(member: ChannelMember, role: ChannelMemberRole): Promise<ChannelMember> {
+		member.role = role;
+
+		const result = await this.save(member);
 		return (result);
 	}
 }

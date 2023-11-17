@@ -63,8 +63,7 @@ export class ChannelController {
     return (channel);
   }
 
-  // public인 경우만 true인지, 아니면 다른 타입은 어떻게 되는지
-  // 아마 타입을 보내주는게 더 나을수도 있음
+
   @ApiOperation({
     summary: '채널 비밀번호가 있으면 true, 아니면 false'
   })
@@ -81,6 +80,7 @@ export class ChannelController {
     }
     return { isPasswordRequired: false };
   }
+
 
   // 에러 status로 하면 제일 좋을 것 같긴 함
   @ApiOperation({
@@ -105,8 +105,7 @@ export class ChannelController {
     }
 
     const user = await auth.user;
-    const members = await channel.channelMembers;
-    const member = members.find(member => member.user === user);
+    const member = await this.channelMemberService.getChannelMemberByChannelUser(channel, user);
 
     if (member && member.role === ChannelMemberRole.BLOCK) {
       return ({ isAuthenticated: false });
@@ -127,6 +126,7 @@ export class ChannelController {
 
     return ({ isAuthenticated: true });
   }
+
 
   @ApiOperation({
     summary: 'channel-member 관계 만들고 channel 정보 리턴'

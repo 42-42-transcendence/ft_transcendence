@@ -10,8 +10,8 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		super(ChannelMember, dataSource.createEntityManager());
 	}
 
-	async relationChannelMember(ChannelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
-		const { channel, user, role } = ChannelMemberDto;
+	async relationChannelMember(channelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
+		const { channel, user, role } = channelMemberDto;
 
 		const channelMember = this.create({
 			channel,

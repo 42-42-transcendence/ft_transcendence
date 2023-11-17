@@ -20,7 +20,9 @@ export class ChannelMember {
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: 'string'
   })
-  @ManyToOne(() => Channel, (channel) => channel.channelMembers)
+  @ManyToOne(() => Channel, (channel) => channel.channelMembers, {
+    onDelete: 'CASCADE'
+  })
   // @JoinColumn({ referencedColumnName: 'channelID' })
   channel: Channel;
 
@@ -29,7 +31,9 @@ export class ChannelMember {
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: 'string'
   })
-  @ManyToOne(() => User, (user) => user.channelMembers)
+  @ManyToOne(() => User, (user) => user.channelMembers, {
+    onDelete: 'CASCADE'
+  })
   // @JoinColumn({ referencedColumnName: 'userID' })
   user: User;
 

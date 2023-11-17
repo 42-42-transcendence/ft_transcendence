@@ -42,7 +42,9 @@ export class User {
   // @Column({ nullable: false })
   // point: number;
 
-  @OneToOne(() => Auth, (auth) => auth.user)
+  @OneToOne(() => Auth, (auth) => auth.user, {
+    onDelete: 'CASCADE'
+  })
   auth: Promise<Auth>
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)

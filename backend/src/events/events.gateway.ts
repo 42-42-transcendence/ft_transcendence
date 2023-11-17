@@ -1,7 +1,11 @@
 import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway(8080)
+@WebSocketGateway({
+  cors: {
+    origin: 'http://localhost:3000'
+  }
+})
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
 
   // 다른 모듈에서 쓰기 위해 (io 역할)

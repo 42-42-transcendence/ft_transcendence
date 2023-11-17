@@ -29,7 +29,7 @@ export class GameService {
         const user = new User;
         if (!user)
             return null;
-        const game = await this.gameRepository.save({player1 : user.id, player2 : null});
+        const game = await this.gameRepository.save({player1 : user.userID, player2 : null});
         this.playerToGameId.set(clientId, {gameId : game.id, isFirst : true});
         this.gameIdToGameOption.set(game.id, dto);
         return game.id;

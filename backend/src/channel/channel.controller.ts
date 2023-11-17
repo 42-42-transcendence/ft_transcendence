@@ -18,7 +18,7 @@ import { ChannelTypeEnum } from './enums/channelType.enum';
 export class ChannelController {
   constructor(
     private channelService: ChannelService,
-    private channelMemberService: ChannelMemberService
+    private channelMemberService: ChannelMemberService,
   ) {}
 
   // 임시로 채널이 없으면 더미를 생성하게 함
@@ -66,20 +66,20 @@ export class ChannelController {
   // public인 경우만 true인지, 아니면 다른 타입은 어떻게 되는지
   // 아마 타입을 보내주는게 더 나을수도 있음
   @ApiOperation({
-    summary: '채널 타입이 PUBLIC일 경우 true, 아니면 false'
+    summary: '채널 비밀번호가 있으면 true, 아니면 false'
   })
   @ApiOkResponse({
     description: '성공',
-    type: Promise<boolean>
+    type: Promise<{ isPassword: boolean }>
   })
   @Get(':id/join')
-  async checkJoinChannel(@Param('id') channelID: string): Promise<boolean> {
+  async checkHasPassword(@Param('id') channelID: string): Promise<{ isPassword: boolean }> {
     const channel = await this.channelService.getChannelById(channelID);
 
-    if (channel.type === ChannelTypeEnum.PUBLIC) {
-      return (true);
+    if (channel.password !== '') {
+      return { isPassword: true };
     }
-    return (false);
+    return { isPassword: false };
   }
 
   // 여기는 단순히 맞다고 확인만 해야하는지, 아니면 입장까지 된 상태로 해야하는건지
@@ -95,13 +95,21 @@ export class ChannelController {
   async checkProtectedChannelPassword(
     @Param('id') channelID: string,
     @Body('password') password: string
-  ): Promise<boolean> {
+  ): Promise<{ isAuth: boolean }> {
     const channel = await this.channelService.getChannelById(channelID);
 
-    if (channel.password === password) {
-      return (true);
+    if (channel.type === ChannelTypeEnum.PRIVATE)
+      return ({ isAuth: false });
+
+    if (channel.type === ChannelTypeEnum.DM)
+      return ({ isAuth: false });
+
+    if (channel.type === ChannelTypeEnum.PUBLIC) {
+      if (channel.password !== password) {
+        return ({ isAuth: false });
+      }
     }
-    return (false);
+    return ({ isAuth: true });
   }
 
   @ApiOperation({

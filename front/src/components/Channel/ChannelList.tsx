@@ -11,8 +11,8 @@ type Props = {
 const ChannelList = ({ filteredChannels, isLoading, error }: Props) => {
   const channelItemList = filteredChannels.map((channel) => (
     <ChannelItem
-      key={channel.id}
-      id={channel.id}
+      key={channel.channelID}
+      channelID={channel.channelID}
       title={channel.title}
       type={channel.type}
       total={channel.total}

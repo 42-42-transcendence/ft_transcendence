@@ -22,7 +22,7 @@ const authSlice = createSlice({
       state.userID = action.payload;
     },
 
-    logout: (state) => {
+    clearAuth: (state) => {
       state.token = '';
       state.userID = '';
     },

@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuthState from '../store/Auth/useAuthState';
+import { SocketContextProvider } from '../socket/SocketContext';
 
 const ProtectedRouter = () => {
   const authState = useAuthState();
@@ -9,7 +10,11 @@ const ProtectedRouter = () => {
   } else if (!authState.userID) {
     return <Navigate to="/setting-profile" />;
   } else {
-    return <Outlet />;
+    return (
+      <SocketContextProvider>
+        <Outlet />
+      </SocketContextProvider>
+    );
   }
 };
 export default ProtectedRouter;

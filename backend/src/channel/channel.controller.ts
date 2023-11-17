@@ -70,46 +70,62 @@ export class ChannelController {
   })
   @ApiOkResponse({
     description: '성공',
-    type: Promise<{ isPassword: boolean }>
+    type: Promise<{ isPasswordRequired: boolean }>
   })
   @Get(':id/join')
-  async checkHasPassword(@Param('id') channelID: string): Promise<{ isPassword: boolean }> {
+  async checkHasPassword(@Param('id') channelID: string): Promise<{ isPasswordRequired: boolean }> {
     const channel = await this.channelService.getChannelById(channelID);
 
     if (channel.password !== '') {
-      return { isPassword: true };
+      return { isPasswordRequired: true };
     }
-    return { isPassword: false };
+    return { isPasswordRequired: false };
   }
 
-  // 여기는 단순히 맞다고 확인만 해야하는지, 아니면 입장까지 된 상태로 해야하는건지
-  // 일단 단순 체크만 함
+  // 에러 status로 하면 제일 좋을 것 같긴 함
   @ApiOperation({
-    summary: 'protected 채널의 패스워드가 맞으면 true, 아니면 false'
+    summary: '채널 '
   })
   @ApiOkResponse({
     description: '성공',
-    type: Promise<boolean>
+    type: Promise<{ isAuthenticated: boolean }>
   })
   @Post(':id/join')
-  async checkProtectedChannelPassword(
+  async checkJoinChannel(
+    @GetAuth() auth: Auth,
     @Param('id') channelID: string,
     @Body('password') password: string
-  ): Promise<{ isAuth: boolean }> {
+  ): Promise<{ isAuthenticated: boolean }> {
     const channel = await this.channelService.getChannelById(channelID);
-
-    if (channel.type === ChannelTypeEnum.PRIVATE)
-      return ({ isAuth: false });
-
-    if (channel.type === ChannelTypeEnum.DM)
-      return ({ isAuth: false });
 
     if (channel.type === ChannelTypeEnum.PUBLIC) {
       if (channel.password !== password) {
-        return ({ isAuth: false });
+        return ({ isAuthenticated: false });
       }
     }
-    return ({ isAuth: true });
+
+    const user = await auth.user;
+    const members = await channel.channelMembers;
+    const member = members.find(member => member.user === user);
+
+    if (member && member.role === ChannelMemberRole.BLOCK) {
+      return ({ isAuthenticated: false });
+    }
+
+    if (channel.type === ChannelTypeEnum.PRIVATE) {
+      if (member && member.role !== ChannelMemberRole.INVITE) {
+        return ({ isAuthenticated: false });
+      }
+    }
+
+    // DM의 경우 guest로 설정할지 다른 권한으로 설정할지 생각하기
+    if (channel.type === ChannelTypeEnum.DM) {
+      if (member && member.role !== ChannelMemberRole.GUEST) {
+        return ({ isAuthenticated: false });
+      }
+    }
+
+    return ({ isAuthenticated: true });
   }
 
   @ApiOperation({

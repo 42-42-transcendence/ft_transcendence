@@ -1,34 +1,39 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { GameService } from './game.service';
-import { CreateGameDto } from './dto/create-game.dto';
-import { UpdateGameDto } from './dto/update-game.dto';
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Game } from './entities/game.entity';
+import { GameInfoDto } from './dto/in-game.dto';
 
+@ApiTags('GAME')
 @Controller('game')
 export class GameController {
   constructor(private readonly gameService: GameService) {}
 
-  @Post()
-  create(@Body() createGameDto: CreateGameDto) {
-    return this.gameService.create(createGameDto);
-  }
-
+  @ApiOperation({ summary: '게임 조회' })
+  @ApiOkResponse({ description: '조회 성공' })
   @Get()
-  findAll() {
-    return this.gameService.findAll();
+  async getFinishedGames() : Promise<Game[]> {
+      return await this.gameService.getFinishedGames();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.gameService.findOne(+id);
-  }
+  @ApiOperation({ summary: '전체 게임 조회' })
+  @ApiOkResponse({ description: '조희 성공' })
+  @Get('all')
+  async getAll() : Promise<Game[]> {
+    return this.gameService.findAllGame();
+}
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
-    return this.gameService.update(+id, updateGameDto);
-  }
+  @ApiOperation({ summary: '특정 게임 조회' })
+  @ApiParam({ name: 'id', required: true, description: '게임 ID' })
+  @ApiOkResponse({ description: 'ID로 조회 성공' })
+  async getById(@Param('id') id : string) : Promise<Game> {
+    return this.gameService.findGameById(id);
+}
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.gameService.remove(+id);
+  @ApiOperation({ summary: '게임 참가' })
+  @ApiOkResponse({ description: '참가 성공' })
+  @Get('join')
+  gamesToJoin() : GameInfoDto[] {
+      return this.gameService.getGamesToJoin();
   }
 }

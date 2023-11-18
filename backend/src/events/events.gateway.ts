@@ -30,8 +30,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     console.log('[socket.io] ----------- server init ----------------------------');
   }
 
-  handleConnection(client: Socket) {
-    console.log(`[socket.io] ----------- ${client.id} connect -------------------`);
+  async handleConnection(client: Socket) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const user = await auth.user;
+    console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
   }
 
   async handleDisconnect(client: Socket) {
@@ -50,7 +52,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
       client.leave(channel.channelID);
     })
-    console.log(`[socket.io] ----------- ${client.id} disconnect ----------------`);
+    console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
   }
 
   @SubscribeMessage('joinChannel')

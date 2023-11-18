@@ -14,11 +14,10 @@ export class RelationRepository extends Repository<Relation> {
 	async createRelation(relationDto: RelationDto): Promise<Relation> {
 		const { subjectUser, objectUser, relationType } = relationDto;
 
-		const relation = this.create({
-			subjectUser: Promise.resolve(subjectUser),
-			objectUser: Promise.resolve(objectUser),
-			relationType
-		});
+		const relation = new Relation();
+		relation.subjectUser = Promise.resolve(subjectUser);
+		relation.objectUser = Promise.resolve(objectUser);
+		relation.relationType = relationType;
 		const result = await this.save(relation);
 
 		return (result);

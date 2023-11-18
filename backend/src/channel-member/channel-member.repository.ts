@@ -13,11 +13,11 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 	async relationChannelMember(channelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
 		const { channel, user, role } = channelMemberDto;
 
-		const channelMember = this.create({
-			channel: Promise.resolve(channel),
-			user: Promise.resolve(user),
-			role
-		})
+		const channelMember = new ChannelMember();
+
+		channelMember.channel = Promise.resolve(channel);
+		channelMember.user = Promise.resolve(user);
+		channelMember.role = role;
 
 		const result = await this.save(channelMember);
 		return (result);

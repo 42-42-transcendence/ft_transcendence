@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { RelationService } from './relation.service';
-import { CreateRelationDto } from './dto/create-relation.dto';
+import { RelationDto } from './dto/relation.dto';
 import { UpdateRelationDto } from './dto/update-relation.dto';
 
 @Controller('relation')
@@ -8,8 +8,8 @@ export class RelationController {
   constructor(private readonly relationService: RelationService) {}
 
   @Post()
-  create(@Body() createRelationDto: CreateRelationDto) {
-    return this.relationService.create(createRelationDto);
+  create(@Body() RelationDto: RelationDto) {
+    return this.relationService.create(RelationDto);
   }
 
   @Get()

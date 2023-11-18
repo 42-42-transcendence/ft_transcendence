@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { RelationEnum } from '../enums/relation.enum';
+import { RelationTypeEnum } from '../enums/relation-type.enum';
 
 @Entity()
 export class Relation {
@@ -9,7 +9,7 @@ export class Relation {
   relationID: string;
 
   @Column()
-  relation: RelationEnum;
+  relationType: RelationTypeEnum;
 
 
   @ManyToOne(() => User, (user) => user.subjectRelations, {

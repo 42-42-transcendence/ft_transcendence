@@ -24,8 +24,8 @@ export class ChannelMemberService {
     return (member);
   }
 
-  async updateChannelMemberRole(ChannelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
-    const { channel, user, role } = ChannelMemberDto;
+  async updateChannelMemberRole(channelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
+    const { channel, user, role } = channelMemberDto;
     const member = await this.getChannelMemberByChannelUser(channel, user);
 
     return (this.channelMemberRepository.updateChannelMemberRole(member, role));

@@ -1,26 +1,24 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { RelationEnum } from '../enums/relation.enum';
 
 @Entity()
 export class Relation {
-  @PrimaryColumn()
-  requestId: number;
 
-  @PrimaryColumn()
-  responderId: number;
+  @PrimaryGeneratedColumn('uuid')
+  relationID: string;
 
-  @Column({
-    type: 'enum',
-    enum: RelationEnum,
+  @Column()
+  relation: RelationEnum;
+
+
+  @ManyToOne(() => User, (user) => user.subjectRelations, {
+    onDelete: 'CASCADE'
   })
-  relation: string;
+  subjectUser: User;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'requestId' })
-  requester: User;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'responderId' })
-  responder: User;
+  @ManyToOne(() => User, (user) => user.objectRelations, {
+    onDelete: 'CASCADE'
+  })
+  objectUser: User;
 }

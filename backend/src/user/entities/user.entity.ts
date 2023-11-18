@@ -56,11 +56,11 @@ export class User {
   @OneToMany(() => Chat, (chat) => chat.user)
   chats: Promise<Chat[]>;
 
-  // @OneToMany(() => Relation, (relation) => relation.requester)
-  // initiatedRelations: Relation[];
+  @OneToMany(() => Relation, (relation) => relation.subjectUser)
+  subjectRelations: Promise<Relation[]>;
 
-  // @OneToMany(() => Relation, (relation) => relation.responder)
-  // receivedRelations: Relation[];
+  @OneToMany(() => Relation, (relation) => relation.objectUser)
+  objectRelations: Promise<Relation[]>;
 
   // @OneToMany(() => Game, (game) => game.playerOne)
   // initiatedGames: Game[];

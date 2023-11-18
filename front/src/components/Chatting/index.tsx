@@ -33,6 +33,7 @@ export type Message = {
 const Chatting = () => {
   const params = useParams();
   const { socket } = useSocket();
+
   const [members, setMembers] = useState<Member[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -41,10 +42,10 @@ const Chatting = () => {
   const activeMemberHandler = (member: Member) => {
     setActiveMember({ ...member });
   };
-
+  console.log(socket);
   useEffect(() => {
     if (socket) {
-      socket.emit('joinChannel', { channelID: params.channelID });
+      socket.emit('joinChannel');
 
       socket.on('updatedMessage', () => {});
 
@@ -69,7 +70,7 @@ const Chatting = () => {
     <div className={styles.container}>
       <div className={styles.contents}>
         <ChattingMessageList members={members} messages={messages} />
-        <ChattingForm />
+        <ChattingForm socket={socket} />
       </div>
       <ChattingMemberList members={members} onActive={activeMemberHandler} />
       <ChattingSettingList />

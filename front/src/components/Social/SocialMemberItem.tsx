@@ -1,21 +1,21 @@
 import UserItem from '../../UI/UserItem';
 
-import styles from '../../styles/Friends.module.css';
+import styles from '../../styles/Social.module.css';
 import useOpenModal from '../../store/Modal/useOpenModal';
+import { Member } from '.';
 
-type Friend = {
-  id: string;
-  image: string;
-  status: 'offline' | 'online' | 'in-game';
-  isBlocked: boolean;
+type Props = Member & {
+  onActive: (member: Member) => void;
 };
 
-type Props = Friend & {
-  onActive: (friend: Friend) => void;
-};
-
-const FriendItem = ({ id, image, status, isBlocked, onActive }: Props) => {
-  const openModalHandler = useOpenModal('showFriendDetail');
+const SocialMemberItem = ({
+  id,
+  image,
+  status,
+  isBlocked,
+  onActive,
+}: Props) => {
+  const openModalHandler = useOpenModal('showSocialMemberDetail');
 
   const activeHandler = () => {
     openModalHandler();
@@ -35,4 +35,4 @@ const FriendItem = ({ id, image, status, isBlocked, onActive }: Props) => {
     </li>
   );
 };
-export default FriendItem;
+export default SocialMemberItem;

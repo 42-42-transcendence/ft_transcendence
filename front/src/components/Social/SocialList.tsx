@@ -1,14 +1,8 @@
-import styles from '../../styles/Friends.module.css';
-import FriendItem from './FriendItem';
+import type { Member } from '.';
+import styles from '../../styles/Social.module.css';
+import SocialMemberItem from './SocialMemberItem';
 
-type Friend = {
-  id: string;
-  image: string;
-  status: 'offline' | 'online' | 'in-game';
-  isBlocked: boolean;
-};
-
-const DUMMY_ITEMS: Friend[] = [
+const DUMMY_ITEMS: Member[] = [
   {
     id: '이지수',
     image:
@@ -109,7 +103,7 @@ const DUMMY_ITEMS: Friend[] = [
   },
 ];
 
-const sortByStatus = (a: Friend, b: Friend): number => {
+const sortByStatus = (a: Member, b: Member): number => {
   const aPriority = a.status === 'offline' ? 1 : 0;
   const bPriority = b.status === 'offline' ? 1 : 0;
   return aPriority - bPriority;
@@ -117,28 +111,31 @@ const sortByStatus = (a: Friend, b: Friend): number => {
 
 type Props = {
   selectedOption: string;
-  onActive: (friend: Friend) => void;
+  onActive: (member: Member) => void;
 };
 
-const FriendList = ({ selectedOption, onActive }: Props) => {
-  let filteredFriendList: Friend[] = [];
+const SocialMemberList = ({ selectedOption, onActive }: Props) => {
+  let filteredSocialMemberList: Member[] = [];
   if (selectedOption === 'friends')
-    filteredFriendList = DUMMY_ITEMS.filter((friend) => !friend.isBlocked);
-  else filteredFriendList = DUMMY_ITEMS.filter((friend) => friend.isBlocked);
+    filteredSocialMemberList = DUMMY_ITEMS.filter(
+      (member) => !member.isBlocked
+    );
+  else
+    filteredSocialMemberList = DUMMY_ITEMS.filter((member) => member.isBlocked);
 
-  filteredFriendList.sort(sortByStatus);
+  filteredSocialMemberList.sort(sortByStatus);
 
-  const friendItemList = filteredFriendList.map((friend) => (
-    <FriendItem
-      key={friend.id}
-      id={friend.id}
-      image={friend.image}
-      status={friend.status}
-      isBlocked={friend.isBlocked}
+  const socialMemberItemList = filteredSocialMemberList.map((member) => (
+    <SocialMemberItem
+      key={member.id}
+      id={member.id}
+      image={member.image}
+      status={member.status}
+      isBlocked={member.isBlocked}
       onActive={onActive}
     />
   ));
 
-  return <ul className={styles.items}>{friendItemList}</ul>;
+  return <ul className={styles.items}>{socialMemberItemList}</ul>;
 };
-export default FriendList;
+export default SocialMemberList;

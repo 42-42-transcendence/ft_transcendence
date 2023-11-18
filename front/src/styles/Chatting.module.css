@@ -70,6 +70,10 @@
   border-bottom-right-radius: 8px;
   color: var(--text-white);
 }
+.submit:disabled {
+  background-color: var(--tone-down-color);
+  color: #777777;
+}
 
 .message-list {
   height: 100%;

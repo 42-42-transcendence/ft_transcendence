@@ -75,7 +75,8 @@ const ChattingPage = () => {
   if (error) {
     contents = (
       <>
-        <h1>{error}</h1>
+        <h1>!!!ERROR!!!</h1>
+        <p>{error}</p>
         <BackLink title="채널목록보기" redirect="/channels" />
       </>
     );

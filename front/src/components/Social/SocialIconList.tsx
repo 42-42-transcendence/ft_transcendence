@@ -1,9 +1,10 @@
 import plusIcon from '../../assets/plus-icon.svg';
 import refreshIcon from '../../assets/refresh-icon.svg';
-import styles from '../../styles/Friends.module.css';
+import styles from '../../styles/Social.module.css';
+
 import useOpenModal from '../../store/Modal/useOpenModal';
 
-const FriendIconList = () => {
+const SocialIconList = () => {
   const openHandler = useOpenModal('showAddFriend');
 
   return (
@@ -21,4 +22,4 @@ const FriendIconList = () => {
     </ul>
   );
 };
-export default FriendIconList;
+export default SocialIconList;

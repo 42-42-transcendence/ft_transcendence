@@ -4,7 +4,7 @@ import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, S
 import { authenticate } from 'passport';
 import { Server, Socket } from 'socket.io';
 import { Auth } from 'src/auth/entities/auth.entity';
-import { GetAuth } from 'src/auth/get-auth.decorator';
+import { GetAuthWs } from 'src/auth/get-auth-ws.decorator';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelService } from 'src/channel/channel.service';
 import { ChatService } from 'src/chat/chat.service';
@@ -40,7 +40,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @UseGuards(AuthGuard())
   @SubscribeMessage('joinChannel')
-  async joinChannel(client: Socket, data: any, @GetAuth() auth: Auth) {
+  async joinChannel(client: Socket, data: any, @GetAuthWs() auth: Auth) {
     if (!client.rooms.has(data.channelID)) {
       client.join(data.channelID);
     }
@@ -66,7 +66,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @UseGuards(AuthGuard())
   @SubscribeMessage('leaveChannel')
-  async leaveChannel(client: Socket, data: any, @GetAuth() auth: Auth) {
+  async leaveChannel(client: Socket, data: any, @GetAuthWs() auth: Auth) {
 
     const channel = await this.channelService.getChannelById(data.channelID);
     const user = await auth.user;

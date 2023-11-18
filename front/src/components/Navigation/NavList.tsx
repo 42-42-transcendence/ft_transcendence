@@ -34,7 +34,7 @@ const NavList = () => {
       </li>
       <li>
         <NavLink to="/social" className={checkNavActivation}>
-          친구
+          소셜
         </NavLink>
       </li>
     </ul>

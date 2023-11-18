@@ -21,8 +21,7 @@ import { EventsModule } from 'src/events/events.module';
         secret: process.env.JWT_SECRET,
         signOptions: { expiresIn: 3600 * 24 },
       }),
-    }),
-    EventsModule
+    })
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, JwtStrategy, UserRepository],

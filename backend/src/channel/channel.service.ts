@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { User } from 'src/user/entities/user.entity';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {
@@ -19,8 +20,16 @@ export class ChannelService {
     return (this.channelRepository.createChannel(createChannelDto));
   }
 
-  getChannelById(channelID: string): Promise<Channel> {
+  async getChannelById(channelID: string): Promise<Channel> {
     return (this.channelRepository.getChannelById(channelID));
+  }
+
+  async getChannelAllInfo(channelID: string): Promise<Channel> {
+    const channel = await this.getChannelById(channelID);
+    await channel.channelMembers;
+    await channel.chats;
+
+    return (channel);
   }
 
   async deleteChannelById(channelID: string): Promise<void> {
@@ -36,7 +45,7 @@ export class ChannelService {
   }
 
   async joinChannel(user: User, channelID: string) {
-    
+
   }
 
 }

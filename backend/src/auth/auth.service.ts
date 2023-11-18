@@ -1,10 +1,9 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
-import { IsNull } from 'typeorm';
 import { UserRepository } from 'src/user/user.repository';
 import { Auth } from './entities/auth.entity';
 
@@ -79,7 +78,20 @@ export class AuthService {
     return jwtToken;
   }
 
-  getAuthByIntraID(intraUID: string): Promise<Auth> {
-    return (this.authRepository.getAuthByIntraID(intraUID));
+  checkAuthByIntraUID(intraUID: string): Promise<Auth> {
+    const auth = this.authRepository.getAuthByIntraID(intraUID);
+
+    if (!auth) {
+			throw new UnauthorizedException(`token이 유효하지 않습니다.`);
+		}
+
+    return (auth);
+  }
+
+  checkAuthByJWT(token: string): Promise<Auth> {
+    const decode = this.jwtService.verify(token);
+    const auth = this.checkAuthByIntraUID(decode.intraUID);
+
+    return (auth);
   }
 }

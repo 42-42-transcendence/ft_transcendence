@@ -15,10 +15,10 @@ export class Relation {
   @ManyToOne(() => User, (user) => user.subjectRelations, {
     onDelete: 'CASCADE'
   })
-  subjectUser: User;
+  subjectUser: Promise<User>;
 
   @ManyToOne(() => User, (user) => user.objectRelations, {
     onDelete: 'CASCADE'
   })
-  objectUser: User;
+  objectUser: Promise<User>;
 }

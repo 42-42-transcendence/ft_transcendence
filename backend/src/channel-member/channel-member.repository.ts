@@ -14,8 +14,8 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		const { channel, user, role } = channelMemberDto;
 
 		const channelMember = this.create({
-			channel,
-			user,
+			channel: Promise.resolve(channel),
+			user: Promise.resolve(user),
 			role
 		})
 

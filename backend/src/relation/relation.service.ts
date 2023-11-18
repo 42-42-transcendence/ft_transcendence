@@ -15,7 +15,7 @@ export class RelationService {
 
   async getRelationByUsers(subjectUser: User, objectUser: User): Promise<Relation> {
     const relations = await subjectUser.subjectRelations;
-    const relation = relations.find(relation => relation.objectUser.userID === objectUser.userID);
+    const relation = relations.find(async relation => (await relation.objectUser).userID === objectUser.userID);
 
     return (relation);
   }

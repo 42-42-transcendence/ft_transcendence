@@ -24,7 +24,7 @@ export class ChannelMember {
     onDelete: 'CASCADE'
   })
   // @JoinColumn({ referencedColumnName: 'channelID' })
-  channel: Channel;
+  channel: Promise<Channel>;
 
   @ApiProperty({
     description: 'User 외래키',
@@ -35,7 +35,7 @@ export class ChannelMember {
     onDelete: 'CASCADE'
   })
   // @JoinColumn({ referencedColumnName: 'userID' })
-  user: User;
+  user: Promise<User>;
 
   @ApiProperty({
     description: 'User의 채널 권한',

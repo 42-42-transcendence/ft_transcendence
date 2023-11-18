@@ -16,7 +16,7 @@ export class ChannelMemberService {
 
   async getChannelMemberByChannelUser(channel: Channel, user: User): Promise<ChannelMember> {
     const members = await channel.channelMembers;
-    const member = members.find(member => member.user.userID = user.userID);
+    const member = members.find(async member => (await member.user).userID = user.userID);
 
     return (member);
   }

@@ -1,14 +1,13 @@
-import { Get, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { authenticate } from 'passport';
 import { Server, Socket } from 'socket.io';
-import { Auth } from 'src/auth/entities/auth.entity';
-import { GetAuthWs } from 'src/auth/get-auth-ws.decorator';
+import { AuthService } from 'src/auth/auth.service';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelService } from 'src/channel/channel.service';
+import { Channel } from 'src/channel/entities/channel.entity';
 import { ChatService } from 'src/chat/chat.service';
+import { CreateChatMessageDto } from 'src/chat/dto/create-chat-message.dto';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
+import { User } from 'src/user/entities/user.entity';
 
 @WebSocketGateway({
   cors: {
@@ -20,6 +19,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private channelService: ChannelService,
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
+    private authService: AuthService,
   ) {}
 
   // 다른 모듈에서 쓰기 위해 (io 역할)
@@ -34,13 +34,29 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     console.log(`[socket.io] ----------- ${client.id} connect -------------------`);
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const user = await auth.user;
+    const channelMembers = await user.channelMembers;
+
+    channelMembers.forEach(async channelMember => {
+      const channel = await channelMember.channel;
+      const createChatMessageDto = {
+        content: `${user.nickname}님께서 퇴장하셨습니다.`,
+        chatType: ChatType.SYSTEM,
+        user,
+        channel
+      };
+      this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
+      client.leave(channel.channelID);
+    })
     console.log(`[socket.io] ----------- ${client.id} disconnect ----------------`);
   }
 
-  @UseGuards(AuthGuard())
   @SubscribeMessage('joinChannel')
-  async joinChannel(client: Socket, data: any, @GetAuthWs() auth: Auth) {
+  async joinChannel(client: Socket, data: any) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+
     if (!client.rooms.has(data.channelID)) {
       client.join(data.channelID);
     }
@@ -56,18 +72,15 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       user,
       channel
     };
+    this.sendMessage(client, "joinChannelMessage", createChatMessageDto);
 
-    const chat = await this.chatService.createChatMessage(createChatMessageDto);
-
-    client.to(data.channelID).emit("joinChannelMessage", chat);
-    // client.to(data.channelID).emit('joinChannelMsg', 'aaaaaa');
     console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
   }
 
-  @UseGuards(AuthGuard())
-  @SubscribeMessage('leaveChannel')
-  async leaveChannel(client: Socket, data: any, @GetAuthWs() auth: Auth) {
 
+  @SubscribeMessage('leaveChannel')
+  async leaveChannel(client: Socket, data: any) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const channel = await this.channelService.getChannelById(data.channelID);
     const user = await auth.user;
     const createChatMessageDto = {
@@ -76,14 +89,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       user,
       channel
     };
-
-    const chat = await this.chatService.createChatMessage(createChatMessageDto);
-
-    client.to(data.channelID).emit("leaveChannelMessage", chat);
-
+    this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
     client.leave(data.channelID);
-    // client.to(data.channelID).emit('leaveChannelMsg', 'bbbbbb');
     console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
+  }
+
+  private async sendMessage(client: Socket, events: string, createChatMessageDto: CreateChatMessageDto) {
+    const chat = await this.chatService.createChatMessage(createChatMessageDto);
+    client.to(createChatMessageDto.channel.channelID).emit(events, chat);
   }
 
   @SubscribeMessage('sendMessageToChannel')

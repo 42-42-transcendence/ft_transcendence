@@ -37,7 +37,6 @@ const ChattingPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            type: params.type,
             channelID: params.chatID,
             password: password,
           }),

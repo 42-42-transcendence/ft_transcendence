@@ -1,12 +1,6 @@
+import type { Member } from '.';
 import styles from '../../styles/Chatting.module.css';
 import ChattingMemberItem from './ChattingMemberItem';
-
-type Member = {
-  id: string;
-  image: string;
-  role: 'owner' | 'staff' | 'member';
-  isMuted: boolean;
-};
 
 type Props = {
   members: Member[];

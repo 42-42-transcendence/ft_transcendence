@@ -1,13 +1,10 @@
+import { Message } from '.';
 import AvatarImage from '../../UI/AvatarImage';
 import styles from '../../styles/Chatting.module.css';
 import SystemMessageItem from './SystemMessageItem';
 
-type Props = {
-  id: string;
-  message: string;
-  date: Date;
+type Props = Message & {
   image: string;
-  type: 'normal' | 'system';
 };
 
 // until
@@ -21,7 +18,7 @@ const formatTimeToHHMM = (date: Date): string => {
   return `${hoursString}:${minutesString}`;
 };
 
-const ChattingMessageItem = ({ id, message, date, image, type }: Props) => {
+const ChattingMessageItem = ({ id, message, date, type, image }: Props) => {
   if (type === 'system') {
     return (
       <li className={styles['message-item']}>

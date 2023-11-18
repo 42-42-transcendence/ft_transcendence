@@ -44,7 +44,7 @@ const router = createBrowserRouter([
             element: <ChannelsPage />,
           },
           {
-            path: '/chatting/:type/:chatID',
+            path: '/chatting/:chatID',
             element: <ChattingPage />,
           },
           {

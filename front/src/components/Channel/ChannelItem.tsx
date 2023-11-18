@@ -11,7 +11,7 @@ const ChannelItem = ({
   password,
 }: ChannelType) => {
   return (
-    <Link to={`/chatting/${type}/${channelID}`}>
+    <Link to={`/chatting/${channelID}`} state={{ channelID, type }}>
       <li className={styles.item}>
         <div className={styles.title}>
           <div>{title}</div>

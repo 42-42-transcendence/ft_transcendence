@@ -1,29 +1,14 @@
-import ChattingMessageItem from './ChattingMessageItem';
-
 import styles from '../../styles/Chatting.module.css';
+import ChattingMessageItem from './ChattingMessageItem';
 import { useEffect, useRef } from 'react';
-
-type Content = {
-  key: number;
-  id: string;
-  message: string;
-  date: Date;
-  type: 'normal' | 'system';
-};
-
-type Member = {
-  id: string;
-  image: string;
-  role: 'owner' | 'staff' | 'member';
-  isMuted: boolean;
-};
+import type { Member, Message } from '.';
 
 type Props = {
   members: Member[];
-  contents: Content[];
+  messages: Message[];
 };
 
-const ChattingMessageList = ({ members, contents }: Props) => {
+const ChattingMessageList = ({ members, messages }: Props) => {
   const listRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
@@ -31,7 +16,7 @@ const ChattingMessageList = ({ members, contents }: Props) => {
       listRef.current.scrollTop = listRef.current.scrollHeight;
   }, []);
 
-  const messageItemList = contents.map((content) => {
+  const messageItemList = messages.map((content) => {
     const senderInMembers = members.find((member) => member.id === content.id);
 
     return (

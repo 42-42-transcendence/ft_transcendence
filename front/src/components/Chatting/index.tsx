@@ -8,8 +8,9 @@ import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
 import { useParams } from 'react-router-dom';
 import ChatMemberDetailModal from '../Modal/ChatMemberDetailModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ConfirmModal from '../Modal/ConfirmModal';
+import { useSocket } from '../../socket/SocketContext';
 
 type Member = {
   id: string;
@@ -476,6 +477,7 @@ const DUMMY_ITEMS: DUMMY_TYPE = {
 };
 
 const Chatting = () => {
+  const { socket } = useSocket();
   const params = useParams();
   const type = params.type;
 
@@ -489,6 +491,24 @@ const Chatting = () => {
   const activeMemberHandler = (member: Member) => {
     setActiveMember({ ...member });
   };
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit('joinChannel', { channelID: params.chatID });
+
+      socket.on('updatedMessage', () => {});
+
+      socket.on('updatedMembers', () => {});
+    }
+
+    return () => {
+      if (socket) {
+        socket.emit('leaveChannel', { channelID: params.chatID });
+        socket.off('updatedMessage');
+        socket.off('updatedMembers');
+      }
+    };
+  }, [socket, params]);
 
   const showChatRoomConfig = useModalState('showChatRoomConfig');
   const showChatInvitation = useModalState('showChatInvitation');

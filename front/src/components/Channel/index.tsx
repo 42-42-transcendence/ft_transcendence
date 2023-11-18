@@ -9,7 +9,7 @@ import ChannelIconList from './ChannelIconList';
 import useRequest from '../../http/useRequest';
 
 type ChannelType = {
-  id: string;
+  channelID: string;
   title: string;
   type: 'public' | 'private' | 'direct';
   total?: number;

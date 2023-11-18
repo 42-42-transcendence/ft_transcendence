@@ -15,7 +15,7 @@ const UserDropdown = () => {
   };
 
   const logoutHandler = () => {
-    dispatch(authActions.logout());
+    dispatch(authActions.clearAuth());
     navigate('/login');
   };
 

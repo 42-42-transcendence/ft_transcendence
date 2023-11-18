@@ -3,12 +3,14 @@ import Modal from '../../UI/Modal';
 import useCloseModal from '../../store/Modal/useCloseModal';
 
 import styles from '../../styles/Modal.module.css';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   onPassowrdSubmit: (password: string) => Promise<void>;
 };
 
 const ChatPasswordModal = ({ onPassowrdSubmit }: Props) => {
+  const navigate = useNavigate();
   const closeHandler = useCloseModal();
 
   const [enteredPassword, setEnteredPassword] = useState<string>('');
@@ -24,7 +26,12 @@ const ChatPasswordModal = ({ onPassowrdSubmit }: Props) => {
       return;
     }
 
+    setEnteredPassword('');
     onPassowrdSubmit(enteredPassword);
+  };
+
+  const redirectHandler = () => {
+    navigate('/channels');
     closeHandler();
   };
 
@@ -49,6 +56,13 @@ const ChatPasswordModal = ({ onPassowrdSubmit }: Props) => {
             className={`${styles['footer-button']} ${styles.confirm}`}
           >
             SUBMIT
+          </button>
+          <button
+            type="button"
+            className={`${styles['footer-button']} ${styles.cancel}`}
+            onClick={redirectHandler}
+          >
+            CANCEL
           </button>
         </div>
       </form>

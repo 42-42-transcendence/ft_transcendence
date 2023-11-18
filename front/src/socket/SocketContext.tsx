@@ -16,7 +16,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 
   useEffect(() => {
     if (!socket) {
-      const newSocket = io('http://localhost:3001/');
+      const newSocket = io('http://localhost:3000/');
 
       // 확인차 출력
       newSocket.on('connect', () => {

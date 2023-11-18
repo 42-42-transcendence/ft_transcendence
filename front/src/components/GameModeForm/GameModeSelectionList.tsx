@@ -10,7 +10,6 @@ type GameModeSelectionListProps = {
 };
 
 const GameModeSelectionList: React.FC<GameModeSelectionListProps> = ({ enteredMode, setEnteredMode}) => {
-
   const changeModeHandler = (mode: string) => {
     setEnteredMode(mode);
   };

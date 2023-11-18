@@ -7,19 +7,28 @@ import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import useModalState from '../../store/Modal/useModalState';
 import useOpenModal from '../../store/Modal/useOpenModal';
-import { socket } from '../../socket/SocketContext';
+import { useSocket } from '../../socket/SocketContext';
 
 const GameModeForm = () => {
   const showGameMatching = useModalState('showGameMatching');
   const openHandler = useOpenModal('showGameMatching'); // submit handler
   const [enteredMode, setEnteredMode] = useState<string>('normal');
+  const { socket } = useSocket();
 
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (socket) {
+      socket.emit('create', { gameMode: enteredMode });
+      console.log("socket emit");
+      socket.on('created', () => {
+        console.log("hello world");
+        // navigate(`/game/${data.gameId}`, { state: { gameMode: enteredMode, gameId: data.gameId, player: data.player } });
+        });
+      }
 
-    console.log(enteredMode);
     openHandler();
     // 1초 지연 (해당 부분에서, API 요청)
+    // socket.emit('create', { gameMode: enteredMode });
     console.log('1초 지연');
     await new Promise((res) => setTimeout(res, 1000));
     // 받은 데이터 처리
@@ -32,7 +41,7 @@ const GameModeForm = () => {
         <div className={styles.container}>
           <h2>GAME MODE</h2>
           <GameModeSelectionList setEnteredMode={setEnteredMode} enteredMode={enteredMode}/>
-          <CardButton className={styles.start} type="submit">
+          <CardButton className={styles.start} clickHandler={openHandler}>
             START
           </CardButton>
         </div>

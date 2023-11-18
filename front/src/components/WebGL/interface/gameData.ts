@@ -37,7 +37,6 @@ let data: gameData = {
 	profileRef: [null, null],
 	scoreRef: [null, null],
 	canvasRef: null,
-	socket: null,
 	program: [null, null],
 };
 

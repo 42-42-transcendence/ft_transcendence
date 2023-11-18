@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux';
 const useOpenModal = (modalID: string) => {
   const dispatch = useDispatch();
 
-  const openHandler = () => {
+  let openHandler: () => void;
+  openHandler = () => {
     dispatch(modalActions.openModal(modalID)); // 예외처리 필요?
   };
 

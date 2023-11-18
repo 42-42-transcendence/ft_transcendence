@@ -35,7 +35,6 @@ interface gameData {
 	lastTime: number;
 	isFirstRender: boolean;
 	canvasRef: HTMLCanvasElement | null;
-	socket: number | null;
 	profileRef: (HTMLDivElement | null)[];
 	scoreRef: (HTMLDivElement | null)[];
 	program: (WebGLProgram | null)[];

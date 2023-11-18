@@ -5,9 +5,10 @@ type Props = {
   className?: string;
   clickHandler?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 };
 
-const CardButton = ({ children, className, clickHandler, disabled }: Props) => {
+const CardButton = ({ children, className, clickHandler, disabled, type }: Props) => {
   const classes = `${styles.card} ${className || ''}`;
 
   return (
@@ -15,6 +16,7 @@ const CardButton = ({ children, className, clickHandler, disabled }: Props) => {
       className={classes}
       onClick={clickHandler}
       disabled={disabled || false}
+      type={type || 'button'}
     >
       {children}
     </button>

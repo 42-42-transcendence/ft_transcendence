@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@loadable/component": "^5.15.3",
     "@reduxjs/toolkit": "^1.9.7",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -49,7 +50,9 @@
     ]
   },
   "devDependencies": {
+    "@types/loadable__component": "^5.13.7",
     "@types/lodash": "^4.14.200",
+    "@types/react-router-dom": "^5.3.3",
     "webpack": "^5.89.0"
   }
 }

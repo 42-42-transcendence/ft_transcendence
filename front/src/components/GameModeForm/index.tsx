@@ -7,18 +7,34 @@ import GameMatchingModal from '../Modal/GameMatchingModal';
 
 import useModalState from '../Modal/useModalState';
 import useOpenModal from '../Modal/useOpenModal';
+import {useState} from "react";
+
+import { useNavigate } from 'react-router-dom';
 
 const GameModeForm = () => {
   const showGameMatching = useModalState('showGameMatching');
-  const openHandler = useOpenModal('showGameMatching');
+  const openHandler = useOpenModal('showGameMatching'); // submit handler
+  const [enteredMode, setEnteredMode] = useState<string>('normal');
+
+  const navigate = useNavigate();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+    console.log(enteredMode);
+    openHandler();
+    // 1초 지연 (해당 부분에서, API 요청)
+    console.log('1초 지연');
+    await new Promise((res) => setTimeout(res, 1000));
+    // 받은 데이터 처리
+    navigate(`/game/10`, { state: { gameMode: enteredMode, gameId: 10, player: ["김봉삼", "감미선"]} });
+  };
 
   return (
     <>
-      <Form method="post" className={styles.form}>
+      <Form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.container}>
           <h2>GAME MODE</h2>
-          <GameModeSelectionList />
-          <CardButton className={styles.start} clickHandler={openHandler}>
+          <GameModeSelectionList setEnteredMode={setEnteredMode} enteredMode={enteredMode}/>
+          <CardButton className={styles.start} type="submit">
             START
           </CardButton>
         </div>

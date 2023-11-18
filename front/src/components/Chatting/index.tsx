@@ -3,13 +3,14 @@ import ChattingMemberList from './ChattingMemberList';
 
 import styles from '../../styles/Chatting.module.css';
 import ChattingSettingList from './ChattingSettingList';
-import useModalState from '../Modal/useModalState';
-import ChatExitConfirmModal from '../Modal/ChatExitConfirmModal';
+import useModalState from '../../store/Modal/useModalState';
 import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
 import { useParams } from 'react-router-dom';
 import ChatMemberDetailModal from '../Modal/ChatMemberDetailModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import ConfirmModal from '../Modal/ConfirmModal';
+import { useSocket } from '../../socket/SocketContext';
 
 type Member = {
   id: string;
@@ -476,9 +477,9 @@ const DUMMY_ITEMS: DUMMY_TYPE = {
 };
 
 const Chatting = () => {
+  const { socket } = useSocket();
   const params = useParams();
-  const mode = params.mode;
-  console.log(mode);
+  const type = params.type;
 
   const [activeMemeber, setActiveMember] = useState<Member>({
     id: '',
@@ -491,10 +492,28 @@ const Chatting = () => {
     setActiveMember({ ...member });
   };
 
+  useEffect(() => {
+    if (socket) {
+      socket.emit('joinChannel', { channelID: params.chatID });
+
+      socket.on('updatedMessage', () => {});
+
+      socket.on('updatedMembers', () => {});
+    }
+
+    return () => {
+      if (socket) {
+        socket.emit('leaveChannel', { channelID: params.chatID });
+        socket.off('updatedMessage');
+        socket.off('updatedMembers');
+      }
+    };
+  }, [socket, params]);
+
   const showChatRoomConfig = useModalState('showChatRoomConfig');
   const showChatInvitation = useModalState('showChatInvitation');
-  const showChatExitConfirm = useModalState('showChatExitConfirm');
   const showChatMemberDetail = useModalState('showChatMemberDetail');
+  const showConfirmModal = useModalState('showConfirmModal');
 
   return (
     <div className={styles.container}>
@@ -506,12 +525,18 @@ const Chatting = () => {
         members={DUMMY_ITEMS.members}
         onActive={activeMemberHandler}
       />
-      {mode !== 'direct' && <ChattingSettingList />}
+      {type !== 'direct' && <ChattingSettingList />}
 
       {showChatRoomConfig && <ChatRoomConfigModal />}
       {showChatInvitation && <ChatInvitationModal />}
-      {showChatExitConfirm && <ChatExitConfirmModal />}
       {showChatMemberDetail && <ChatMemberDetailModal member={activeMemeber} />}
+      {showConfirmModal && (
+        <ConfirmModal
+          title="채팅방 나가기"
+          message="정말로 나가시겠습니까?"
+          acceptHandler={() => {}}
+        />
+      )}
     </div>
   );
 };

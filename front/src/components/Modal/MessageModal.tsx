@@ -5,26 +5,25 @@ import styles from '../../styles/Modal.module.css';
 
 type Props = {
   title: string;
-  description: string;
+  message: string;
 };
 
-const AchievementDetailModal = ({ title, description }: Props) => {
+const MessageModal = ({ title, message }: Props) => {
   const closeHandler = useCloseModal();
 
   return (
     <Modal onClose={closeHandler}>
       <div className={styles.header}>{title}</div>
-      <div className={styles.wrapper}>{description}</div>
+      <div className={styles.wrapper}>{message}</div>
       <div className={styles.footer}>
         <button
-          type="button"
-          className={`${styles['footer-button']} ${styles.confirm}`}
+          className={`${styles['footer-button']} ${styles.cancel}`}
           onClick={closeHandler}
         >
-          OK
+          CANCEL
         </button>
       </div>
     </Modal>
   );
 };
-export default AchievementDetailModal;
+export default MessageModal;

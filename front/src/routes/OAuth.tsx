@@ -2,21 +2,20 @@ import { useDispatch } from 'react-redux';
 import {
   LoaderFunctionArgs,
   useLoaderData,
-  json,
   Navigate,
   defer,
   Await,
 } from 'react-router-dom';
-import { actions as authActions } from '../store/auth';
+import { actions as authActions } from '../store/Auth/auth';
 import { Suspense } from 'react';
 
 type oAuthResponseData = {
   jwtToken: string;
-  isSignUp: boolean;
+  userName: string;
 };
 
 type loaderData = {
-  oAuthData: oAuthResponseData;
+  oAuthData: oAuthResponseData | string;
 };
 
 const OAuth = () => {
@@ -26,43 +25,57 @@ const OAuth = () => {
   return (
     <Suspense fallback={<h1 style={{ textAlign: 'center' }}>...login...</h1>}>
       <Await resolve={data.oAuthData}>
-        {(auth) => {
-          dispatch(authActions.setAuthToken(auth.jwtToken));
-          return (
-            <Navigate
-              to={auth.isSignUp ? '/' : '/setting-profile'}
-              replace={true}
-            />
-          );
+        {(ret: oAuthResponseData | string) => {
+          if (typeof ret === 'string') {
+            return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
+          } else {
+            dispatch(authActions.setAuthToken(ret.jwtToken));
+            dispatch(authActions.setUserID(ret.userName));
+            return (
+              <Navigate
+                // to={ret.isSignUp ? '/' : '/setting-profile'}
+                to="/"
+                replace={true}
+              />
+            );
+          }
         }}
       </Await>
     </Suspense>
   );
 };
-export default OAuth;
 
 const requestOAuth = async (request: Request) => {
   const url = new URL(request.url);
   const authCode = url.searchParams.get('code');
 
-  const res = await fetch('http://localhost:3001/api/auth', {
-    method: 'POST',
-    body: JSON.stringify({ code: authCode }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  try {
+    const res = await fetch('http://localhost:3001/api/auth', {
+      method: 'POST',
+      body: JSON.stringify({ code: authCode }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!res.ok) {
-    throw json({ message: '로그인에 실패하였습니다' }, { status: 500 });
+    if (!res.ok) {
+      throw new Error('Login Faile');
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    if (typeof e === 'string') return e;
+    if (e instanceof Error) return e.message;
+    return 'Something Wrong';
   }
-
-  const data = await res.json();
-  return data;
 };
 
-export const loader = ({ request }: LoaderFunctionArgs) => {
+const loader = ({ request }: LoaderFunctionArgs) => {
   return defer({
     oAuthData: requestOAuth(request),
   });
 };
+
+export { loader };
+export default OAuth;

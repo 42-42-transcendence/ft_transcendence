@@ -1,7 +1,7 @@
 import UserItem from '../../UI/UserItem';
 
 import styles from '../../styles/Friends.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 type Friend = {
   id: string;

@@ -1,6 +1,6 @@
 import CardButton from '../../UI/CardButton';
 import styles from '../../styles/Profile.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 type Props = {
   title: string;

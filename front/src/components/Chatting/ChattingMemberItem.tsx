@@ -1,6 +1,6 @@
 import UserItem from '../../UI/UserItem';
 import styles from '../../styles/Chatting.module.css';
-import useOpenModal from '../Modal/useOpenModal';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 type Member = {
   id: string;

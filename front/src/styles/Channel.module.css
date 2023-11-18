@@ -1,6 +1,9 @@
 .container {
   display: flex;
   justify-content: center;
+  margin: auto;
+  position: relative;
+  width: fit-content;
 }
 
 .sidebar {
@@ -14,7 +17,7 @@
   overflow-x: hidden;
   max-height: 70vh;
   height: 100%;
-  width: 50%;
+  width: 50vw;
 }
 
 .items a {
@@ -62,12 +65,17 @@
   margin-right: 16px;
 }
 
-.add {
-  width: 100%;
-  background-color: var(--focus-color);
-  color: var(--text-white);
-  font-size: 20px;
+.icons {
+  position: absolute;
+  top: -32px;
+  left: 180px;
+  display: flex;
+  gap: 12px;
 }
-.add:hover {
-  background-color: var(--focus-hover-color);
+
+.icon {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
 }

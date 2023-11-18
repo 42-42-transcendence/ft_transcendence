@@ -169,3 +169,16 @@
   background: none;
   color: #777777;
 }
+
+.form-error {
+  color: var(--focus-color);
+  width: 100%;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.form-loading {
+  width: 100%;
+  text-align: center;
+  margin: 8px 0;
+}

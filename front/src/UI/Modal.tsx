@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import styles from '../styles/Modal.module.css';
 
 type BackdropOverlayProps = {
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 type ModalOverlayProps = {
@@ -12,7 +12,7 @@ type ModalOverlayProps = {
 
 type Props = {
   children: React.ReactNode;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 const overlayModalElement = document.getElementById(

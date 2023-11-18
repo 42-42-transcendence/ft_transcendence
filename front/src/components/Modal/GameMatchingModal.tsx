@@ -3,7 +3,7 @@ import Modal from '../../UI/Modal';
 import styles from '../../styles/Modal.module.css';
 import loadingImage from '../../assets/loading.gif';
 
-import useCloseModal from './useCloseModal';
+import useCloseModal from '../../store/Modal/useCloseModal';
 
 const GameMatchingModal = () => {
   const closeHandler = useCloseModal();

@@ -5,11 +5,16 @@ import GameModeSelectionList from './GameModeSelectionList';
 import CardButton from '../../UI/CardButton';
 import GameMatchingModal from '../Modal/GameMatchingModal';
 
+<<<<<<< HEAD
 import useModalState from '../Modal/useModalState';
 import useOpenModal from '../Modal/useOpenModal';
 import {useState} from "react";
 
 import { useNavigate } from 'react-router-dom';
+=======
+import useModalState from '../../store/Modal/useModalState';
+import useOpenModal from '../../store/Modal/useOpenModal';
+>>>>>>> e8385e14cdfe002877d8eb7bdacb6742353e4670
 
 const GameModeForm = () => {
   const showGameMatching = useModalState('showGameMatching');

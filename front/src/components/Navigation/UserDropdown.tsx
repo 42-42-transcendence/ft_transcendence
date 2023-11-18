@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../../styles/Dropdown.module.css';
 import { RootStoreType } from '../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as authActions } from '../../store/auth';
+import { actions as authActions } from '../../store/Auth/auth';
 
 const UserDropdown = () => {
   const auth = useSelector((state: RootStoreType) => state.auth);
@@ -15,7 +15,7 @@ const UserDropdown = () => {
   };
 
   const logoutHandler = () => {
-    dispatch(authActions.logout());
+    dispatch(authActions.clearAuth());
     navigate('/login');
   };
 

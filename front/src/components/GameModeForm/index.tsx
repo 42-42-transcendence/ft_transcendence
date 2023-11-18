@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import useModalState from '../../store/Modal/useModalState';
 import useOpenModal from '../../store/Modal/useOpenModal';
 import { useSocket } from '../../socket/SocketContext';
+import { io } from 'socket.io-client';
 
 const GameModeForm = () => {
   const showGameMatching = useModalState('showGameMatching');
@@ -17,11 +18,12 @@ const GameModeForm = () => {
 
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const socket = io('http://localhost:3001/');
     if (socket) {
       socket.emit('create', { gameMode: enteredMode });
       console.log("socket emit");
       socket.on('created', () => {
-        console.log("hello world");
+        console.log("hello world!!!!");
         // navigate(`/game/${data.gameId}`, { state: { gameMode: enteredMode, gameId: data.gameId, player: data.player } });
         });
       }

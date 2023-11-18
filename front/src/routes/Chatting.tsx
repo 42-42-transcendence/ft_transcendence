@@ -30,14 +30,14 @@ const ChattingPage = () => {
   const requestAuthenticated = useCallback(
     async (password: string = '') => {
       const data = await request<RequestAuthenticated>(
-        `http://localhost:3001/api/channel/${params.chatID}/join`,
+        `http://localhost:3001/api/channel/${params.channelID}/join`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            channelID: params.chatID,
+            channelID: params.channelID,
             password: password,
           }),
         }
@@ -55,7 +55,7 @@ const ChattingPage = () => {
   useEffect(() => {
     const protectedChattingPage = async () => {
       const data = await request<RequestPasswordRequired>(
-        `http://localhost:3001/api/channel/${params.chatID}/join`,
+        `http://localhost:3001/api/channel/${params.channelID}/join`,
         {
           method: 'GET',
         }

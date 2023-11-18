@@ -7,6 +7,8 @@ import { GameInfoDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 import { GameDataDto } from "./dto/game-data.dto";
 import { User } from 'src/user/entities/user.entity';
+import { GameModeEnum } from './enums/gameMode.enum';
+import { GameTypeEnum } from './enums/gameType.enum';
 
 interface Queue {
     gameId : string;
@@ -22,45 +24,29 @@ export class GameService {
     private gameIdToGameOption = new Map<string, GameOptionDto>();
     private gameIdToGameData = new Map<string, GameDataDto>();
 
-    async newGame (clientId : string, dto : GameOptionDto ) : Promise<string> {
+    async newGame (clientId : string, gameOptions : GameOptionDto ) : Promise<string> {
         const gameId = this.getPlayerGameId(clientId);
         if (gameId)
             return null;
         const user = new User;
         if (!user)
             return null;
-        const game = await this.gameRepository.save({player1 : user.id, player2 : null});
+        const game = await this.gameRepository.save({player1 : user.userID, player2 : null});
         this.playerToGameId.set(clientId, {gameId : game.id, isFirst : true});
-        this.gameIdToGameOption.set(game.id, dto);
+
+        // const gameOptions: GameOptionDto = new GameOptionDto;
+        // gameOptions.gamemode = mode;
+        // gameOptions.player1 = clientId;
+        // gameOptions.player2 = null;
+        // gameOptions.paddleHeight = 0;
+        // gameOptions.ballSpeed = 0;
+        // gameOptions.gametype = GameTypeEnum.LADDER;
+        // gameOptions.isInGame = false;
+        
+        this.gameIdToGameOption.set(game.id, gameOptions);
         return game.id;
     }
 
-    reconnectToGame (clientId : string, playerName : string) : string {
-        for (const [gameId, gameData] of this.gameIdToGameData) {
-            if (gameData.players.player1 === playerName) {
-                this.playerToGameId.set(clientId, {gameId: gameId, isFirst: true});
-                return gameId;
-            }
-            else if (gameData.players.player2 === playerName) {
-                this.playerToGameId.set(clientId, {gameId: gameId, isFirst: false});
-                return gameId;
-            }
-        }
-        return null;
-
-    }
-
-    getGameData (gameId :string) : GameDataDto {
-        return this.gameIdToGameData.get(gameId);
-    }
-
-    setGameData (gameId :string, gameData : GameDataDto) {
-        this.gameIdToGameData.set(gameId, gameData);
-    }
-
-    deleteGameData (gameId : string) {
-        this.gameIdToGameData.delete(gameId);
-    }
 
     // async joinGame (clientId : string, dto : JoinGameDto) : Promise<GameOptionDto> {
     //     const gameOption : GameOptionDto = this.getGameOptions(dto.gameId);
@@ -76,6 +62,32 @@ export class GameService {
     //     this.playerToGameId.set(clientId, {gameId : dto.gameId, isFirst : false});
     //     return gameOption;
     // }
+
+    reconnectToGame (clientId : string, playerName : string) : string {
+        for (const [gameId, gameData] of this.gameIdToGameData) {
+            if (gameData.players.player1 === playerName) {
+                this.playerToGameId.set(clientId, {gameId: gameId, isFirst: true});
+                return gameId;
+            }
+            else if (gameData.players.player2 === playerName) {
+                this.playerToGameId.set(clientId, {gameId: gameId, isFirst: false});
+                return gameId;
+            }
+        }
+        return null;
+    }
+
+    getGameData (gameId :string) : GameDataDto {
+        return this.gameIdToGameData.get(gameId);
+    }
+
+    setGameData (gameId :string, gameData : GameDataDto) {
+        this.gameIdToGameData.set(gameId, gameData);
+    }
+
+    deleteGameData (gameId : string) {
+        this.gameIdToGameData.delete(gameId);
+    }
 
     // async setplayer2(gameId : string, player2 : string) : Promise<void> {
     //     const game : Game = await this.findGameById(gameId);

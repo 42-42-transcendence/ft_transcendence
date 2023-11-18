@@ -16,6 +16,7 @@ export class  Ball {
     speed: number;
 }
 
+//DB
 export class Players {
     player1: string
     player1Score: number

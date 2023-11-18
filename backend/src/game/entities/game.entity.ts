@@ -12,7 +12,7 @@ export class Game {
   @ApiProperty({
     description: '게임 이름',
     example: "User1's game",
-    required: true,
+    type: 'string'
   })
   @Column({ nullable: false })
   title: string;

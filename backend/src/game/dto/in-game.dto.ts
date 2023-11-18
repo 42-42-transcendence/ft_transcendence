@@ -1,3 +1,6 @@
+import { GameTypeEnum } from "../enums/gameType.enum";
+import { GameModeEnum } from "../enums/gameMode.enum";
+
 export class GameInfoDto {
     readonly player1 : string;
     readonly player2 : string;
@@ -10,6 +13,8 @@ export class GameOptionDto {
     paddleHeight : number;
     ballSpeed : number;
     paddleSpeed : number;
+    gametype: GameTypeEnum;
+    gamemode: GameModeEnum;
     isInGame : boolean;
 }
 
@@ -18,7 +23,9 @@ export class GameScoreDto {
     readonly player2Score : number;
 }
 
-export class JoinGameDto {
+export class JoinGameDto { // will combine with GameInfoDto
     readonly displayName : string;
     readonly gameId : string;
+    readonly player1 : string;
+    readonly player2 : string;
 }

@@ -4,15 +4,17 @@ import { GameService } from "./game.service";
 import { GameDataDto } from "./dto/game-data.dto";
 import { JoinGameDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
+import { GameModeEnum } from './enums/gameMode.enum';
 
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server : Server;
+  @WebSocketServer() public server : Server;
 
   constructor(private readonly gameService: GameService) {}
 
   afterInit() {}
+
   handleConnection(@ConnectedSocket() client: Socket) {
     // for test
     console.log('Client connected');
@@ -23,20 +25,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 }*/
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
-      if (this.gameService.isPlayer(client.id)) {
-          const gameId : string = this.gameService.getPlayerGameId(client.id);
-          if (gameId && this.gameService.isInGame(gameId))
-          {
-              const gameData : GameDataDto = this.gameService.getGameData(gameId);
-              if (gameData)
-                  this.server.to(gameId).emit("gameUpdate", gameData);
-          }
-          else {
-              this.gameService.deleteGameOption(gameId);
-              this.gameService.deleteGameData(gameId);
-          }
-      }
-      this.gameService.deletePlayer(client.id);
+    //   if (this.gameService.isPlayer(client.id)) {
+    //       const gameId : string = this.gameService.getPlayerGameId(client.id);
+    //       if (gameId && this.gameService.isInGame(gameId))
+    //       {
+    //           const gameData : GameDataDto = this.gameService.getGameData(gameId);
+    //           if (gameData)
+    //               this.server.to(gameId).emit("updateGame", gameData);
+    //       }
+    //       else {
+    //           this.gameService.deleteGameOption(gameId);
+    //           this.gameService.deleteGameData(gameId);
+    //       }
+    //   }
+    //   this.gameService.deletePlayer(client.id);
       console.log('Client Disconnected');
   }
 
@@ -49,7 +51,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
               const gameData : GameDataDto = this.gameService.getGameData(gameId);
               if (gameData) {
                   client.leave(gameId);
-                  this.server.to(gameId).emit("gameUpdate", gameData);
+                  this.server.to(gameId).emit("updateGame", gameData);
               }
           }
           else {
@@ -75,7 +77,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           const gameData : GameDataDto = this.gameService.getGameData(gameId);
           if (gameId) {
               client.join(gameId);
-              this.server.to(gameId).emit("gameUpdate", gameData);
+              this.server.to(gameId).emit("updateGame", gameData);
           }
       }
   }
@@ -90,14 +92,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
   }
 
-  @SubscribeMessage('reconnect')
+  @SubscribeMessage('reconnect') // 재접속 구현 안 할 수도 
   reconnectGame (@ConnectedSocket() client: Socket) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
           const gameData : GameDataDto = this.gameService.getGameData(queue.gameId);
           if (gameData) {
               client.join(queue.gameId);
-              this.server.to(queue.gameId).emit("gameUpdate", gameData);
+              this.server.to(queue.gameId).emit("updateGame", gameData);
           }
       }
       else
@@ -118,21 +120,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage('create')
   async createGame (
-      @ConnectedSocket() client: Socket,
-      @MessageBody() gameOptions : GameOptionDto
-  ) : Promise<void> {
+      @ConnectedSocket() client: Socket, @MessageBody() gameOptions : string) : Promise<void> {
       if (!gameOptions || this.gameService.isPlayer(client.id))
           client.emit('notCreated');
       else {
-          const gameId = await this.gameService.newGame(client.id, gameOptions);
+        //   const gameId = await this.gameService.newGame(client.id, gameOptions);
+        const gameId = "test";
           if (gameId) {
               client.join(gameId);
               client.emit('created');
-              this.server.emit('newGame');
+            //   this.server.emit('newGame');
           }
           else
               client.emit('notCreated');
       }
+      console.log("test game created");
   }
 
 //   @SubscribeMessage('join')
@@ -180,7 +182,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
               dto.leftPaddle.delta = 0;
           else
               dto.rightPaddle.delta = 0;
-          this.server.to(queue.gameId).emit("gameUpdate", dto);
+          this.server.to(queue.gameId).emit("updateGame", dto);
           this.gameService.setGameData(queue.gameId, dto);
       }
   }
@@ -196,7 +198,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     //           dto.leftPaddle.delta = -dto.leftPaddle.speed;
     //       else
     //           dto.rightPaddle.delta = -dto.rightPaddle.speed;
-    //       this.server.to(queue.gameId).emit("gameUpdate", dto);
+    //       this.server.to(queue.gameId).emit("updateGame", dto);
     //       this.gameService.setGameData(queue.gameId, dto);
     //   }
       console.log("up");
@@ -213,7 +215,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     //           dto.leftPaddle.delta = dto.leftPaddle.speed;
     //       else
     //           dto.rightPaddle.delta = dto.rightPaddle.speed;
-    //       this.server.to(queue.gameId).emit("gameUpdate", dto);
+    //       this.server.to(queue.gameId).emit("updateGame", dto);
     //       this.gameService.setGameData(queue.gameId, dto);
     //   }
     console.log("down");

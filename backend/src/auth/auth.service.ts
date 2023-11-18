@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { IsNull } from 'typeorm';
 import { UserRepository } from 'src/user/user.repository';
+import { Auth } from './entities/auth.entity';
 
 @Injectable()
 export class AuthService {
@@ -76,5 +77,9 @@ export class AuthService {
     const jwtToken = await this.jwtService.sign(payload);
 
     return jwtToken;
+  }
+
+  getAuthByIntraID(intraUID: string): Promise<Auth> {
+    return (this.authRepository.getAuthByIntraID(intraUID));
   }
 }

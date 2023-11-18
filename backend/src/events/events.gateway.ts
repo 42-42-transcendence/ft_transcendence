@@ -30,6 +30,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return ;
     }
     client.join(data.channelID);
+
+    client.emit("updateChats", )
     // client.to(data.channelID).emit('joinChannelMsg', 'aaaaaa');
     console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
   }

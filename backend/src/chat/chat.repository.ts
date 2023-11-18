@@ -10,10 +10,11 @@ export class ChatRepository extends Repository<Chat> {
 	}
 
 	async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
-		const { content, user, channel } = createChatMessageDto;
+		const { content, chatType, user, channel } = createChatMessageDto;
 
 		const chat = this.create({
 			content,
+			chatType,
 			user,
 			channel
 		})

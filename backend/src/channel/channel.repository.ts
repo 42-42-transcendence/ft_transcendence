@@ -31,12 +31,11 @@ export class ChannelRepository extends Repository<Channel> {
 	}
 
 	async getChannelById(channelID: string): Promise<Channel> {
-		const channel = await this.findOneBy({ channelID });
 
-		if (!channel)
-			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+		// if (!channel)
+		// 	throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
-		return (channel);
+		return (await this.findOneBy({ channelID }));
 	}
 
 	async deleteChannelById(channelID: string): Promise<void> {
@@ -58,6 +57,9 @@ export class ChannelRepository extends Repository<Channel> {
 
 	async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
 		const channel = await this.getChannelById(channelID);
+
+		if (!channel)
+			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
 		return (await channel.channelMembers);
 	}

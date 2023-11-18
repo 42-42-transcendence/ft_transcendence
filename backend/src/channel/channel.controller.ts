@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
@@ -75,6 +75,9 @@ export class ChannelController {
   async checkHasPassword(@Param('id') channelID: string): Promise<{ isPasswordRequired: boolean }> {
     const channel = await this.channelService.getChannelById(channelID);
 
+    if (!channel)
+      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+
     if (channel.password !== '') {
       return { isPasswordRequired: true };
     }
@@ -97,6 +100,9 @@ export class ChannelController {
     @Body('password') password: string
   ): Promise<{ isAuthenticated: boolean }> {
     const channel = await this.channelService.getChannelById(channelID);
+
+    if (!channel)
+      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
     if (channel.type === ChannelTypeEnum.PUBLIC) {
       if (channel.password !== password) {
@@ -141,6 +147,10 @@ export class ChannelController {
     @Param('id') channelID: string
   ): Promise<Channel> {
     const channel = await this.channelService.getChannelById(channelID);
+
+    if (!channel)
+      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+
     const user = await auth.user;
     const role = ChannelMemberRole.GUEST;
 
@@ -159,7 +169,12 @@ export class ChannelController {
   })
   @Get(':id')
   getChannelById(@Param('id') channelID: string): Promise<Channel> {
-    return this.channelService.getChannelById(channelID);
+
+    const channel = this.channelService.getChannelById(channelID);
+    if (!channel)
+      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+
+    return (channel);
   }
 
   @ApiOperation({

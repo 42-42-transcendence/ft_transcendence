@@ -18,9 +18,6 @@ export class ChannelMemberService {
     const members = await channel.channelMembers;
     const member = members.find(member => member.user.userID = user.userID);
 
-    if (!member)
-      throw new NotFoundException('없는 channel-member 관계입니다.');
-
     return (member);
   }
 
@@ -28,11 +25,17 @@ export class ChannelMemberService {
     const { channel, user, role } = channelMemberDto;
     const member = await this.getChannelMemberByChannelUser(channel, user);
 
+    if (!member)
+      throw new NotFoundException('없는 channel-member 관계입니다.');
+
     return (this.channelMemberRepository.updateChannelMemberRole(member, role));
   }
 
   async deleteChannelMember(channel: Channel, user: User) {
     const member = await this.getChannelMemberByChannelUser(channel, user);
+
+    if (!member)
+      throw new NotFoundException('없는 channel-member 관계입니다.');
 
     this.channelMemberRepository.deleteChannelMember(member.channelMemberID);
   }

@@ -8,7 +8,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from './jwt.strategy';
 import { UserRepository } from 'src/user/user.repository';
-import { EventsModule } from 'src/events/events.module';
 
 @Module({
   imports: [

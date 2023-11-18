@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { Channel } from './entities/channel.entity';
@@ -26,6 +26,10 @@ export class ChannelService {
 
   async getChannelAllInfo(channelID: string): Promise<Channel> {
     const channel = await this.getChannelById(channelID);
+
+    if (!channel)
+      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+
     await channel.channelMembers;
     await channel.chats;
 

@@ -7,6 +7,7 @@ import useModalState from '../../store/Modal/useModalState';
 import CreatingChatRoomModal from '../Modal/CreatingChatRoomModal';
 import ChannelIconList from './ChannelIconList';
 import useRequest from '../../http/useRequest';
+import { SERVER_URL } from '../../App';
 
 type ChannelType = {
   channelID: string;
@@ -14,11 +15,6 @@ type ChannelType = {
   type: 'public' | 'private' | 'direct';
   total?: number;
   password?: string;
-};
-
-const url = 'http://localhost:3001/api/channel';
-const options = {
-  method: 'GET',
 };
 
 const Channel = () => {
@@ -34,9 +30,13 @@ const Channel = () => {
   };
 
   const setRequestData = useCallback(async () => {
-    const channels = await request<ChannelType[]>(url, options);
+    const channels = await request<ChannelType[]>(`${SERVER_URL}/api/channel`, {
+      method: 'GET',
+    });
 
-    setChannels(channels?.reverse() || []);
+    if (channels !== null) {
+      setChannels(channels.reverse());
+    }
   }, [request]);
 
   const refreshChannelHandler = () => {
@@ -63,9 +63,7 @@ const Channel = () => {
         />
         <ChannelIconList onRefreshHandler={refreshChannelHandler} />
       </div>
-      {showCreatingChatRoom && (
-        <CreatingChatRoomModal onRefreshChannel={refreshChannelHandler} />
-      )}
+      {showCreatingChatRoom && <CreatingChatRoomModal />}
     </>
   );
 };

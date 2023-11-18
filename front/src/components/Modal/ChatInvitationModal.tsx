@@ -1,16 +1,67 @@
-import { Form } from 'react-router-dom';
-
 import Modal from '../../UI/Modal';
 import useCloseModal from '../../store/Modal/useCloseModal';
 
 import styles from '../../styles/Modal.module.css';
+import { useEffect, useState } from 'react';
+import useRequest from '../../http/useRequest';
+import { SERVER_URL } from '../../App';
 
-const ChatInvitationModal = () => {
-  const closeHandler = useCloseModal();
+type Props = {
+  channelID: string;
+};
 
-  return (
-    <Modal onClose={closeHandler}>
-      <Form method="POST">
+const ChatInvitationModal = ({ channelID }: Props) => {
+  const closeModalHandler = useCloseModal();
+
+  const [enteredName, setEnteredName] = useState<string>('');
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+  const [successModalMessage, setSuccessModalMessage] = useState<string>('');
+  const { isLoading, error, request } = useRequest();
+
+  useEffect(() => {
+    if (error) {
+      setFeedbackMessage(error);
+    }
+  }, [error]);
+
+  const changeNameHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEnteredName(e.target.value);
+  };
+
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (enteredName.trim().length < 4 || enteredName.trim().length > 8) {
+      setFeedbackMessage('닉네임 길이는 4 ~ 8자 입니다');
+      return;
+    }
+    setFeedbackMessage('');
+
+    const ret = await request<string>(
+      `${SERVER_URL}/api/channel/${channelID}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ invitedUser: enteredName }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    if (ret !== null) {
+      setSuccessModalMessage('요청에 성공하였습니다.');
+      setTimeout(() => {
+        closeModalHandler();
+      }, 1000);
+    }
+  };
+
+  let contents: React.ReactNode = '';
+  if (successModalMessage) {
+    contents = (
+      <h1 className={styles['success-message']}>{successModalMessage}</h1>
+    );
+  } else {
+    contents = (
+      <form onSubmit={submitHandler}>
         <div className={styles.header}>초대 하기</div>
         <div className={styles['input-field']}>
           <label className={styles.title}>닉네임</label>
@@ -20,8 +71,12 @@ const ChatInvitationModal = () => {
             name="name"
             maxLength={8}
             placeholder="닉네임 입력"
+            value={enteredName}
+            onChange={changeNameHandler}
           />
         </div>
+        {isLoading && <div className={styles['form-loading']}>..loading..</div>}
+        <div className={styles['form-feedback']}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"
@@ -32,13 +87,15 @@ const ChatInvitationModal = () => {
           <button
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
-            onClick={closeHandler}
+            onClick={closeModalHandler}
           >
             CANCEL
           </button>
         </div>
-      </Form>
-    </Modal>
-  );
+      </form>
+    );
+  }
+
+  return <Modal onClose={closeModalHandler}>{contents}</Modal>;
 };
 export default ChatInvitationModal;

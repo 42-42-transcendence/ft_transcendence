@@ -1,7 +1,7 @@
 import styles from '../../styles/Channel.module.css';
 import lockIcon from '../../assets/lock-icon.svg';
 import { Link } from 'react-router-dom';
-import { ChannelType } from '.';
+import type { ChannelType } from '.';
 
 const ChannelItem = ({
   channelID,

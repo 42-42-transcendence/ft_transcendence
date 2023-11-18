@@ -3,8 +3,8 @@ DC = docker
 IMAGE = react-image
 CONTAINER = react-test
 
-SRC_PORT = 3001
-DEST_PORT = 3001
+SRC_PORT = 3000
+DEST_PORT = 3000
 
 all: $(IMAGE)
 
@@ -18,7 +18,7 @@ start: all
 	@echo "\033[1;32m"
 	@echo "It is just only \"react-test\" server"
 	@echo "Actually, be built by the backend"
-	@echo "Open browser => http://localhost:3001"
+	@echo "Open browser => http://localhost:3000"
 
 clean:
 		$(DC) rm -f $(CONTAINER);

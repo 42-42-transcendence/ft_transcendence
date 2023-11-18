@@ -1,6 +1,7 @@
 import { Socket, io } from 'socket.io-client';
 import { createContext, useContext, useEffect, useState } from 'react';
 import useAuthState from '../store/Auth/useAuthState';
+import { SERVER_URL } from '../App';
 
 type SocketContextType = {
   socket: Socket | null;
@@ -18,7 +19,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 
   useEffect(() => {
     if (!socket) {
-      const newSocket = io('http://localhost:3001/', {
+      const newSocket = io(SERVER_URL, {
         auth: {
           token: 'Bearer ' + authState.token,
         },
@@ -46,7 +47,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         setSocket(null);
       }
     };
-  }, [socket]);
+  }, [socket, authState]);
 
   return (
     <SocketContext.Provider value={{ socket }}>

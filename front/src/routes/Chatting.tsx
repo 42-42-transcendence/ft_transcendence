@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import Chatting from '../components/Chatting';
 import useRequest from '../http/useRequest';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import ChatPasswordModal from '../components/Modal/ChatPasswordModal';
 import useOpenModal from '../store/Modal/useOpenModal';
 import useModalState from '../store/Modal/useModalState';
 import BackLink from '../UI/BackLink';
 import useCloseModal from '../store/Modal/useCloseModal';
+import { SERVER_URL } from '../App';
 
 type RequestPasswordRequired = {
   isPasswordRequired: boolean;
@@ -17,6 +18,8 @@ type RequestAuthenticated = {
 };
 
 const ChattingPage = () => {
+  const location = useLocation();
+
   const params = useParams();
   const closeModalHandler = useCloseModal();
 
@@ -29,8 +32,8 @@ const ChattingPage = () => {
 
   const requestAuthenticated = useCallback(
     async (password: string = '') => {
-      const data = await request<RequestAuthenticated>(
-        `http://localhost:3001/api/channel/${params.channelID}/join`,
+      const ret = await request<RequestAuthenticated>(
+        `${SERVER_URL}/api/channel/${params.channelID}/join`,
         {
           method: 'POST',
           headers: {
@@ -42,10 +45,10 @@ const ChattingPage = () => {
           }),
         }
       );
-      if (data === null) return;
+      if (ret === null) return;
 
-      setIsAuthenticated(data.isAuthenticated);
-      if (data.isAuthenticated) {
+      setIsAuthenticated(ret.isAuthenticated);
+      if (ret.isAuthenticated) {
         closeModalHandler();
       }
     },
@@ -54,22 +57,26 @@ const ChattingPage = () => {
 
   useEffect(() => {
     const protectedChattingPage = async () => {
-      const data = await request<RequestPasswordRequired>(
-        `http://localhost:3001/api/channel/${params.channelID}/join`,
+      const ret = await request<RequestPasswordRequired>(
+        `${SERVER_URL}/api/channel/${params.channelID}/join`,
         {
           method: 'GET',
         }
       );
 
-      if (data?.isPasswordRequired) {
-        openModalHandler();
-      } else {
+      if (ret === null) return;
+      else if (
+        ret.isPasswordRequired === false ||
+        location.state.initialRedirect === true
+      ) {
         requestAuthenticated();
+      } else {
+        openModalHandler();
       }
     };
 
     protectedChattingPage();
-  }, [request, openModalHandler, requestAuthenticated, params]);
+  }, [request, openModalHandler, requestAuthenticated, params, location]);
 
   let contents: React.ReactNode = 'Wait For..';
   if (error) {

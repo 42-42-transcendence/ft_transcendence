@@ -96,12 +96,30 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
   }
 
+  @SubscribeMessage('sendMessageToChannel')
+  async sendMessageToChannel(client: Socket, data: any) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const channel = await this.channelService.getChannelById(data.channelID);
+    const user = await auth.user;
+    const createChatMessageDto = {
+      content: data.message,
+      chatType: ChatType.NORMAL,
+      user,
+      channel
+    };
+    this.sendMessage(client, 'sendMessageToChannel', createChatMessageDto);
+  }
+
+
   private async sendMessage(client: Socket, events: string, createChatMessageDto: CreateChatMessageDto) {
     const chat = await this.chatService.createChatMessage(createChatMessageDto);
     client.to(createChatMessageDto.channel.channelID).emit(events, chat);
   }
 
-  @SubscribeMessage('sendMessageToChannel')
-  async sendMessageToChannel(client: Socket, data: any) {
+  async updateChannelMembers(client: Socket, channel: Channel, events: string) {
+    const channelMembers = await channel.channelMembers;
+    this.server.to(channel.channelID).emit(events, channelMembers);
   }
+
+
 }

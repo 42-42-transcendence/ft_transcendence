@@ -17,7 +17,7 @@
   color: var(--active-color);
 }
 
-.members {
+.users {
   width: 200px;
   padding: 16px;
 
@@ -29,13 +29,13 @@
   border-left: 2px dashed var(--tone-up-color);
 }
 
-.member {
+.user {
   margin-bottom: 8px;
 }
-.member .owner {
+.user .owner {
   color: var(--owner-color);
 }
-.member .staff {
+.user .staff {
   color: var(--staff-color);
 }
 

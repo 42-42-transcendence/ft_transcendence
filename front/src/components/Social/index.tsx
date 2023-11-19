@@ -5,35 +5,30 @@ import SocialList from './SocialList';
 import SocialSidebar from './SocialSidebar';
 import SocialIconList from './SocialIconList';
 import AddFriendModal from '../Modal/AddFriendModal';
-import SocialMemberDetailModal from '../Modal/SocialMemberDetailModal';
 import useModalState from '../../store/Modal/useModalState';
+import UserDetailModal from '../Modal/UserDetailModal';
 
-export type Member = {
+export type User = {
   id: string;
   image: string;
+  relation: 'normal' | 'friend' | 'block';
   status: 'offline' | 'online' | 'in-game';
-  isBlocked: boolean;
 };
 
 const Social = () => {
   const [selectedOption, setSelectedOption] = useState<string>('friends');
 
-  const showSocialMemberDetail = useModalState('showSocialMemberDetail');
+  const showUserDetail = useModalState('showUserDetail');
   const showAddFriend = useModalState('showAddFriend');
 
-  const [activeMember, setActiveMember] = useState<Member>({
-    id: '',
-    image: '',
-    status: 'offline',
-    isBlocked: false,
-  });
+  const [activeUser, setActiveUser] = useState<User | null>(null);
 
   const changeOptionHandler = (option: string) => {
     setSelectedOption(option);
   };
 
-  const setActiveUserHandler = (member: Member) => {
-    setActiveMember({ ...member });
+  const setActiveUserHandler = (user: User) => {
+    setActiveUser({ ...user });
   };
 
   return (
@@ -48,9 +43,7 @@ const Social = () => {
       />
       <SocialIconList />
       {showAddFriend && <AddFriendModal />}
-      {showSocialMemberDetail && (
-        <SocialMemberDetailModal member={activeMember as Member} />
-      )}
+      {showUserDetail && <UserDetailModal user={activeUser as User} />}
     </div>
   );
 };

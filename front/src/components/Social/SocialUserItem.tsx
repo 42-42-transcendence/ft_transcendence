@@ -1,25 +1,18 @@
-import UserItem from '../../UI/UserItem';
-
 import styles from '../../styles/Social.module.css';
+import UserItem from '../../UI/UserItem';
 import useOpenModal from '../../store/Modal/useOpenModal';
-import { Member } from '.';
+import { User } from '.';
 
-type Props = Member & {
-  onActive: (member: Member) => void;
+type Props = User & {
+  onActive: (user: User) => void;
 };
 
-const SocialMemberItem = ({
-  id,
-  image,
-  status,
-  isBlocked,
-  onActive,
-}: Props) => {
-  const openModalHandler = useOpenModal('showSocialMemberDetail');
+const SocialUserItem = ({ id, image, status, relation, onActive }: Props) => {
+  const openModalHandler = useOpenModal('showUserDetail');
 
   const activeHandler = () => {
     openModalHandler();
-    onActive({ id, image, status, isBlocked });
+    onActive({ id, image, status, relation });
   };
 
   return (
@@ -35,4 +28,4 @@ const SocialMemberItem = ({
     </li>
   );
 };
-export default SocialMemberItem;
+export default SocialUserItem;

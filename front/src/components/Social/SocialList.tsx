@@ -1,109 +1,109 @@
-import type { Member } from '.';
+import { User } from '.';
 import styles from '../../styles/Social.module.css';
-import SocialMemberItem from './SocialMemberItem';
+import SocialUserItem from './SocialUserItem';
 
-const DUMMY_ITEMS: Member[] = [
+const DUMMY_ITEMS: User[] = [
   {
     id: '이지수',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: '김말봉',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'offline',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: '홍길동',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'offline',
-    isBlocked: true,
+    relation: 'block',
   },
   {
     id: 'abcd',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'asdf',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'qweqwe',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: true,
+    relation: 'block',
   },
   {
     id: 'xcbxcvb',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'in-game',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'ccczzz',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'in-game',
-    isBlocked: false,
+    relation: 'block',
   },
   {
     id: 'fjgakdjf',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'block',
   },
   {
     id: 'cfjgkdjf',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'eeee',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'hhhh',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'in-game',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'iiii',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'offline',
-    isBlocked: false,
+    relation: 'friend',
   },
   {
     id: 'qqqqqq',
     image:
       'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
     status: 'online',
-    isBlocked: false,
+    relation: 'friend',
   },
 ];
 
-const sortByStatus = (a: Member, b: Member): number => {
+const sortByStatus = (a: User, b: User): number => {
   const aPriority = a.status === 'offline' ? 1 : 0;
   const bPriority = b.status === 'offline' ? 1 : 0;
   return aPriority - bPriority;
@@ -111,31 +111,33 @@ const sortByStatus = (a: Member, b: Member): number => {
 
 type Props = {
   selectedOption: string;
-  onActive: (member: Member) => void;
+  onActive: (user: User) => void;
 };
 
-const SocialMemberList = ({ selectedOption, onActive }: Props) => {
-  let filteredSocialMemberList: Member[] = [];
+const SocialUserList = ({ selectedOption, onActive }: Props) => {
+  let filteredSocialUserList: User[] = [];
   if (selectedOption === 'friends')
-    filteredSocialMemberList = DUMMY_ITEMS.filter(
-      (member) => !member.isBlocked
+    filteredSocialUserList = DUMMY_ITEMS.filter(
+      (user) => user.relation === 'friend'
     );
   else
-    filteredSocialMemberList = DUMMY_ITEMS.filter((member) => member.isBlocked);
+    filteredSocialUserList = DUMMY_ITEMS.filter(
+      (user) => user.relation === 'block'
+    );
 
-  filteredSocialMemberList.sort(sortByStatus);
+  filteredSocialUserList.sort(sortByStatus);
 
-  const socialMemberItemList = filteredSocialMemberList.map((member) => (
-    <SocialMemberItem
-      key={member.id}
-      id={member.id}
-      image={member.image}
-      status={member.status}
-      isBlocked={member.isBlocked}
+  const socialUserItemList = filteredSocialUserList.map((user) => (
+    <SocialUserItem
+      key={user.id}
+      id={user.id}
+      image={user.image}
+      status={user.status}
+      relation={user.relation}
       onActive={onActive}
     />
   ));
 
-  return <ul className={styles.items}>{socialMemberItemList}</ul>;
+  return <ul className={styles.items}>{socialUserItemList}</ul>;
 };
-export default SocialMemberList;
+export default SocialUserList;

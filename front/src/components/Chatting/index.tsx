@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSocket } from '../../socket/SocketContext';
 
-import ChattingMemberList from './ChattingMemberList';
+import ChattingUserList from './ChattingUserList';
 import ChattingMessageList from './ChattingMessageList';
 import ChattingForm from './ChattingForm';
 import ChattingSettingList from './ChattingSettingList';
@@ -12,16 +12,15 @@ import useModalState from '../../store/Modal/useModalState';
 import useOpenModal from '../../store/Modal/useOpenModal';
 
 import ConfirmModal from '../Modal/ConfirmModal';
-import ChatMemberDetailModal from '../Modal/ChatMemberDetailModal';
 import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
 import MessageModal from '../Modal/MessageModal';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
+import UserDetailModal from '../Modal/UserDetailModal';
+import { User } from '../Social';
 
-export type Member = {
-  id: string;
-  image: string;
+export type ChatUser = User & {
   role: 'owner' | 'staff' | 'member';
   isMuted: boolean;
 };
@@ -37,25 +36,75 @@ export type Message = {
 const Chatting = () => {
   const params = useParams();
   const { socket } = useSocket();
-  const openMessageModalHandler = useOpenModal('showMessageModal');
+  const openMessageModalHandler = useOpenModal('showMessage');
   const navigate = useNavigate();
 
   const [firedMessage, setFiredMessage] = useState<string>('');
-  const [activeMemeber, setActiveMember] = useState<Member | null>(null);
+  const [activeUser, setActiveUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [members, setMembers] = useState<Member[]>([
+  const [users, setUsers] = useState<ChatUser[]>([
     {
-      id: 'haha',
+      id: 'heryu',
+      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+      role: 'staff',
+      isMuted: false,
+      status: 'online',
+      relation: 'normal',
+    },
+    {
+      id: 'a',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'owner',
       isMuted: false,
+      status: 'offline',
+      relation: 'friend',
+    },
+    {
+      id: 'b',
+      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+      role: 'staff',
+      isMuted: true,
+      status: 'online',
+      relation: 'normal',
+    },
+    {
+      id: 'c',
+      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+      role: 'member',
+      isMuted: false,
+      status: 'online',
+      relation: 'block',
+    },
+    {
+      id: 'd',
+      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+      role: 'member',
+      isMuted: false,
+      status: 'online',
+      relation: 'normal',
+    },
+    {
+      id: 'e',
+      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+      role: 'member',
+      isMuted: false,
+      status: 'online',
+      relation: 'normal',
+    },
+    {
+      id: 'f',
+      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+      role: 'member',
+      isMuted: false,
+      status: 'offline',
+      relation: 'friend',
     },
   ]);
 
   const { request } = useRequest();
 
-  const activeMemberHandler = (member: Member) => {
-    setActiveMember({ ...member });
+  const activeUserHandler = (user: ChatUser) => {
+    setActiveUser({ ...user });
   };
 
   const unsubscribeHandler = async () => {
@@ -71,8 +120,8 @@ const Chatting = () => {
     if (socket) {
       socket.emit(
         'joinChannel',
-        (channelInfo: { members: Member[]; messages: Message[] }) => {
-          setMembers(channelInfo.members);
+        (channelInfo: { users: ChatUser[]; messages: Message[] }) => {
+          setUsers(channelInfo.users);
           setMessages(channelInfo.messages);
         }
       );
@@ -81,8 +130,8 @@ const Chatting = () => {
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
-      socket.on('updatedMembers', (members: Member[]) => {
-        setMembers(members);
+      socket.on('updatedUsers', (users: ChatUser[]) => {
+        setUsers(users);
       });
 
       socket.on('firedChannel', (message) => {
@@ -96,56 +145,53 @@ const Chatting = () => {
       if (socket) {
         socket.emit('leaveChannel', { channelID: params.channelID as string });
         socket.off('updatedMessage');
-        socket.off('updatedMembers');
+        socket.off('updatedUsers');
       }
     };
-  }, [socket, params, setMembers, openMessageModalHandler]);
+  }, [socket, params, setUsers, openMessageModalHandler]);
 
   const showChatRoomConfig = useModalState('showChatRoomConfig');
   const showChatInvitation = useModalState('showChatInvitation');
-  const showChatMemberDetail = useModalState('showChatMemberDetail');
-  const showConfirmModal = useModalState('showConfirmModal');
-  const showMessageModal = useModalState('showMessageModal');
+  const showUserDetail = useModalState('showUserDetail');
+  const showConfirm = useModalState('showConfirm');
+  const showMessage = useModalState('showMessage');
 
   return (
-    <>
-      {/* <div className={styles['channel-title']}>{title}</div> */}
-      <div className={styles.container}>
-        <div className={styles.contents}>
-          <ChattingMessageList members={members} messages={messages} />
-          <ChattingForm socket={socket} />
-        </div>
-        <ChattingMemberList members={members} onActive={activeMemberHandler} />
-        <ChattingSettingList />
-
-        {/* modal */}
-        {showChatRoomConfig && (
-          <ChatRoomConfigModal channelID={params.channelID as string} />
-        )}
-        {showChatInvitation && (
-          <ChatInvitationModal channelID={params.channelID as string} />
-        )}
-        {showChatMemberDetail && (
-          <ChatMemberDetailModal member={activeMemeber as Member} />
-        )}
-        {showConfirmModal && (
-          <ConfirmModal
-            title="채팅방 나가기"
-            message="정말로 나가시겠습니까?"
-            acceptCallback={unsubscribeHandler}
-          />
-        )}
-        {showMessageModal && (
-          <MessageModal
-            title="채팅방 알림"
-            message={firedMessage}
-            acceptCallback={() => {
-              navigate('/channels');
-            }}
-          />
-        )}
+    <div className={styles.container}>
+      <div className={styles.contents}>
+        <ChattingMessageList users={users} messages={messages} />
+        <ChattingForm socket={socket} />
       </div>
-    </>
+      <ChattingUserList users={users} onActive={activeUserHandler} />
+      <ChattingSettingList />
+
+      {/* modal */}
+      {showChatRoomConfig && (
+        <ChatRoomConfigModal channelID={params.channelID as string} />
+      )}
+      {showChatInvitation && (
+        <ChatInvitationModal channelID={params.channelID as string} />
+      )}
+      {showUserDetail && (
+        <UserDetailModal user={activeUser as ChatUser} myPermission="staff" />
+      )}
+      {showConfirm && (
+        <ConfirmModal
+          title="채팅방 나가기"
+          message="정말로 나가시겠습니까?"
+          acceptCallback={unsubscribeHandler}
+        />
+      )}
+      {showMessage && (
+        <MessageModal
+          title="채팅방 알림"
+          message={firedMessage}
+          acceptCallback={() => {
+            navigate('/channels');
+          }}
+        />
+      )}
+    </div>
   );
 };
 export default Chatting;

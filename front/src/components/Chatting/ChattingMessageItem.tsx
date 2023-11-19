@@ -7,7 +7,6 @@ type Props = Message & {
   image: string;
 };
 
-// until
 const formatTimeToHHMM = (date: Date): string => {
   let hoursString = date.getHours().toString();
   let minutesString = date.getMinutes().toString();
@@ -26,7 +25,7 @@ const ChattingMessageItem = ({ id, message, date, type, image }: Props) => {
       </li>
     );
   }
-
+  // check me
   const isOther = id !== '이지수';
 
   return (

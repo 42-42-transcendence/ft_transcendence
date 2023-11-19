@@ -5,16 +5,14 @@ type ModalState = {
   showGameInvitation: boolean;
   showCreatingChatRoom: boolean;
   showAchievementDetail: boolean;
-  showSocialMemberDetail: boolean;
   showAddFriend: boolean;
   showFriendRequest: boolean;
   showChatRoomConfig: boolean;
   showChatInvitation: boolean;
-  showChatMemberDetail: boolean;
   showChatPassword: boolean;
-
-  showConfirmModal: boolean;
-  showMessageModal: boolean;
+  showUserDetail: boolean;
+  showConfirm: boolean;
+  showMessage: boolean;
 };
 
 const initialState: ModalState = {
@@ -22,16 +20,14 @@ const initialState: ModalState = {
   showGameInvitation: false,
   showCreatingChatRoom: false,
   showAchievementDetail: false,
-  showSocialMemberDetail: false,
   showAddFriend: false,
   showFriendRequest: false,
   showChatRoomConfig: false,
   showChatInvitation: false,
-  showChatMemberDetail: false,
   showChatPassword: false,
-
-  showConfirmModal: false,
-  showMessageModal: false,
+  showUserDetail: false,
+  showConfirm: false,
+  showMessage: false,
 };
 
 const modalSlice = createSlice({

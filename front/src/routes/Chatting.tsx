@@ -45,6 +45,7 @@ const ChattingPage = () => {
           }),
         }
       );
+
       if (ret === null) return;
 
       setIsAuthenticated(ret.isAuthenticated);

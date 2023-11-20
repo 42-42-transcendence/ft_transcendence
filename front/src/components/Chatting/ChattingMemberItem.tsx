@@ -20,7 +20,7 @@ const ChattingMemberItem = ({ id, image, role, onActive }: Props) => {
       <UserItem
         id={id}
         image={image}
-        className={styles.user}
+        className={styles.member}
         clickHandler={activeHandler}
       >
         <div className={`${styles[role]}`}>

@@ -53,12 +53,18 @@ export class ChannelMemberService {
     const { channel, user, role } = channelMemberDto;
     const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
-    return (this.channelMemberRepository.updateChannelMemberRole(member, role));
+    return (await this.channelMemberRepository.updateChannelMemberRole(member, role));
+  }
+
+  async updateChannelMemberRoleByChannelMember(
+    member: ChannelMember, role: ChannelMemberRole
+  ): Promise<ChannelMember> {
+    return (await this.channelMemberRepository.updateChannelMemberRole(member, role));
   }
 
   async deleteChannelMember(channel: Channel, user: User) {
     const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
-    this.channelMemberRepository.deleteChannelMember(member.channelMemberID);
+    await this.channelMemberRepository.deleteChannelMember(member.channelMemberID);
   }
 }

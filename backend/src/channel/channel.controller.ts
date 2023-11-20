@@ -12,6 +12,8 @@ import { ChannelMember } from 'src/channel-member/entities/channel-member.entity
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { PostgresDriver } from 'typeorm/driver/postgres/PostgresDriver';
+import { ChatService } from 'src/chat/chat.service';
+import { ChatType } from 'src/chat/enums/chat-type.enum';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -20,6 +22,7 @@ export class ChannelController {
   constructor(
     private channelService: ChannelService,
     private channelMemberService: ChannelMemberService,
+    private chatService: ChatService,
     @Inject(forwardRef(() => EventsGateway))
     private eventsGateway: EventsGateway,
   ) {}
@@ -102,10 +105,7 @@ export class ChannelController {
     @Param('id') channelID: string,
     @Body('password') password: string
   ): Promise<{ isAuthenticated: boolean }> {
-    const channel = await this.channelService.getChannelById(channelID);
-
-    if (!channel)
-      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
 
     if (channel.type === ChannelTypeEnum.PUBLIC) {
       if (channel.password !== password) {
@@ -120,47 +120,106 @@ export class ChannelController {
       return ({ isAuthenticated: false });
     }
 
-    if (channel.type === ChannelTypeEnum.PRIVATE) {
-      if (member && member.role !== ChannelMemberRole.INVITE) {
+    // DM도 일단 이렇게 느슨하게 설정
+    if (channel.type === ChannelTypeEnum.PRIVATE || channel.type === ChannelTypeEnum.DM) {
+      if (!member || (member && member.role === ChannelMemberRole.BLOCK)) {
         return ({ isAuthenticated: false });
+      }
+      else if (member.role === ChannelMemberRole.INVITE) {
+        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       }
     }
 
-    // DM의 경우 guest로 설정할지 다른 권한으로 설정할지 생각하기
-    if (channel.type === ChannelTypeEnum.DM) {
-      if (member && member.role !== ChannelMemberRole.GUEST) {
-        return ({ isAuthenticated: false });
-      }
+    if (!member) {
+      await this.channelMemberService.relationChannelMember({
+        channel,
+        user,
+        role: ChannelMemberRole.GUEST
+      });
     }
+
+    const content = `${user.nickname}님께서 입장하셨습니다.`;
+
+    this.eventsGateway.server.to(channel.channelID).emit(
+      "sendJoinMessageToChannel", content
+    )
+
+    const chat = await this.chatService.createChatMessage({
+      content,
+      chatType: ChatType.SYSTEM,
+      channel,
+      user
+    });
 
     return ({ isAuthenticated: true });
   }
 
-
-  @ApiOperation({
-    summary: 'channel-member 관계 만들고 channel 정보 리턴'
-  })
-  @ApiOkResponse({
-    description: '성공',
-    type: Promise<Channel>
-  })
-  @Get(':id/join/auth')
-  async joinChannel(
+  @Get(':id/leave')
+  async leaveChannel(
     @GetAuth() auth: Auth,
-    @Param('id') channelID: string
-  ): Promise<Channel> {
-    const channel = await this.channelService.getChannelById(channelID);
-
-    if (!channel)
-      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
-
+    @Param('id') channelID: string,
+  ) {
     const user = await auth.user;
-    const role = ChannelMemberRole.GUEST;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    await this.channelMemberService.deleteChannelMember(channel, user);
 
-    await this.channelMemberService.relationChannelMember({ channel, user, role });
-    await channel.chats;
-    return (channel);
+    const content = `${user.nickname}님께서 퇴장하셨습니다.`;
+
+    this.eventsGateway.server.to(channel.channelID).emit(
+      "sendLeaveMessageToChannel",
+      `${user.nickname}님께서 입장하셨습니다.`
+    )
+
+    const chat = await this.chatService.createChatMessage({
+      content,
+      chatType: ChatType.SYSTEM,
+      channel,
+      user
+    });
   }
+
+  @Delete(':id/delete')
+  async deleteChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+  ) {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+
+    if (member.role === ChannelMemberRole.OWNER) {
+      this.eventsGateway.server.to(channel.channelID).emit(
+        "deleteChannel",
+        `${channel.title} 채널이 제거되었습니다.`
+      )
+    }
+  }
+
+
+  // @ApiOperation({
+  //   summary: 'channel-member 관계 만들고 channel 정보 리턴'
+  // })
+  // @ApiOkResponse({
+  //   description: '성공',
+  //   type: Promise<Channel>
+  // })
+  // @Get(':id/join/auth')
+  // async joinChannel(
+  //   @GetAuth() auth: Auth,
+  //   @Param('id') channelID: string
+  // ): Promise<Channel> {
+  //   const channel = await this.channelService.getChannelById(channelID);
+
+  //   if (!channel)
+  //     throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+
+  //   const user = await auth.user;
+  //   const role = ChannelMemberRole.GUEST;
+
+  //   await this.channelMemberService.relationChannelMember({ channel, user, role });
+  //   await channel.chats;
+  //   return (channel);
+  // }
 
 
   @ApiOperation({

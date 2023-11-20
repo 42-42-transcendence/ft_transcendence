@@ -88,7 +88,7 @@ export class AuthService {
     return (auth);
   }
 
-  checkAuthByJWT(token: string): Promise<Auth> {
+  async checkAuthByJWT(token: string): Promise<Auth> {
     const decode = this.jwtService.verify(token);
     const auth = this.checkAuthByIntraUID(decode.intraUID);
 

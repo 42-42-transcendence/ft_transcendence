@@ -75,77 +75,29 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
-    const member = await this.channelMemberService.getChannelMemberByChannelUser(channel, user);
-
-    if (!member) {
-      this.channelMemberService.relationChannelMember({
-        channel,
-        user,
-        role: ChannelMemberRole.GUEST,
-      });
-    } else if (member.role === ChannelMemberRole.BLOCK) {
-      throw new BadRequestException(`${user.nickname}은 채널에 입장할 수 없습니다.`);
-    }
+    await user.subjectRelations;
 
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
+      console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
     }
 
-<<<<<<< Updated upstream
-    // update
-=======
-    const newChannel = this.channelService.getChannelAllInfoById(channel.channelID);
-    await user.subjectRelations;
-
-    client.emit("joinChannel", { newChannel, user });
-
-
->>>>>>> Stashed changes
-    const createChatMessageDto = {
-      content: `${user.nickname}님께서 입장하셨습니다.`,
-      chatType: ChatType.SYSTEM,
-      user,
-      channel,
-    };
-
-<<<<<<< Updated upstream
-    await this.chatService.createChatMessage(createChatMessageDto);
-
-    const newChannel = this.channelService.getChannelAllInfoById(channel.channelID);
-    await user.subjectRelations;
 
     // return
 
     // this.sendMessage(client, "updatedMessage", createChatMessageDto);
     // this.sendMessage(client, "updatedUsers", allUsers)
     // this.sendMessage(client, "firedChannel", message)
-=======
-    // 보내기는 해야함 (다른사람들에게)
-    const chat = await this.chatService.createChatMessage(createChatMessageDto);
-    client.to(createChatMessageDto.channel.channelID).emit("joinChannelMessage", chat);
->>>>>>> Stashed changes
 
-    console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
-
-    return { newChannel, user };
+    return { channel, user };
   }
 
   @SubscribeMessage('leaveChannel')
   async leaveChannel(client: Socket, data: any) {
-    ``;
-    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const channel = await this.channelService.getChannelById(data.channelID);
-    const user = await auth.user;
-    const createChatMessageDto = {
-      content: `${user.nickname}님께서 퇴장하셨습니다.`,
-      chatType: ChatType.SYSTEM,
-      user,
-      channel,
-    };
-    const chat = await this.chatService.createChatMessage(createChatMessageDto);
-    client.to(channel.channelID).emit("leaveChannelMsg", chat);
-    client.leave(data.channelID);
-    console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
+    if (client.rooms.has(data.channelID)) {
+      client.leave(data.channelID);
+      console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
+    }
   }
 
   @SubscribeMessage('')
@@ -198,5 +150,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async updateChannelMembers(client: Socket, channel: Channel, events: string) {
     const channelMembers = await channel.channelMembers;
     this.server.to(channel.channelID).emit(events, channelMembers);
+  }
+
+  async deleteChannel(channel: Channel) {
+    const channelMembers = await channel.channelMembers;
+
   }
 }

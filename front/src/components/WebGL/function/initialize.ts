@@ -1,6 +1,6 @@
 import data from '../interface/gameData';
 
-function initialize() {
+function initialize(state: any) {
 	if (data.canvasRef === null) return;
 	data.gl = data.canvasRef.getContext('webgl');
 	if (!data.gl) {
@@ -12,6 +12,17 @@ function initialize() {
 	data.paddleBuffer = data.gl.createBuffer() as WebGLBuffer;
 	data.ballBuffer = data.gl.createBuffer() as WebGLBuffer;
 	data.lineBuffer = data.gl.createBuffer() as WebGLBuffer;
+
+	if (data.profileRef[0] && data.profileRef[1] && state && state.player) {
+		data.profileRef[0].innerHTML = state.player[0];
+		data.profileRef[1].innerHTML = state.player[1];
+		data.mode = state.gameMode;
+	}
+
+	if (state.gameMode === 'fast') {
+		data.paddle[0].height = 1.5;
+		console.log("fast mode");
+	}
 }
 
 export default initialize;

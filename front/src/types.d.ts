@@ -3,25 +3,26 @@ declare module '*.glsl' {
 	export default content;
 }
 
-type Paddle = {
-	position: vec2;
-	paddleSpeed: number;
-	width: number;
-	height: number;
-};
+// type Paddle = {
+// 	position: vec2;
+// 	paddleSpeed: number;
+// 	width: number;
+// 	height: number;
+// };
 
-type Ball = {
-	position: vec2;
-	direction: vec2;
-	velocity: number;
-	radius: number;
-};
+// type Ball = {
+// 	position: vec2;
+// 	direction: vec2;
+// 	velocity: number;
+// 	radius: number;
+// };
 
 type KeyPress = {
 	up: boolean;
 	down: boolean;
 };
 interface gameData {
+	// paddle: Paddle[];
 	paddle: Paddle[];
 	ball: Ball;
 	keyPress: KeyPress;
@@ -38,4 +39,6 @@ interface gameData {
 	profileRef: (HTMLDivElement | null)[];
 	scoreRef: (HTMLDivElement | null)[];
 	program: (WebGLProgram | null)[];
+	mode: string;
+	items: Item[];
 }

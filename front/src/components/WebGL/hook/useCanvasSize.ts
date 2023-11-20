@@ -57,7 +57,7 @@ const updateCanvasSize = debounce(() => {
       window.removeEventListener('resize', updateCanvasSize);
       updateCanvasSize.cancel(); // 디바운스된 함수를 취소
     };
-  }, [updateCanvasSize]);
+  }, []);
 
   if (!data.canvasRef) {
     return null;

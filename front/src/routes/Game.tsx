@@ -30,11 +30,9 @@ const GamePage = () => {
             data.scoreRef[1] = scoreRef2.current;
             console.log(gameId);
             console.log(state);
-            profileRef1.current!.innerHTML = state.player[0];
-            profileRef2.current!.innerHTML = state.player[1];
 
             /* webGL 초기화 */
-            initialize();
+            initialize(state);
             /* shader 세팅 */
             shader();
             /* 렌더링 */

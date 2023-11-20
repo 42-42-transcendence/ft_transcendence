@@ -22,7 +22,6 @@ function usePress() {
 	useEffect(() => {
 	  window.addEventListener('keydown', keyDownHandler);
 	  window.addEventListener('keyup', keyUpHandler);
-	  
 		return () => {
 			window.removeEventListener('keydown', keyDownHandler);
 			window.removeEventListener('keyup', keyUpHandler);

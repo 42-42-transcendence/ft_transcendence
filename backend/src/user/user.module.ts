@@ -20,6 +20,6 @@ import { AuthModule } from 'src/auth/auth.module';
     UserService,
     UserRepository
   ],
-  exports: [UserRepository]
+  exports: [UserService, UserRepository]
 })
 export class UserModule {}

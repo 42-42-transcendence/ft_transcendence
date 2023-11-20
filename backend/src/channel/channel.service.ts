@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateChannelDto } from './dto/create-channel.dto';
-import { UpdateChannelDto } from './dto/update-channel.dto';
+import { ChannelDto } from './dto/channel.dto';
 import { Channel } from './entities/channel.entity';
 import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
@@ -16,7 +15,7 @@ export class ChannelService {
     return (await this.channelRepository.getAllChannels());
   }
 
-  async createChannel(createChannelDto: CreateChannelDto): Promise<Channel> {
+  async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
     return (this.channelRepository.createChannel(createChannelDto));
   }
 
@@ -24,13 +23,21 @@ export class ChannelService {
     return (this.channelRepository.getChannelById(channelID));
   }
 
-  async getChannelAllInfo(channelID: string): Promise<Channel> {
-    const channel = await this.getChannelById(channelID);
+  async getChannelByIdWithException(channelID: string): Promise<Channel> {
+    const channel = this.channelRepository.getChannelById(channelID);
 
     if (!channel)
       throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
-    await channel.channelMembers;
+    return (channel);
+  }
+
+  async getChannelAllInfoById(channelID: string): Promise<Channel> {
+    const channel = await this.getChannelByIdWithException(channelID);
+    const channelMembers = await channel.channelMembers;
+    channelMembers.forEach(async channelMember => {
+      await channelMember.user;
+    })
     await channel.chats;
 
     return (channel);
@@ -50,6 +57,10 @@ export class ChannelService {
 
   async joinChannel(user: User, channelID: string) {
 
+  }
+
+  async updateChannelInfo(channel: Channel, updateChannelDto: ChannelDto): Promise<Channel> {
+    return (this.channelRepository.updateChannelInfo(channel, updateChannelDto));
   }
 
 }

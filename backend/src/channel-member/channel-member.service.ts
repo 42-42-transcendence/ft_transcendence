@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ChannelMemberDto } from './dto/channel-member.dto';
 import { ChannelMemberRepository } from './channel-member.repository';
 import { Channel } from 'src/channel/entities/channel.entity';
@@ -21,21 +21,43 @@ export class ChannelMemberService {
     return (member);
   }
 
-  async updateChannelMemberRole(channelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
-    const { channel, user, role } = channelMemberDto;
-    const member = await this.getChannelMemberByChannelUser(channel, user);
+  async getChannelMemberByChannelUserWithException(channel: Channel, user: User): Promise<ChannelMember> {
+    const member = this.getChannelMemberByChannelUser(channel, user);
 
     if (!member)
       throw new NotFoundException('없는 channel-member 관계입니다.');
+
+    return (member);
+  }
+
+  async checkChannelMember(channel: Channel, user: User): Promise<boolean> {
+    const member = await this.getChannelMemberByChannelUser(channel, user);
+
+    if (!member) {
+      return (false);
+    }
+    return (true);
+  }
+
+  // 권한이 없으면 부여 가능하기도 해야해서 여기서 예외 던지면 안됨
+  async hasAuthMemberToChannel(channel: Channel, user: User): Promise<boolean> {
+    const member = await this.getChannelMemberByChannelUser(channel, user);
+
+    if ((member.role !== ChannelMemberRole.OWNER) && (member.role !== ChannelMemberRole.STAFF)) {
+      return (false);
+    }
+    return (true)
+  }
+
+  async updateChannelMemberRole(channelMemberDto: ChannelMemberDto): Promise<ChannelMember> {
+    const { channel, user, role } = channelMemberDto;
+    const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
     return (this.channelMemberRepository.updateChannelMemberRole(member, role));
   }
 
   async deleteChannelMember(channel: Channel, user: User) {
-    const member = await this.getChannelMemberByChannelUser(channel, user);
-
-    if (!member)
-      throw new NotFoundException('없는 channel-member 관계입니다.');
+    const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
     this.channelMemberRepository.deleteChannelMember(member.channelMemberID);
   }

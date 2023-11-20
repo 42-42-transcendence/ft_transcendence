@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Inject, forwardRef, BadRequestException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
-import { CreateChannelDto } from './dto/create-channel.dto';
-import { UpdateChannelDto } from './dto/update-channel.dto';
+import { ChannelDto } from './dto/channel.dto';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Channel } from './entities/channel.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -11,6 +10,8 @@ import { ChannelMemberService } from 'src/channel-member/channel-member.service'
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { ChannelTypeEnum } from './enums/channelType.enum';
+import { EventsGateway } from 'src/events/events.gateway';
+import { PostgresDriver } from 'typeorm/driver/postgres/PostgresDriver';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -19,6 +20,8 @@ export class ChannelController {
   constructor(
     private channelService: ChannelService,
     private channelMemberService: ChannelMemberService,
+    @Inject(forwardRef(() => EventsGateway))
+    private eventsGateway: EventsGateway,
   ) {}
 
   // 임시로 채널이 없으면 더미를 생성하게 함
@@ -52,7 +55,7 @@ export class ChannelController {
   @Post()
   async createChannel(
     @GetAuth() auth: Auth,
-    @Body() createChannelDto: CreateChannelDto
+    @Body() createChannelDto: ChannelDto
   ): Promise<Channel> {
     const user = await auth.user;
     const channel = await this.channelService.createChannel(createChannelDto);
@@ -196,8 +199,38 @@ export class ChannelController {
     description: '성공',
   })
   @Delete(':id')
-  async deleteChannelById(@Param('id') channelID: string): Promise<void> {
+  async deleteChannelById(
+    @Param('id') channelID: string,
+    @GetAuth() auth: Auth,
+  ): Promise<void> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+
+    if (member.role !== ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${user.nickname}은 권한이 없습니다.`);
+    }
+
     await this.channelService.deleteChannelById(channelID);
+  }
+
+  @Post(':id/update')
+  async updateChannelInfo(
+    @Param('id') channelID: string,
+    @GetAuth() auth: Auth,
+    @Body() updateChannelDto: ChannelDto
+  ): Promise<Channel> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+
+    if (member.role !== ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${user.nickname}은 권한이 없습니다.`);
+    }
+
+    const updateChannel = this.channelService.updateChannelInfo(channel, updateChannelDto);
+
+    return (updateChannel);
   }
 
 }

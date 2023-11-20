@@ -6,6 +6,7 @@ import { Relation } from '../../relation/entities/relation.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserStatus } from '../enums/user-status.enum';
 
 @Entity()
 export class User {
@@ -29,6 +30,11 @@ export class User {
     unique: true,
   })
   nickname: string;
+
+  @Column({
+    nullable: false
+  })
+  status: UserStatus;
 
   // @Column({ nullable: false })
   // isSecondAuth: boolean;

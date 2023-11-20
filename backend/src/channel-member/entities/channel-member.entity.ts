@@ -49,4 +49,9 @@ export class ChannelMember {
   })
   role: ChannelMemberRole;
 
+  @Column({
+    default: false,
+  })
+  isMuted: boolean;
+
 }

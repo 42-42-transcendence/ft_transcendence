@@ -1,5 +1,13 @@
 import { BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
-import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
@@ -16,10 +24,10 @@ import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000'
-  }
+    origin: 'http://localhost:3000',
+  },
 })
-export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
+export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private userService: UserService,
     private channelMemberService: ChannelMemberService,
@@ -31,7 +39,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   // 다른 모듈에서 쓰기 위해 (io 역할)
   @WebSocketServer()
-  public server: Server
+  public server: Server;
 
   afterInit(server: any) {
     console.log('[socket.io] ----------- server init ----------------------------');
@@ -48,22 +56,22 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const user = await auth.user;
     const channelMembers = await user.channelMembers;
 
-    channelMembers.forEach(async channelMember => {
+    channelMembers.forEach(async (channelMember) => {
       const channel = await channelMember.channel;
       const createChatMessageDto = {
         content: `${user.nickname}님께서 퇴장하셨습니다.`,
         chatType: ChatType.SYSTEM,
         user,
-        channel
+        channel,
       };
       this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
       client.leave(channel.channelID);
-    })
+    });
     console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
   }
 
   @SubscribeMessage('joinChannel')
-  async joinChannel(client: Socket, data: any) {
+  async joinChannel(client: Socket, data: any): Promise<any> {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
@@ -73,36 +81,43 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.channelMemberService.relationChannelMember({
         channel,
         user,
-        role: ChannelMemberRole.GUEST
+        role: ChannelMemberRole.GUEST,
       });
-    }
-    else if (member.role === ChannelMemberRole.BLOCK) {
-        throw new BadRequestException(`${user.nickname}은 채널에 입장할 수 없습니다.`);
+    } else if (member.role === ChannelMemberRole.BLOCK) {
+      throw new BadRequestException(`${user.nickname}은 채널에 입장할 수 없습니다.`);
     }
 
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
     }
 
-    const newChannel = this.channelService.getChannelAllInfoById(channel.channelID);
-    await user.subjectRelations;
-
-    client.emit("joinChannel", { newChannel, user });
-
+    // update
     const createChatMessageDto = {
       content: `${user.nickname}님께서 입장하셨습니다.`,
       chatType: ChatType.SYSTEM,
       user,
-      channel
+      channel,
     };
-    this.sendMessage(client, "joinChannelMessage", createChatMessageDto);
+
+    await this.chatService.createChatMessage(createChatMessageDto);
+
+    const newChannel = this.channelService.getChannelAllInfoById(channel.channelID);
+    await user.subjectRelations;
+
+    // return
+
+    // this.sendMessage(client, "updatedMessage", createChatMessageDto);
+    // this.sendMessage(client, "updatedUsers", allUsers)
+    // this.sendMessage(client, "firedChannel", message)
 
     console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
-  }
 
+    return { newChannel, user };
+  }
 
   @SubscribeMessage('leaveChannel')
   async leaveChannel(client: Socket, data: any) {
+    ``;
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const channel = await this.channelService.getChannelById(data.channelID);
     const user = await auth.user;
@@ -110,7 +125,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       content: `${user.nickname}님께서 퇴장하셨습니다.`,
       chatType: ChatType.SYSTEM,
       user,
-      channel
+      channel,
     };
     this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
     client.leave(data.channelID);
@@ -126,7 +141,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       content: data.message,
       chatType: ChatType.NORMAL,
       user,
-      channel
+      channel,
     };
     this.sendMessage(client, 'sendMessageToChannel', createChatMessageDto);
   }
@@ -149,14 +164,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const chennelMemberDto = {
       channel,
       user: inviteUser,
-      role: ChannelMemberRole.INVITE
-    }
+      role: ChannelMemberRole.INVITE,
+    };
 
     await this.channelMemberService.relationChannelMember(chennelMemberDto);
 
     // 해당 유저에게만 초대된걸 어떻게 보내지?
   }
-
 
   private async sendMessage(client: Socket, events: string, createChatMessageDto: CreateChatMessageDto) {
     const chat = await this.chatService.createChatMessage(createChatMessageDto);
@@ -167,5 +181,4 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const channelMembers = await channel.channelMembers;
     this.server.to(channel.channelID).emit(events, channelMembers);
   }
-
 }

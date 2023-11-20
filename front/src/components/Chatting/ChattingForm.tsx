@@ -4,9 +4,10 @@ import { Socket } from 'socket.io-client';
 
 type Props = {
   socket: Socket | null;
+  channelID: string;
 };
 
-const ChattingForm = ({ socket }: Props) => {
+const ChattingForm = ({ socket, channelID }: Props) => {
   const [enteredInput, setEnteredInput] = useState<string>('');
 
   const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,7 +25,7 @@ const ChattingForm = ({ socket }: Props) => {
       return;
     }
 
-    socket.emit('sendMessage', enteredInput);
+    socket.emit('sendMessage', channelID, enteredInput);
 
     setEnteredInput('');
   };

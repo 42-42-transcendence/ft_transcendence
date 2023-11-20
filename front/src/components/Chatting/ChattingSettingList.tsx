@@ -4,22 +4,19 @@ import exitIcon from '../../assets/exit-icon.svg';
 
 import styles from '../../styles/Chatting.module.css';
 import useOpenModal from '../../store/Modal/useOpenModal';
+import { Role } from '.';
 
-const ChattingSettingList = () => {
+type Props = {
+  myRole: Role | null;
+};
+
+const ChattingSettingList = ({ myRole }: Props) => {
   const openConfigModalHandler = useOpenModal('showChatRoomConfig');
   const openInvitationModalHandler = useOpenModal('showChatInvitation');
   const openExitModalHandler = useOpenModal('showConfirm');
 
   return (
     <ul className={styles['setting-icon-list']}>
-      <li>
-        <button
-          className={styles['icon-button']}
-          onClick={openConfigModalHandler}
-        >
-          <img src={settingsIcon} alt="setting icon" />
-        </button>
-      </li>
       <li>
         <button
           className={styles['icon-button']}
@@ -36,6 +33,16 @@ const ChattingSettingList = () => {
           <img src={exitIcon} alt="exit icon" />
         </button>
       </li>
+      {myRole === 'owner' && (
+        <li>
+          <button
+            className={styles['icon-button']}
+            onClick={openConfigModalHandler}
+          >
+            <img src={settingsIcon} alt="setting icon" />
+          </button>
+        </li>
+      )}
     </ul>
   );
 };

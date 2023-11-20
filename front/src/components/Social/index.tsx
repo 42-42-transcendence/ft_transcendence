@@ -8,11 +8,13 @@ import AddFriendModal from '../Modal/AddFriendModal';
 import useModalState from '../../store/Modal/useModalState';
 import UserDetailModal from '../Modal/UserDetailModal';
 
+export type Status = 'offline' | 'online' | 'in-game';
+export type Relation = 'unknown' | 'friend' | 'block';
 export type User = {
   id: string;
   image: string;
-  status: 'offline' | 'online' | 'in-game';
-  relation: 'unknown' | 'friend' | 'block';
+  status: Status;
+  relation: Relation;
 };
 
 const Social = () => {

@@ -17,7 +17,6 @@ const ChattingMemberList = ({ members, onActive }: Props) => {
       isMuted={member.isMuted}
       onActive={onActive}
       relation={member.relation}
-      status={member.status}
     />
   ));
   return <ul className={styles.members}>{memberItemList}</ul>;

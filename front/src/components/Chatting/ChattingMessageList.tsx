@@ -16,21 +16,18 @@ const ChattingMessageList = ({ members, messages }: Props) => {
       listRef.current.scrollTop = listRef.current.scrollHeight;
   }, []);
 
-  const messageItemList = messages.map((content) => {
-    const sender = members.find((member) => member.id === content.id);
+  const messageItemList = messages.map((message) => {
+    const sender = members.find((member) => member.id === message.nickname);
 
     return (
       <ChattingMessageItem
-        key={content.key}
-        id={content.id}
-        message={content.message}
-        date={content.date}
+        key={message.chatID}
+        message={message}
         image={
           sender
             ? sender.image
             : 'https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/309/59932b0eb046f9fa3e063b8875032edd_crop.jpeg'
         }
-        type={content.type}
       />
     );
   });

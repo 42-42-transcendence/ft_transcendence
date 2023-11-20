@@ -3,7 +3,8 @@ import AvatarImage from '../../UI/AvatarImage';
 import styles from '../../styles/Chatting.module.css';
 import SystemMessageItem from './SystemMessageItem';
 
-type Props = Message & {
+type Props = {
+  message: Message;
   image: string;
 };
 
@@ -17,29 +18,29 @@ const formatTimeToHHMM = (date: Date): string => {
   return `${hoursString}:${minutesString}`;
 };
 
-const ChattingMessageItem = ({ id, message, date, type, image }: Props) => {
-  if (type === 'system') {
+const ChattingMessageItem = ({ message, image }: Props) => {
+  if (message.type === 'system') {
     return (
       <li className={styles['message-item']}>
-        <SystemMessageItem message={`${id}${message}`} />
+        <SystemMessageItem message={`${message.nickname}${message.content}`} />
       </li>
     );
   }
   // check me
-  const isOther = id !== '이지수';
+  const isOther = message.nickname !== '이지수';
 
   return (
     <li className={styles['message-item']}>
       {isOther && (
         <div className={styles.sender}>
           <AvatarImage imageURI={image} radius="32px" />
-          <span>{id}</span>
+          <span>{message.nickname}</span>
         </div>
       )}
       <div className={`${styles['message-box']} ${!isOther && styles.me}`}>
-        <div className={styles.message}>{message}</div>
+        <div className={styles.message}>{message.content}</div>
         <small className={styles['message-date']}>
-          {formatTimeToHHMM(date)}
+          {formatTimeToHHMM(message.date)}
         </small>
       </div>
     </li>

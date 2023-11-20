@@ -79,9 +79,8 @@ const ChattingPage = () => {
     protectedChattingPage();
   }, [request, openModalHandler, requestAuthenticated, params, location]);
 
-  let contents: React.ReactNode = 'Wait For..';
   if (error) {
-    contents = (
+    return (
       <>
         <h1>!!!ERROR!!!</h1>
         <p>{error}</p>
@@ -89,24 +88,18 @@ const ChattingPage = () => {
       </>
     );
   } else if (showChatPassword)
-    contents = <ChatPasswordModal onPassowrdSubmit={requestAuthenticated} />;
-  else if (isLoading) contents = <h1>..Check Access Authentication..</h1>;
-  else if (isAuthenticated === true) contents = <Chatting />;
+    return <ChatPasswordModal onPassowrdSubmit={requestAuthenticated} />;
+  else if (isLoading) return <h1>..Check Access Authentication..</h1>;
+  else if (isAuthenticated === true) return <Chatting />;
   else if (isAuthenticated === false) {
-    contents = (
+    return (
       <>
         <h1>해당 채팅방에 접근할 수 없습니다.</h1>
         <BackLink title="채널목록보기" redirect="/channels" />
       </>
     );
   }
-
-  return (
-    <>
-      <h1>Chatting Room Page</h1>
-      {contents}
-    </>
-  );
+  return <></>;
 };
 
 export default ChattingPage;

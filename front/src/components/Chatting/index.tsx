@@ -1,48 +1,58 @@
 import styles from '../../styles/Chatting.module.css';
 
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { useSocket } from '../../socket/SocketContext';
+import { useCallback, useEffect, useState } from 'react';
 
+import { useSocket } from '../../socket/SocketContext';
+import { SERVER_URL } from '../../App';
+import type { Relation } from '../Social';
 import ChattingMemberList from './ChattingMemberList';
 import ChattingMessageList from './ChattingMessageList';
 import ChattingForm from './ChattingForm';
 import ChattingSettingList from './ChattingSettingList';
 import useModalState from '../../store/Modal/useModalState';
 import useOpenModal from '../../store/Modal/useOpenModal';
-
+import useRequest from '../../http/useRequest';
 import ConfirmModal from '../Modal/ConfirmModal';
 import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
 import MessageModal from '../Modal/MessageModal';
-import useRequest from '../../http/useRequest';
-import { SERVER_URL } from '../../App';
 import UserDetailModal from '../Modal/UserDetailModal';
-import { User } from '../Social';
+import useAuthState from '../../store/Auth/useAuthState';
 
 export type Role = 'owner' | 'staff' | 'guest';
-
-export type ChatMember = User & {
+export type ChatMember = {
+  id: string;
+  image: string;
+  relation: Relation;
   role: Role;
   isMuted: boolean;
 };
-
 export type Message = {
-  key: number;
-  id: string;
-  message: string;
-  date: Date;
+  chatID: number;
+  nickname: string;
   type: 'normal' | 'system';
+  date: Date;
+  content: string;
+};
+type ChannelAllInfo = {
+  title: string;
+  messages: Message[];
+  members: ChatMember[];
 };
 
 const Chatting = () => {
-  const params = useParams();
+  const { request } = useRequest();
+  const { myID } = useAuthState();
   const { socket } = useSocket();
-  const openMessageModalHandler = useOpenModal('showMessage');
+  const params = useParams();
   const navigate = useNavigate();
+  const openMessageModalHandler = useOpenModal('showMessage');
 
+  const [channelTitle, setChannelTitle] = useState<string>('Chatting Room');
   const [firedMessage, setFiredMessage] = useState<string>('');
-  const [activatedUser, setActivatedUser] = useState<string | null>(null);
+  const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<ChatMember[]>([
     {
@@ -50,7 +60,6 @@ const Chatting = () => {
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'owner',
       isMuted: false,
-      status: 'online',
       relation: 'unknown',
     },
     {
@@ -58,15 +67,13 @@ const Chatting = () => {
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'staff',
       isMuted: false,
-      status: 'offline',
-      relation: 'friend',
+      relation: 'unknown',
     },
     {
       id: 'b',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'staff',
       isMuted: true,
-      status: 'online',
       relation: 'unknown',
     },
     {
@@ -74,7 +81,6 @@ const Chatting = () => {
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'guest',
       isMuted: false,
-      status: 'online',
       relation: 'block',
     },
     {
@@ -82,7 +88,6 @@ const Chatting = () => {
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'guest',
       isMuted: false,
-      status: 'offline',
       relation: 'block',
     },
     {
@@ -90,7 +95,6 @@ const Chatting = () => {
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'guest',
       isMuted: false,
-      status: 'online',
       relation: 'unknown',
     },
     {
@@ -98,60 +102,110 @@ const Chatting = () => {
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
       role: 'guest',
       isMuted: false,
-      status: 'offline',
-      relation: 'friend',
+      relation: 'unknown',
     },
   ]);
 
-  const { request } = useRequest();
+  const myMember = members.find((member) => member.id === myID);
+  const targetMember = members.find((member) => member.id === activatedUserID);
 
-  const setActivatedUserHandler = (userID: string) => {
-    setActivatedUser(userID);
+  const myRole = myMember?.role ?? null;
+  const targetRole = targetMember?.role ?? null;
+  const targetIsMuted = targetMember?.isMuted ?? null;
+
+  const setActivatedUserIDHandler = (userID: string) => {
+    setActivatedUserID(userID);
   };
 
   const unsubscribeHandler = async () => {
     await request<{ message: string }>(
       `${SERVER_URL}/api/channel/${params.channelID}`,
-      { method: 'DELETE' }
+      { method: 'GET' }
     );
 
     navigate('/channels');
   };
 
+  const isBlockedMember = useCallback(
+    (targetID: string) => {
+      const flag = members.find(
+        (member) => member.id === targetID && member.relation === 'block'
+      );
+      if (!flag) return false;
+      else return true;
+    },
+    [members]
+  );
+
+  const cleanupSocketEvent = useCallback(() => {
+    if (socket?.connected) {
+      socket.emit('leaveChannel', params.channelID);
+      socket.off('updatedMessage');
+      socket.off('updatedMember');
+      socket.off('updatedChannelTitle');
+      socket.off('firedChannel');
+    }
+  }, [socket, params.channelID]);
+
+  const joinChannelAckHandler = useCallback(
+    ({ title, messages, members }: ChannelAllInfo) => {
+      setChannelTitle(title);
+      setMembers(members);
+      setMessages(
+        messages.filter((message) => !isBlockedMember(message.nickname))
+      );
+    },
+    [isBlockedMember]
+  );
+
+  const updatedMessageHandler = useCallback(
+    (message: Message) => {
+      if (isBlockedMember(message.nickname)) return;
+
+      setMessages((prevMessages) => [...prevMessages, message]);
+    },
+    [isBlockedMember]
+  );
+
+  const updatedMemberHandler = useCallback((members: ChatMember[]) => {
+    setMembers(members);
+  }, []);
+
+  const updatedChannelTitleHandler = useCallback((title: string) => {
+    setChannelTitle(title);
+  }, []);
+
+  const firedChannelHandler = useCallback(
+    (message: string) => {
+      cleanupSocketEvent();
+      setFiredMessage(message);
+      openMessageModalHandler();
+    },
+    [cleanupSocketEvent, openMessageModalHandler]
+  );
+
   useEffect(() => {
-    if (socket) {
-      socket.emit('joinChannel', params.channelID, (any: any) => {
-        console.log(any);
-      });
-
-      socket.on('updatedMessage', (message: Message) => {
-        setMessages((prevMessages) => [...prevMessages, message]);
-      });
-
-      socket.on('updatedMember', (members: ChatMember[]) => {
-        setMembers(members);
-      });
-
-      socket.on('firedChannel', (message) => {
-        socket.emit('leaveChannel', { channelID: params.channelID as string });
-        socket.off('updatedMessage');
-        socket.off('updatedMember');
-        socket.off('firedChannel');
-
-        setFiredMessage(message);
-        openMessageModalHandler();
-      });
+    if (socket?.connected) {
+      socket.emit('joinChannel', params.channelID); //, joinChannelAckHandler);
+      socket.on('updatedMessage', updatedMessageHandler);
+      socket.on('updatedMember', updatedMemberHandler);
+      socket.on('updatedChannelTitle', updatedChannelTitleHandler);
+      socket.on('firedChannel', firedChannelHandler);
     }
 
     return () => {
-      if (socket) {
-        socket.emit('leaveChannel', { channelID: params.channelID as string });
-        socket.off('updatedMessage');
-        socket.off('updatedMember');
-        socket.off('firedChannel');
-      }
+      cleanupSocketEvent();
     };
-  }, [socket, params, setMembers, openMessageModalHandler]);
+  }, [
+    socket,
+    params.channelID,
+    joinChannelAckHandler,
+    updatedMessageHandler,
+    updatedMemberHandler,
+    updatedChannelTitleHandler,
+    firedChannelHandler,
+    cleanupSocketEvent,
+  ]);
 
   const showChatRoomConfig = useModalState('showChatRoomConfig');
   const showChatInvitation = useModalState('showChatInvitation');
@@ -159,52 +213,66 @@ const Chatting = () => {
   const showConfirm = useModalState('showConfirm');
   const showMessage = useModalState('showMessage');
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.contents}>
-        <ChattingMessageList members={members} messages={messages} />
-        <ChattingForm socket={socket} />
-      </div>
-      <ChattingMemberList
-        members={members}
-        onActive={setActivatedUserHandler}
-      />
-      <ChattingSettingList />
+  const renderChatRoomConfig = showChatRoomConfig && (
+    <ChatRoomConfigModal channelID={params.channelID as string} />
+  );
 
-      {/* modal */}
-      {showChatRoomConfig && (
-        <ChatRoomConfigModal channelID={params.channelID as string} />
-      )}
-      {showChatInvitation && (
-        <ChatInvitationModal channelID={params.channelID as string} />
-      )}
-      {showUserDetail && (
-        <UserDetailModal
-          targetUserID={activatedUser as string}
-          channelState={{
-            myRole: 'owner',
-            targetRole: 'staff',
-            isMutedTarget: false,
-          }}
-        />
-      )}
-      {showConfirm && (
-        <ConfirmModal
-          title="채팅방 나가기"
-          message="정말로 나가시겠습니까?"
-          acceptCallback={unsubscribeHandler}
-        />
-      )}
-      {showMessage && (
-        <MessageModal
-          title="채팅방 알림"
-          message={firedMessage}
-          acceptCallback={() => {
-            navigate('/channels');
-          }}
-        />
-      )}
-    </div>
+  const renderChatInvitation = showChatInvitation && (
+    <ChatInvitationModal channelID={params.channelID as string} />
+  );
+
+  const renderUserDetail = showUserDetail && (
+    <UserDetailModal
+      targetUserID={activatedUserID as string}
+      channelState={{ myRole, targetRole, targetIsMuted }}
+    />
+  );
+
+  const renderConfirm = showConfirm && (
+    <ConfirmModal
+      title="채팅방 나가기"
+      message="정말로 나가시겠습니까?"
+      acceptCallback={unsubscribeHandler}
+    />
+  );
+
+  const renderMessage = showMessage && (
+    <MessageModal
+      title="채팅방 알림"
+      message={firedMessage}
+      acceptCallback={() => {
+        navigate('/channels');
+      }}
+    />
+  );
+
+  return (
+    <>
+      <h1 className={styles['channel-title']}>{channelTitle}</h1>
+      <div className={styles.container}>
+        {myRole && (
+          <>
+            <div className={styles.contents}>
+              <ChattingMessageList members={members} messages={messages} />
+              <ChattingForm
+                socket={socket}
+                channelID={params.channelID as string}
+              />
+            </div>
+            <ChattingMemberList
+              members={members}
+              onActive={setActivatedUserIDHandler}
+            />
+            <ChattingSettingList myRole={myRole} />
+            {renderChatRoomConfig}
+            {renderChatInvitation}
+            {renderUserDetail}
+            {renderConfirm}
+          </>
+        )}
+        {renderMessage}
+      </div>
+    </>
   );
 };
 export default Chatting;

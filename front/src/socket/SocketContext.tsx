@@ -24,7 +24,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
           token: authState.token,
         },
         query: {
-          userID: authState.userID,
+          userID: authState.myID,
         },
       });
 

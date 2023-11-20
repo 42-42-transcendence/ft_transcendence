@@ -91,7 +91,16 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       client.join(channel.channelID);
     }
 
+<<<<<<< Updated upstream
     // update
+=======
+    const newChannel = this.channelService.getChannelAllInfoById(channel.channelID);
+    await user.subjectRelations;
+
+    client.emit("joinChannel", { newChannel, user });
+
+
+>>>>>>> Stashed changes
     const createChatMessageDto = {
       content: `${user.nickname}님께서 입장하셨습니다.`,
       chatType: ChatType.SYSTEM,
@@ -99,6 +108,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       channel,
     };
 
+<<<<<<< Updated upstream
     await this.chatService.createChatMessage(createChatMessageDto);
 
     const newChannel = this.channelService.getChannelAllInfoById(channel.channelID);
@@ -109,6 +119,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // this.sendMessage(client, "updatedMessage", createChatMessageDto);
     // this.sendMessage(client, "updatedUsers", allUsers)
     // this.sendMessage(client, "firedChannel", message)
+=======
+    // 보내기는 해야함 (다른사람들에게)
+    const chat = await this.chatService.createChatMessage(createChatMessageDto);
+    client.to(createChatMessageDto.channel.channelID).emit("joinChannelMessage", chat);
+>>>>>>> Stashed changes
 
     console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
 
@@ -127,10 +142,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       user,
       channel,
     };
-    this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
+    const chat = await this.chatService.createChatMessage(createChatMessageDto);
+    client.to(channel.channelID).emit("leaveChannelMsg", chat);
     client.leave(data.channelID);
     console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
   }
+
+  @SubscribeMessage('')
 
   @SubscribeMessage('sendMessageToChannel')
   async sendMessageToChannel(client: Socket, data: any) {

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { User } from './entities/user.entity';
+import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 
 @Injectable()
 export class UserService {
@@ -20,4 +21,17 @@ export class UserService {
 
 		return (user);
 	}
+
+	// async getBlockedList(user: User): Promise<string[]> {
+	// 	const relations = await user.objectRelations;
+	// 	let blockedList: string[] = [];
+
+	// 	relations.forEach(async relation => {
+	// 		if (relation.relationType === RelationTypeEnum.BLOCK) {
+	// 			const user = await relation.subjectUser;
+	// 			blockedList.push(user.nickname);
+	// 		}
+	// 	});
+	// 	return (blockedList);
+	// }
 }

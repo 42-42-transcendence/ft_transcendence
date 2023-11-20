@@ -11,8 +11,8 @@ import UserDetailModal from '../Modal/UserDetailModal';
 export type User = {
   id: string;
   image: string;
-  relation: 'normal' | 'friend' | 'block';
   status: 'offline' | 'online' | 'in-game';
+  relation: 'unknown' | 'friend' | 'block';
 };
 
 const Social = () => {
@@ -21,14 +21,14 @@ const Social = () => {
   const showUserDetail = useModalState('showUserDetail');
   const showAddFriend = useModalState('showAddFriend');
 
-  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [activatedUser, setActivatedUser] = useState<string | null>(null);
 
   const changeOptionHandler = (option: string) => {
     setSelectedOption(option);
   };
 
-  const setActiveUserHandler = (user: User) => {
-    setActiveUser({ ...user });
+  const setActivatedUserHandler = (userID: string) => {
+    setActivatedUser(userID);
   };
 
   return (
@@ -39,11 +39,13 @@ const Social = () => {
       />
       <SocialList
         selectedOption={selectedOption}
-        onActive={setActiveUserHandler}
+        onActive={setActivatedUserHandler}
       />
       <SocialIconList />
       {showAddFriend && <AddFriendModal />}
-      {showUserDetail && <UserDetailModal user={activeUser as User} />}
+      {showUserDetail && (
+        <UserDetailModal targetUserID={activatedUser as string} />
+      )}
     </div>
   );
 };

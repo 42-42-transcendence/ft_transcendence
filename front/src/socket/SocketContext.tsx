@@ -21,7 +21,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
     if (!socket) {
       const newSocket = io(SERVER_URL, {
         auth: {
-          token: 'Bearer ' + authState.token,
+          token: authState.token,
         },
         query: {
           userID: authState.userID,

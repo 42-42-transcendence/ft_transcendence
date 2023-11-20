@@ -1,14 +1,14 @@
 import styles from '../../styles/Chatting.module.css';
 import ChattingMessageItem from './ChattingMessageItem';
 import { useEffect, useRef } from 'react';
-import type { ChatUser, Message } from '.';
+import type { ChatMember, Message } from '.';
 
 type Props = {
-  users: ChatUser[];
+  members: ChatMember[];
   messages: Message[];
 };
 
-const ChattingMessageList = ({ users, messages }: Props) => {
+const ChattingMessageList = ({ members, messages }: Props) => {
   const listRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const ChattingMessageList = ({ users, messages }: Props) => {
   }, []);
 
   const messageItemList = messages.map((content) => {
-    const sender = users.find((user) => user.id === content.id);
+    const sender = members.find((member) => member.id === content.id);
 
     return (
       <ChattingMessageItem

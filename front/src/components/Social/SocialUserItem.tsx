@@ -4,7 +4,7 @@ import useOpenModal from '../../store/Modal/useOpenModal';
 import { User } from '.';
 
 type Props = User & {
-  onActive: (user: User) => void;
+  onActive: (userID: string) => void;
 };
 
 const SocialUserItem = ({ id, image, status, relation, onActive }: Props) => {
@@ -12,7 +12,7 @@ const SocialUserItem = ({ id, image, status, relation, onActive }: Props) => {
 
   const activeHandler = () => {
     openModalHandler();
-    onActive({ id, image, status, relation });
+    onActive(id);
   };
 
   return (

@@ -3,34 +3,76 @@ import useCloseModal from '../../store/Modal/useCloseModal';
 import styles from '../../styles/Modal.module.css';
 import AvatarImage from '../../UI/AvatarImage';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../Social';
-import { ChatUser } from '../Chatting';
+import { useEffect, useState } from 'react';
+import type { User } from '../Social';
+import type { Role } from '../Chatting';
+import useRequest from '../../http/useRequest';
+import { SERVER_URL } from '../../App';
 
 type Props = {
-  user: User | ChatUser;
-  myPermission?: 'owner' | 'staff' | 'member';
+  targetUserID: string;
+  channelState?: {
+    myRole: Role;
+    targetRole: Role;
+    isMutedTarget: boolean;
+  };
 };
 
-const UserDetailModal = ({ user, myPermission }: Props) => {
+const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const navigate = useNavigate();
   const closeModalHandler = useCloseModal();
+  const { request } = useRequest();
+
+  const [userInfo, setUserInfo] = useState<User | null>({
+    id: 'heryu',
+    image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
+    relation: 'friend',
+    status: 'online',
+  });
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const ret = await request<User>(`${SERVER_URL}/api/user`, {
+        method: 'GET',
+      });
+      setUserInfo(ret);
+    };
+
+    fetchUserInfo();
+  }, [request]);
 
   const navigateProfile = () => {
     closeModalHandler();
-    navigate(`/profile/${user.id}`);
+    navigate(`/profile/${targetUserID}`);
   };
 
   const navigateDashboard = () => {
     closeModalHandler();
-    navigate(`/dashboard/${user.id}`);
+    navigate(`/dashboard/${targetUserID}`);
   };
+
+  if (userInfo === null)
+    return (
+      <Modal onClose={closeModalHandler}>
+        <div className={styles.header}>잘못된 유저 정보입니다.</div>
+        <div className={styles.footer}>
+          <button
+            type="button"
+            className={`${styles['footer-button']} ${styles.cancel}`}
+            onClick={closeModalHandler}
+          >
+            ClOSE
+          </button>
+        </div>
+      </Modal>
+    );
 
   return (
     <Modal onClose={closeModalHandler}>
       <div className={styles.header}>
         <div className={styles['user-wrapper']}>
-          <AvatarImage radius="64px" imageURI={user.image} />
-          <h3>{user.id}</h3>
+          <AvatarImage radius="64px" imageURI={userInfo.image} />
+          <h3>{userInfo.id}</h3>
         </div>
       </div>
       <div className={styles.wrapper}>
@@ -40,38 +82,56 @@ const UserDetailModal = ({ user, myPermission }: Props) => {
         <button className={styles['list-button']} onClick={navigateDashboard}>
           전적 보기
         </button>
-        {user.relation !== 'block' && (
-          <button className={styles['list-button']}>다이렉트 메시지</button>
-        )}
-        {user.relation !== 'block' && user.status === 'online' && (
-          <button className={styles['list-button']}>게임 신청</button>
-        )}
-        {user.relation !== 'block' && (
-          <button className={styles['list-button']}>
-            친구 {user.relation === 'normal' ? '추가' : '삭제'}
-          </button>
-        )}
-        <button className={styles['list-button']}>
-          차단{user.relation === 'block' ? ' 풀기' : ''}
+        <button
+          className={styles['list-button']}
+          disabled={userInfo.relation === 'block'}
+        >
+          다이렉트 메시지
         </button>
-        {'role' in user &&
-          user.role !== 'owner' &&
-          myPermission !== 'member' && (
-            <>
-              <button className={styles['list-button']}>강퇴</button>
-              <button className={styles['list-button']}>영구 추방</button>
-              {
-                <button className={styles['list-button']}>
-                  채팅 금지{user.isMuted ? ' 풀기' : ''}
-                </button>
-              }
-              {myPermission === 'owner' && (
-                <button className={styles['list-button']}>
-                  스태프 {user.role === 'member' ? '설정' : '해제'}
-                </button>
-              )}
-            </>
-          )}
+        <button
+          className={styles['list-button']}
+          disabled={
+            userInfo.relation === 'block' || userInfo.status !== 'online'
+          }
+        >
+          게임 신청
+        </button>
+        <button className={styles['list-button']}>
+          차단{userInfo.relation === 'block' ? ' 풀기' : ''}
+        </button>
+        <button
+          className={styles['list-button']}
+          disabled={userInfo.relation === 'block'}
+        >
+          친구 {userInfo.relation === 'friend' ? '삭제' : '추가'}
+        </button>
+        {channelState && channelState.myRole !== 'guest' && (
+          <>
+            <button
+              className={styles['list-button']}
+              disabled={channelState.targetRole === 'owner'}
+            >
+              강퇴
+            </button>
+            <button
+              className={styles['list-button']}
+              disabled={channelState.targetRole === 'owner'}
+            >
+              영구 추방
+            </button>
+            <button
+              className={styles['list-button']}
+              disabled={channelState.targetRole === 'owner'}
+            >
+              채팅 금지{channelState.isMutedTarget ? ' 풀기' : ''}
+            </button>
+            {channelState.myRole === 'owner' && (
+              <button className={styles['list-button']}>
+                스태프 {channelState.targetRole === 'guest' ? '설정' : '해제'}
+              </button>
+            )}
+          </>
+        )}
       </div>
       <div className={styles.footer}>
         <button

@@ -1,25 +1,17 @@
 import UserItem from '../../UI/UserItem';
 import styles from '../../styles/Chatting.module.css';
 import useOpenModal from '../../store/Modal/useOpenModal';
-import { ChatUser } from '.';
+import { ChatMember } from '.';
 
-type Props = ChatUser & {
-  onActive: (user: ChatUser) => void;
+type Props = ChatMember & {
+  onActive: (user: string) => void;
 };
 
-const ChattingUserItem = ({
-  id,
-  image,
-  relation,
-  status,
-  role,
-  isMuted,
-  onActive,
-}: Props) => {
+const ChattingMemberItem = ({ id, image, role, onActive }: Props) => {
   const openModalHandler = useOpenModal('showUserDetail');
 
   const activeHandler = () => {
-    onActive({ id, image, relation, status, role, isMuted });
+    onActive(id);
     openModalHandler();
   };
 
@@ -32,10 +24,10 @@ const ChattingUserItem = ({
         clickHandler={activeHandler}
       >
         <div className={`${styles[role]}`}>
-          {role !== 'member' && role!.toLocaleUpperCase()}
+          {role !== 'guest' && role!.toLocaleUpperCase()}
         </div>
       </UserItem>
     </li>
   );
 };
-export default ChattingUserItem;
+export default ChattingMemberItem;

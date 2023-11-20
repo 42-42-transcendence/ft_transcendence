@@ -111,7 +111,7 @@ const sortByStatus = (a: User, b: User): number => {
 
 type Props = {
   selectedOption: string;
-  onActive: (user: User) => void;
+  onActive: (userID: string) => void;
 };
 
 const SocialUserList = ({ selectedOption, onActive }: Props) => {

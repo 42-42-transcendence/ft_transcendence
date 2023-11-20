@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSocket } from '../../socket/SocketContext';
 
-import ChattingUserList from './ChattingUserList';
+import ChattingMemberList from './ChattingMemberList';
 import ChattingMessageList from './ChattingMessageList';
 import ChattingForm from './ChattingForm';
 import ChattingSettingList from './ChattingSettingList';
@@ -20,8 +20,10 @@ import { SERVER_URL } from '../../App';
 import UserDetailModal from '../Modal/UserDetailModal';
 import { User } from '../Social';
 
-export type ChatUser = User & {
-  role: 'owner' | 'staff' | 'member';
+export type Role = 'owner' | 'staff' | 'guest';
+
+export type ChatMember = User & {
+  role: Role;
   isMuted: boolean;
 };
 
@@ -40,21 +42,21 @@ const Chatting = () => {
   const navigate = useNavigate();
 
   const [firedMessage, setFiredMessage] = useState<string>('');
-  const [activeUser, setActiveUser] = useState<ChatUser | null>(null);
+  const [activatedUser, setActivatedUser] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [users, setUsers] = useState<ChatUser[]>([
+  const [members, setMembers] = useState<ChatMember[]>([
     {
       id: 'heryu',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'staff',
+      role: 'owner',
       isMuted: false,
       status: 'online',
-      relation: 'normal',
+      relation: 'unknown',
     },
     {
       id: 'a',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'owner',
+      role: 'staff',
       isMuted: false,
       status: 'offline',
       relation: 'friend',
@@ -65,12 +67,12 @@ const Chatting = () => {
       role: 'staff',
       isMuted: true,
       status: 'online',
-      relation: 'normal',
+      relation: 'unknown',
     },
     {
       id: 'c',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'member',
+      role: 'guest',
       isMuted: false,
       status: 'online',
       relation: 'block',
@@ -78,23 +80,23 @@ const Chatting = () => {
     {
       id: 'd',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'member',
+      role: 'guest',
       isMuted: false,
-      status: 'online',
-      relation: 'normal',
+      status: 'offline',
+      relation: 'block',
     },
     {
       id: 'e',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'member',
+      role: 'guest',
       isMuted: false,
       status: 'online',
-      relation: 'normal',
+      relation: 'unknown',
     },
     {
       id: 'f',
       image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'member',
+      role: 'guest',
       isMuted: false,
       status: 'offline',
       relation: 'friend',
@@ -103,8 +105,8 @@ const Chatting = () => {
 
   const { request } = useRequest();
 
-  const activeUserHandler = (user: ChatUser) => {
-    setActiveUser({ ...user });
+  const setActivatedUserHandler = (userID: string) => {
+    setActivatedUser(userID);
   };
 
   const unsubscribeHandler = async () => {
@@ -118,26 +120,26 @@ const Chatting = () => {
 
   useEffect(() => {
     if (socket) {
-      socket.emit(
-        'joinChannel',
-        (channelInfo: { users: ChatUser[]; messages: Message[] }) => {
-          setUsers(channelInfo.users);
-          setMessages(channelInfo.messages);
-        }
-      );
+      socket.emit('joinChannel', params.channelID, (any: any) => {
+        console.log(any);
+      });
 
       socket.on('updatedMessage', (message: Message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
-      socket.on('updatedUsers', (users: ChatUser[]) => {
-        setUsers(users);
+      socket.on('updatedMember', (members: ChatMember[]) => {
+        setMembers(members);
       });
 
       socket.on('firedChannel', (message) => {
+        socket.emit('leaveChannel', { channelID: params.channelID as string });
+        socket.off('updatedMessage');
+        socket.off('updatedMember');
+        socket.off('firedChannel');
+
         setFiredMessage(message);
         openMessageModalHandler();
-        // ok
       });
     }
 
@@ -145,10 +147,11 @@ const Chatting = () => {
       if (socket) {
         socket.emit('leaveChannel', { channelID: params.channelID as string });
         socket.off('updatedMessage');
-        socket.off('updatedUsers');
+        socket.off('updatedMember');
+        socket.off('firedChannel');
       }
     };
-  }, [socket, params, setUsers, openMessageModalHandler]);
+  }, [socket, params, setMembers, openMessageModalHandler]);
 
   const showChatRoomConfig = useModalState('showChatRoomConfig');
   const showChatInvitation = useModalState('showChatInvitation');
@@ -159,10 +162,13 @@ const Chatting = () => {
   return (
     <div className={styles.container}>
       <div className={styles.contents}>
-        <ChattingMessageList users={users} messages={messages} />
+        <ChattingMessageList members={members} messages={messages} />
         <ChattingForm socket={socket} />
       </div>
-      <ChattingUserList users={users} onActive={activeUserHandler} />
+      <ChattingMemberList
+        members={members}
+        onActive={setActivatedUserHandler}
+      />
       <ChattingSettingList />
 
       {/* modal */}
@@ -173,7 +179,14 @@ const Chatting = () => {
         <ChatInvitationModal channelID={params.channelID as string} />
       )}
       {showUserDetail && (
-        <UserDetailModal user={activeUser as ChatUser} myPermission="staff" />
+        <UserDetailModal
+          targetUserID={activatedUser as string}
+          channelState={{
+            myRole: 'owner',
+            targetRole: 'staff',
+            isMutedTarget: false,
+          }}
+        />
       )}
       {showConfirm && (
         <ConfirmModal

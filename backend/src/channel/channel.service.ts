@@ -35,9 +35,11 @@ export class ChannelService {
   async getChannelAllInfoById(channelID: string): Promise<Channel> {
     const channel = await this.getChannelByIdWithException(channelID);
     const channelMembers = await channel.channelMembers;
-    channelMembers.forEach(async channelMember => {
+
+    const relationUsers = channelMembers.map(async channelMember => {
       await channelMember.user;
     })
+    await Promise.all(relationUsers);
     await channel.chats;
 
     return (channel);

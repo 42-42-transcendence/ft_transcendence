@@ -58,7 +58,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const user = await auth.user;
     const channelMembers = await user.channelMembers;
 
-    channelMembers.forEach(async (channelMember) => {
+
+    const leaveChannels = channelMembers.map(async (channelMember) => {
       const channel = await channelMember.channel;
       const createChatMessageDto = {
         content: `${user.nickname}님께서 퇴장하셨습니다.`,
@@ -69,6 +70,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
       client.leave(channel.channelID);
     });
+    await Promise.all(leaveChannels);
+
     console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
   }
 

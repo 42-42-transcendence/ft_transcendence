@@ -10,9 +10,10 @@ export class EventsService {
 
     async createEventsMembers(members: ChannelMember[], user: User): Promise<EventsMemberDto[]> {
         let eventsMembers: EventsMemberDto[] = [];
-    
-        // 지금 이게 돌기전에 먼저 배열이 리턴된다
-        members.forEach(async member => {
+
+        // forEach는 async에 대해서 기다려주지 않는다
+        // 따라서 비동기함수에 대한 map을 만들고 Promise.all로 전체를 실행한다.
+        const insertEventsMembers = members.map(async member => {
             const memberUser = await member.user;
             const relationType = await this.relationService.isBlockRelation(user, memberUser);
             const eventsMember = {
@@ -26,6 +27,7 @@ export class EventsService {
             console.log('eventsMember: ', eventsMember);
             eventsMembers.push(eventsMember);
         });
+        await Promise.all(insertEventsMembers);
 
         console.log('eventsMembers: ', eventsMembers);
 

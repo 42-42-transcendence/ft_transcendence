@@ -4,6 +4,8 @@ export class EventsMemberDto {
     
     userID: string;
 
+    nickname: string;
+
     image: string;
 
     relation: string;

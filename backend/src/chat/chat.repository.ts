@@ -15,6 +15,7 @@ export class ChatRepository extends Repository<Chat> {
 		const chat = this.create({
 			content,
 			chatType,
+			userNickname: user.nickname,
 			user,
 			channel
 		})

@@ -21,6 +21,7 @@ import { CreateChatMessageDto } from 'src/chat/dto/create-chat-message.dto';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { EventsService } from './events.service';
 
 @WebSocketGateway({
   cors: {
@@ -33,6 +34,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private authService: AuthService,
+    private eventsService: EventsService,
     @Inject(forwardRef(() => ChannelService))
     private channelService: ChannelService,
   ) {}
@@ -75,12 +77,16 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
-    await user.subjectRelations;
+    const chats = await channel.chats;
+    const members = await channel.channelMembers;
+    const eventsMembers = await this.eventsService.createEventsMembers(members, user);
 
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
       console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
     }
+
+    const title = channel.title;
 
 
     // return
@@ -89,7 +95,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // this.sendMessage(client, "updatedUsers", allUsers)
     // this.sendMessage(client, "firedChannel", message)
 
-    return { channel, user };
+    return { title, chats, eventsMembers };
   }
 
   @SubscribeMessage('leaveChannel')

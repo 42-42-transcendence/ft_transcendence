@@ -11,5 +11,6 @@ import { Relation } from './entities/relation.entity';
   ],
   controllers: [RelationController],
   providers: [RelationService, RelationRepository],
+  exports: [RelationService]
 })
 export class RelationModule {}

@@ -18,6 +18,9 @@ export class Chat {
   @Column()
   chatType: ChatType
 
+  @Column()
+  userNickname: string;
+
 
   // unique 하지 않으면 referencedColumnName을 지정할 수 없다
   @ManyToOne(() => User, (user) => user.chats)

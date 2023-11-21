@@ -6,6 +6,7 @@ import { ChannelMemberModule } from 'src/channel-member/channel-member.module';
 import { ChatModule } from 'src/chat/chat.module';
 import { EventsService } from './events.service';
 import { UserModule } from 'src/user/user.module';
+import { RelationModule } from 'src/relation/relation.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UserModule } from 'src/user/user.module';
     UserModule,
     ChannelMemberModule,
     ChatModule,
+    RelationModule,
     AuthModule,
   ],
   providers: [EventsGateway, EventsService],

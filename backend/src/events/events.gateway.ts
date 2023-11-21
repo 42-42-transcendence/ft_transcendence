@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import {
-  MessageBody,
+  ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -77,17 +77,15 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
-    const chats = await channel.chats;
-    const members = await channel.channelMembers;
-    const eventsMembers = await this.eventsService.createEventsMembers(members, user);
+    const messages = await channel.chats;
+    const channelMembers = await channel.channelMembers;
+    const members = await this.eventsService.createEventsMembers(channelMembers, user);
+    const title = channel.title;
 
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
       console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
     }
-
-    const title = channel.title;
-
 
     // return
 
@@ -95,7 +93,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // this.sendMessage(client, "updatedUsers", allUsers)
     // this.sendMessage(client, "firedChannel", message)
 
-    return { title, chats, eventsMembers };
+    return { title, messages, members };
   }
 
   @SubscribeMessage('leaveChannel')

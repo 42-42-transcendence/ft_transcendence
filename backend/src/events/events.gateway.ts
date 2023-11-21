@@ -1,6 +1,5 @@
 import { BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import {
-  ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -112,7 +111,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     };
 
     const chat = await this.chatService.createChatMessage(createChatMessageDto);
-    client.to(channel.channelID).emit("updateMessage", { message: chat });
+    client.to(channel.channelID).emit("updatedMessage", { message: chat });
   }
 
   @SubscribeMessage('inviteChannel')
@@ -141,14 +140,25 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 해당 유저에게만 초대된걸 어떻게 보내지?
   }
 
-  async updateMessage(userID: string, channelID: string, chat: Chat) {
+  async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
-    client.to(channelID).emit("updateMessage", { message: chat });
+    client.to(channelID).emit("updatedMessage", { message: chat });
   }
 
-  async updateChannelMembers(client: Socket, channel: Channel, events: string) {
+  async updatedMembers(channel: Channel) {
     const channelMembers = await channel.channelMembers;
-    this.server.to(channel.channelID).emit(events, channelMembers);
+
+    const emitUpdatedMembers = channelMembers.map(async member => {
+      const user = await member.user;
+      const client = this.eventsService.getClient(user.userID);
+      if (client === undefined || !client.rooms.has(channel.channelID)) {
+        return ;
+      }
+      const members = await this.eventsService.createEventsMembers(channelMembers, user);
+      this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
+    });
+
+    await Promise.all(emitUpdatedMembers);
   }
 
   async deleteChannel(channel: Channel) {

@@ -13,6 +13,7 @@ import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -22,6 +23,7 @@ export class ChannelController {
     private channelService: ChannelService,
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
+    private userService: UserService,
     @Inject(forwardRef(() => EventsGateway))
     private eventsGateway: EventsGateway,
   ) {}
@@ -145,7 +147,7 @@ export class ChannelController {
       channel,
       user
     });
-    this.eventsGateway.server.to(channel.channelID).emit("updateMessage", { message: chat });
+    this.eventsGateway.server.to(channel.channelID).emit("updatedMessage", { message: chat });
 
     return ({ isAuthenticated: true });
   }
@@ -175,7 +177,7 @@ export class ChannelController {
       user
     });
 
-    this.eventsGateway.updateMessage(user.userID, channel.channelID, chat);
+    this.eventsGateway.updatedMessage(user.userID, channel.channelID, chat);
 
     return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};
   }
@@ -273,6 +275,56 @@ export class ChannelController {
     await this.channelService.updateChannelInfo(channel, updateChannelDto);
 
     return ({ message: `해당 채널의 정보를 수정했습니다.` });
+  }
+
+
+  @ApiOperation({
+    summary: '특정 인원에게 스태프 권한을 부여한다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Post(':id/staff')
+  async assignStaff(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('newStaffUser') newStaffUserID: string,
+  ): Promise<{ message: string }> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const newStaffUser = await this.userService.getUserByIdWithException(newStaffUserID);
+    const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, newStaffUser);
+
+    if (subjectUserRole.role !== ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${user.nickname}은 스태프 부여 권한이 없습니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${newStaffUser.nickname}은 채널 소유자입니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.INVITE) {
+      throw new BadRequestException(`${newStaffUser.nickname}은 아직 초대상태입니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.STAFF) {
+      await this.channelMemberService.updateChannelMemberRoleByChannelMember(
+        objectUserRole,
+        ChannelMemberRole.GUEST
+      );
+      await this.eventsGateway.updatedMembers(channel);
+
+      return ({ message: `${newStaffUser.nickname}님의 스태프 권한이 해제되었습니다.`} )
+    }
+
+    await this.channelMemberService.updateChannelMemberRoleByChannelMember(
+      objectUserRole,
+      ChannelMemberRole.STAFF
+    );
+    await this.eventsGateway.updatedMembers(channel);
+    return ({ message: `${newStaffUser.nickname}님이 스태프로 임명되었습니다.` });
   }
 
 }

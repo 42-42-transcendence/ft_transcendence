@@ -9,6 +9,8 @@ export class CreateChatMessageDto {
 
 	chatType: ChatType;
 
+	userNickname: string;
+
 	user: User;
 
 	channel: Channel;

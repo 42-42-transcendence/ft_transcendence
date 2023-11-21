@@ -11,7 +11,6 @@ import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
-import { PostgresDriver } from 'typeorm/driver/postgres/PostgresDriver';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
 
@@ -93,7 +92,7 @@ export class ChannelController {
 
   // 에러 status로 하면 제일 좋을 것 같긴 함
   @ApiOperation({
-    summary: '채널 '
+    summary: '들어갈 수 있는 채널인지 확인, 들어갈 수 있으면 true 아니면 false'
   })
   @ApiOkResponse({
     description: '성공',
@@ -139,43 +138,46 @@ export class ChannelController {
     }
 
     const content = `${user.nickname}님께서 입장하셨습니다.`;
-
-    this.eventsGateway.server.to(channel.channelID).emit(
-      "sendJoinMessageToChannel", content
-    )
-
     const chat = await this.chatService.createChatMessage({
       content,
       chatType: ChatType.SYSTEM,
+      userNickname: user.nickname,
       channel,
       user
     });
+    this.eventsGateway.server.to(channel.channelID).emit("updateMessage", { message: chat });
 
     return ({ isAuthenticated: true });
   }
 
+  @ApiOperation({
+    summary: '해당 채널을 나간다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Get(':id/leave')
   async leaveChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-  ) {
+  ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     await this.channelMemberService.deleteChannelMember(channel, user);
-
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
-
-    this.eventsGateway.server.to(channel.channelID).emit(
-      "sendLeaveMessageToChannel",
-      `${user.nickname}님께서 입장하셨습니다.`
-    )
 
     const chat = await this.chatService.createChatMessage({
       content,
       chatType: ChatType.SYSTEM,
+      userNickname: user.nickname,
       channel,
       user
     });
+
+    this.eventsGateway.updateMessage(user.userID, channel.channelID, chat);
+
+    return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};
   }
 
   @Delete(':id/delete')
@@ -194,32 +196,6 @@ export class ChannelController {
       )
     }
   }
-
-
-  // @ApiOperation({
-  //   summary: 'channel-member 관계 만들고 channel 정보 리턴'
-  // })
-  // @ApiOkResponse({
-  //   description: '성공',
-  //   type: Promise<Channel>
-  // })
-  // @Get(':id/join/auth')
-  // async joinChannel(
-  //   @GetAuth() auth: Auth,
-  //   @Param('id') channelID: string
-  // ): Promise<Channel> {
-  //   const channel = await this.channelService.getChannelById(channelID);
-
-  //   if (!channel)
-  //     throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
-
-  //   const user = await auth.user;
-  //   const role = ChannelMemberRole.GUEST;
-
-  //   await this.channelMemberService.relationChannelMember({ channel, user, role });
-  //   await channel.chats;
-  //   return (channel);
-  // }
 
 
   @ApiOperation({
@@ -273,12 +249,19 @@ export class ChannelController {
     await this.channelService.deleteChannelById(channelID);
   }
 
-  @Post(':id/update')
+  @ApiOperation({
+    summary: '해당 채널의 정보를 수정한다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Patch(':id')
   async updateChannelInfo(
     @Param('id') channelID: string,
     @GetAuth() auth: Auth,
     @Body() updateChannelDto: ChannelDto
-  ): Promise<Channel> {
+  ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
@@ -287,9 +270,9 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}은 권한이 없습니다.`);
     }
 
-    const updateChannel = this.channelService.updateChannelInfo(channel, updateChannelDto);
+    await this.channelService.updateChannelInfo(channel, updateChannelDto);
 
-    return (updateChannel);
+    return ({ message: `해당 채널의 정보를 수정했습니다.` });
   }
 
 }

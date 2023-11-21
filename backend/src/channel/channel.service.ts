@@ -62,7 +62,7 @@ export class ChannelService {
   }
 
   async updateChannelInfo(channel: Channel, updateChannelDto: ChannelDto): Promise<Channel> {
-    return (this.channelRepository.updateChannelInfo(channel, updateChannelDto));
+    return (await this.channelRepository.updateChannelInfo(channel, updateChannelDto));
   }
 
 }

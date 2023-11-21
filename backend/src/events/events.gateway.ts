@@ -22,6 +22,7 @@ import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { EventsService } from './events.service';
+import { Chat } from 'src/chat/entities/chat.entity';
 
 @WebSocketGateway({
   cors: {
@@ -50,6 +51,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async handleConnection(client: Socket) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await auth.user;
+    this.eventsService.addClient(user.userID, client);
     console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
   }
 
@@ -58,25 +60,20 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const user = await auth.user;
     const channelMembers = await user.channelMembers;
 
-
     const leaveChannels = channelMembers.map(async (channelMember) => {
       const channel = await channelMember.channel;
-      const createChatMessageDto = {
-        content: `${user.nickname}님께서 퇴장하셨습니다.`,
-        chatType: ChatType.SYSTEM,
-        user,
-        channel,
-      };
-      this.sendMessage(client, 'leaveChannelMsg', createChatMessageDto);
-      client.leave(channel.channelID);
+
+      await this.leaveChannelSession(client, { channelID: channel.channelID });
     });
     await Promise.all(leaveChannels);
+
+    this.eventsService.removeClient(user.userID);
 
     console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
   }
 
   @SubscribeMessage('joinChannel')
-  async joinChannel(client: Socket, data: any): Promise<any> {
+  async joinChannelSession(client: Socket, data: any): Promise<any> {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
@@ -87,40 +84,35 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
-      console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
     }
-
-    // return
-
-    // this.sendMessage(client, "updatedMessage", createChatMessageDto);
-    // this.sendMessage(client, "updatedUsers", allUsers)
-    // this.sendMessage(client, "firedChannel", message)
+    console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
 
     return { title, messages, members };
   }
 
   @SubscribeMessage('leaveChannel')
-  async leaveChannel(client: Socket, data: any) {
+  async leaveChannelSession(client: Socket, data: any) {
     if (client.rooms.has(data.channelID)) {
       client.leave(data.channelID);
       console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
     }
   }
 
-  @SubscribeMessage('')
-
-  @SubscribeMessage('sendMessageToChannel')
-  async sendMessageToChannel(client: Socket, data: any) {
+  @SubscribeMessage('sendMessage')
+  async sendMessage(client: Socket, data: any) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const channel = await this.channelService.getChannelById(data.channelID);
+    const channel = await this.channelService.getChannelByIdWithException(data.channelID);
     const user = await auth.user;
     const createChatMessageDto = {
       content: data.message,
       chatType: ChatType.NORMAL,
+      userNickname: user.nickname,
       user,
       channel,
     };
-    this.sendMessage(client, 'sendMessageToChannel', createChatMessageDto);
+
+    const chat = await this.chatService.createChatMessage(createChatMessageDto);
+    client.to(channel.channelID).emit("updateMessage", { message: chat });
   }
 
   @SubscribeMessage('inviteChannel')
@@ -149,9 +141,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 해당 유저에게만 초대된걸 어떻게 보내지?
   }
 
-  private async sendMessage(client: Socket, events: string, createChatMessageDto: CreateChatMessageDto) {
-    const chat = await this.chatService.createChatMessage(createChatMessageDto);
-    client.to(createChatMessageDto.channel.channelID).emit(events, chat);
+  async updateMessage(userID: string, channelID: string, chat: Chat) {
+    const client = this.eventsService.getClient(userID);
+    client.to(channelID).emit("updateMessage", { message: chat });
   }
 
   async updateChannelMembers(client: Socket, channel: Channel, events: string) {

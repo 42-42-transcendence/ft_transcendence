@@ -3,10 +3,25 @@ import { ChannelMember } from 'src/channel-member/entities/channel-member.entity
 import { EventsMemberDto } from './dto/events-member.dto';
 import { User } from 'src/user/entities/user.entity';
 import { RelationService } from 'src/relation/relation.service';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class EventsService {
     constructor(private relationService: RelationService) {}
+
+    private clients: Map<string, Socket> = new Map();
+
+    addClient(userID: string, socket: Socket) {
+        this.clients.set(userID, socket);
+    }
+
+    removeClient(userID: string) {
+        this.clients.delete(userID);
+    }
+
+    getClient(userID: string): Socket | undefined  {
+        return (this.clients.get(userID));
+    }
 
     async createEventsMembers(members: ChannelMember[], user: User): Promise<EventsMemberDto[]> {
         let eventsMembers: EventsMemberDto[] = [];
@@ -24,12 +39,9 @@ export class EventsService {
                 role: member.role,
                 isMuted: member.isMuted
             }
-            console.log('eventsMember: ', eventsMember);
             eventsMembers.push(eventsMember);
         });
         await Promise.all(insertEventsMembers);
-
-        console.log('eventsMembers: ', eventsMembers);
 
         return (eventsMembers);
     }

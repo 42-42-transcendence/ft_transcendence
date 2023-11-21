@@ -10,8 +10,8 @@ type Props = {
 const ChattingMemberList = ({ members, onActive }: Props) => {
   const memberItemList = members.map((member) => (
     <ChattingMemberItem
-      key={member.id}
-      id={member.id}
+      key={member.nickname}
+      nickname={member.nickname}
       image={member.image}
       role={member.role}
       isMuted={member.isMuted}

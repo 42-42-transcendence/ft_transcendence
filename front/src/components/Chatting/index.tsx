@@ -22,7 +22,7 @@ import useAuthState from '../../store/Auth/useAuthState';
 
 export type Role = 'owner' | 'staff' | 'guest';
 export type ChatMember = {
-  id: string;
+  nickname: string;
   image: string;
   relation: Relation;
   role: Role;
@@ -30,15 +30,23 @@ export type ChatMember = {
 };
 export type Message = {
   chatID: number;
-  nickname: string;
-  type: 'normal' | 'system';
-  date: Date;
+  userNickname: string;
+  chatType: 'normal' | 'system';
+  date: string;
   content: string;
 };
 type ChannelAllInfo = {
   title: string;
   messages: Message[];
   members: ChatMember[];
+};
+
+const isBlockedMember = (targetID: string, members: ChatMember[]) => {
+  const flag = members.find(
+    (member) => member.nickname === targetID && member.relation === 'block'
+  );
+  if (!flag) return false;
+  else return true;
 };
 
 const Chatting = () => {
@@ -54,60 +62,12 @@ const Chatting = () => {
   const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [members, setMembers] = useState<ChatMember[]>([
-    {
-      id: 'heryu',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'owner',
-      isMuted: false,
-      relation: 'unknown',
-    },
-    {
-      id: 'a',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'staff',
-      isMuted: false,
-      relation: 'unknown',
-    },
-    {
-      id: 'b',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'staff',
-      isMuted: true,
-      relation: 'unknown',
-    },
-    {
-      id: 'c',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'guest',
-      isMuted: false,
-      relation: 'block',
-    },
-    {
-      id: 'd',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'guest',
-      isMuted: false,
-      relation: 'block',
-    },
-    {
-      id: 'e',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'guest',
-      isMuted: false,
-      relation: 'unknown',
-    },
-    {
-      id: 'f',
-      image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-      role: 'guest',
-      isMuted: false,
-      relation: 'unknown',
-    },
-  ]);
+  const [members, setMembers] = useState<ChatMember[]>([]);
 
-  const myMember = members.find((member) => member.id === myID);
-  const targetMember = members.find((member) => member.id === activatedUserID);
+  const myMember = members.find((member) => member.nickname === myID);
+  const targetMember = members.find(
+    (member) => member.nickname === activatedUserID
+  );
 
   const myRole = myMember?.role ?? null;
   const targetRole = targetMember?.role ?? null;
@@ -126,45 +86,35 @@ const Chatting = () => {
     navigate('/channels');
   };
 
-  const isBlockedMember = useCallback(
-    (targetID: string) => {
-      const flag = members.find(
-        (member) => member.id === targetID && member.relation === 'block'
-      );
-      if (!flag) return false;
-      else return true;
-    },
-    [members]
-  );
-
-  const cleanupSocketEvent = useCallback(() => {
-    if (socket?.connected) {
-      socket.emit('leaveChannel', params.channelID);
-      socket.off('updatedMessage');
-      socket.off('updatedMember');
-      socket.off('updatedChannelTitle');
-      socket.off('firedChannel');
-    }
-  }, [socket, params.channelID]);
-
   const joinChannelAckHandler = useCallback(
     ({ title, messages, members }: ChannelAllInfo) => {
       setChannelTitle(title);
       setMembers(members);
       setMessages(
-        messages.filter((message) => !isBlockedMember(message.nickname))
+        messages.filter(
+          (message) => !isBlockedMember(message.userNickname, members)
+        )
       );
     },
-    [isBlockedMember]
+    []
   );
+
+  const cleanupSocketEvent = useCallback(() => {
+    if (socket) {
+      socket.off('updatedMessage');
+      socket.off('updatedMember');
+      socket.off('updatedChannelTitle');
+      socket.off('firedChannel');
+    }
+  }, [socket]);
 
   const updatedMessageHandler = useCallback(
     (message: Message) => {
-      if (isBlockedMember(message.nickname)) return;
+      if (isBlockedMember(message.userNickname, members)) return;
 
       setMessages((prevMessages) => [...prevMessages, message]);
     },
-    [isBlockedMember]
+    [members]
   );
 
   const updatedMemberHandler = useCallback((members: ChatMember[]) => {
@@ -184,22 +134,41 @@ const Chatting = () => {
     [cleanupSocketEvent, openMessageModalHandler]
   );
 
+  const unloadHandler = useCallback(() => {
+    if (socket) {
+      socket.emit('leaveChannel', { channelID: params.channelID });
+    }
+    cleanupSocketEvent();
+  }, [socket, params.channelID, cleanupSocketEvent]);
+
   useEffect(() => {
-    if (socket?.connected) {
-      socket.emit('joinChannel', params.channelID); //, joinChannelAckHandler);
+    if (socket) {
+      socket.emit(
+        'joinChannel',
+        { channelID: params.channelID },
+        joinChannelAckHandler
+      );
+      window.addEventListener('beforeunload', unloadHandler);
+    }
+
+    return () => {
+      if (socket) {
+        socket.emit('leaveChannel', { channelID: params.channelID });
+        window.removeEventListener('beforeunload', unloadHandler);
+      }
+    };
+  }, [socket, params.channelID, joinChannelAckHandler, unloadHandler]);
+
+  useEffect(() => {
+    if (socket) {
       socket.on('updatedMessage', updatedMessageHandler);
       socket.on('updatedMember', updatedMemberHandler);
       socket.on('updatedChannelTitle', updatedChannelTitleHandler);
       socket.on('firedChannel', firedChannelHandler);
     }
-
-    return () => {
-      cleanupSocketEvent();
-    };
+    return cleanupSocketEvent();
   }, [
     socket,
-    params.channelID,
-    joinChannelAckHandler,
     updatedMessageHandler,
     updatedMemberHandler,
     updatedChannelTitleHandler,

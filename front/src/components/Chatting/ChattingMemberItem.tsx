@@ -7,18 +7,18 @@ type Props = ChatMember & {
   onActive: (user: string) => void;
 };
 
-const ChattingMemberItem = ({ id, image, role, onActive }: Props) => {
+const ChattingMemberItem = ({ nickname, image, role, onActive }: Props) => {
   const openModalHandler = useOpenModal('showUserDetail');
 
   const activeHandler = () => {
-    onActive(id);
+    onActive(nickname);
     openModalHandler();
   };
 
   return (
     <li>
       <UserItem
-        id={id}
+        id={nickname}
         image={image}
         className={styles.member}
         clickHandler={activeHandler}

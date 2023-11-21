@@ -14,10 +14,12 @@ const ChattingMessageList = ({ members, messages }: Props) => {
   useEffect(() => {
     if (listRef.current)
       listRef.current.scrollTop = listRef.current.scrollHeight;
-  }, []);
+  }, [messages]);
 
   const messageItemList = messages.map((message) => {
-    const sender = members.find((member) => member.id === message.nickname);
+    const sender = members.find(
+      (member) => member.nickname === message.userNickname
+    );
 
     return (
       <ChattingMessageItem

@@ -57,6 +57,10 @@ const ChattingPage = () => {
   );
 
   useEffect(() => {
+    if (location.state?.initialRedirect === true) {
+      setIsAuthenticated(true);
+      return;
+    }
     const protectedChattingPage = async () => {
       const ret = await request<RequestPasswordRequired>(
         `${SERVER_URL}/api/channel/${params.channelID}/join`,
@@ -68,7 +72,7 @@ const ChattingPage = () => {
       if (ret === null) return;
       else if (
         ret.isPasswordRequired === false ||
-        location.state.initialRedirect === true
+        location.state?.initialRedirect === true
       ) {
         requestAuthenticated();
       } else {

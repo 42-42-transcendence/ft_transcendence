@@ -118,32 +118,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     client.to(channel.channelID).emit("updatedMessage", { message: chat });
   }
 
-  @SubscribeMessage('inviteChannel')
-  async inviteChannel(client: Socket, data: any) {
-    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const channel = await this.channelService.getChannelById(data.channelID);
-    const authUser = await auth.user;
-    const inviteUser = await this.userService.getUserByNickname(data.nickname);
-
-    if (this.channelMemberService.checkChannelMember(channel, inviteUser)) {
-      throw new BadRequestException(`${inviteUser.nickname}은 현재 채널에 존재합니다.`);
-    }
-
-    if (!this.channelMemberService.hasAuthMemberToChannel(channel, authUser)) {
-      throw new ForbiddenException(`${authUser.nickname}은 초대권한이 없습니다.`);
-    }
-
-    const chennelMemberDto = {
-      channel,
-      user: inviteUser,
-      role: ChannelMemberRole.INVITE,
-    };
-
-    await this.channelMemberService.relationChannelMember(chennelMemberDto);
-
-    // 해당 유저에게만 초대된걸 어떻게 보내지?
-  }
-
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
     client.to(channelID).emit("updatedMessage", { message: chat });

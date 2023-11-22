@@ -50,7 +50,7 @@ const requestOAuth = async (request: Request) => {
   const authCode = url.searchParams.get('code');
 
   try {
-    const res = await fetch('http://localhost:3001/api/auth', {
+    const res = await fetch(`http://localhost:3001/api/auth`, {
       method: 'POST',
       body: JSON.stringify({ code: authCode }),
       headers: {

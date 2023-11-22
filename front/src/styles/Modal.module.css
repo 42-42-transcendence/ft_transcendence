@@ -170,15 +170,21 @@
   color: #777777;
 }
 
-.form-error {
+.feedback {
   color: var(--focus-color);
+  text-align: center;
+  margin: 8px auto;
+  max-width: 300px;
+}
+
+.loading {
   width: 100%;
   text-align: center;
   margin: 8px 0;
 }
 
-.form-loading {
-  width: 100%;
+.success-message {
+  color: var(--active-color);
+  margin: 32px;
   text-align: center;
-  margin: 8px 0;
 }

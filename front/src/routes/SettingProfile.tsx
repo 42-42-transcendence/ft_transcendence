@@ -27,7 +27,7 @@ const action = async ({ request }: ActionFunctionArgs) => {
       return json({ errorMessage: '이미지 파일은 3MB가 최대입니다.' });
     }
   }
-  if (name.length < 4 || name.length > 8) {
+  if (name.trim().length < 4 || name.trim().length > 8) {
     return json({ errorMessage: '닉네임 길이는 4~8자 입니다.' });
   }
 

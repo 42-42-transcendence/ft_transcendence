@@ -11,7 +11,7 @@ COPY        ./front/src /react/test/src
 WORKDIR     /react/test
 RUN         npm install
 
-EXPOSE      3001
+EXPOSE      3000
 
 #ENTRYPOINT  
-CMD         PORT=3001 npm start
+CMD         PORT=3000 npm start

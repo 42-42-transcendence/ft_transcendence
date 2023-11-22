@@ -10,6 +10,11 @@
   position: relative;
 }
 
+.channel-title {
+  width: 100%;
+  color: var(--active-color);
+}
+
 .members {
   width: 200px;
   padding: 16px;
@@ -69,6 +74,10 @@
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
   color: var(--text-white);
+}
+.submit:disabled {
+  background-color: var(--tone-down-color);
+  color: #777777;
 }
 
 .message-list {

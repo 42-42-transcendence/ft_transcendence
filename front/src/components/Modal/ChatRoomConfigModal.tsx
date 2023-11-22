@@ -1,40 +1,102 @@
-import { Form, useSubmit } from 'react-router-dom';
+import { SERVER_URL } from '../../App';
 import Modal from '../../UI/Modal';
+import useRequest from '../../http/useRequest';
 import useCloseModal from '../../store/Modal/useCloseModal';
-
 import styles from '../../styles/Modal.module.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const ChatRoomConfigModal = () => {
-  const submit = useSubmit();
-  const closeHandler = useCloseModal();
+type Props = {
+  channelID: string;
+};
 
-  const [selectedType, setSelectedType] = useState<string>('public');
-  const [enteredName, setEnteredName] = useState<string>('');
+const ChatRoomConfigModal = ({ channelID }: Props) => {
+  const navigate = useNavigate();
+  const closeModalHandler = useCloseModal();
+
+  const [enteredType, setEnteredType] = useState<string>('public');
+  const [enteredTitle, setEnteredTitme] = useState<string>('');
   const [enteredPassword, setEnteredPassword] = useState<string>('');
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+  const [successModalMessage, setSuccessModalMessage] = useState<string>('');
+  const { isLoading, error, request } = useRequest();
 
-  const clickHandler = (e: React.MouseEvent<HTMLInputElement>) => {
-    setSelectedType(e.currentTarget.value);
+  useEffect(() => {
+    if (error) {
+      setFeedbackMessage(error);
+    }
+  }, [error]);
+
+  const changeTypeHandler = (e: React.MouseEvent<HTMLInputElement>) => {
+    setEnteredType(e.currentTarget.value);
     if (e.currentTarget.value === 'private') {
       setEnteredPassword('');
     }
   };
 
-  const changeNameHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEnteredName(e.target.value);
+  const changeTitleHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEnteredTitme(e.target.value);
+    if (e.target.value.trim().length > 0) setFeedbackMessage('');
   };
 
   const changePasswordHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEnteredPassword(e.target.value);
   };
 
-  const onDeleteHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
-    submit(null, { method: 'DELETE' });
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (enteredTitle.trim().length === 0) {
+      setFeedbackMessage('방 제목을 입력하세요.');
+      return;
+    }
+    setFeedbackMessage('');
+
+    const bodyData = {
+      type: enteredType,
+      title: enteredTitle,
+      password: enteredPassword,
+    };
+
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${channelID}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(bodyData),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    if (ret !== null) {
+      setSuccessModalMessage('요청에 성공하였습니다.');
+      setTimeout(() => {
+        closeModalHandler();
+      }, 1000);
+    }
   };
 
-  return (
-    <Modal onClose={closeHandler}>
-      <Form method="PATCH">
+  const deleteHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${channelID}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+      navigate('/channels');
+    }
+  };
+
+  let contents: React.ReactNode = '';
+  if (successModalMessage) {
+    contents = (
+      <h1 className={styles['success-message']}>{successModalMessage}</h1>
+    );
+  } else {
+    contents = (
+      <form onSubmit={submitHandler}>
         <div className={styles.header}>채팅방 설정</div>
         <div className={styles['input-field']}>
           <div className={styles.title}>종류</div>
@@ -43,21 +105,21 @@ const ChatRoomConfigModal = () => {
               PUBLIC
               <input
                 type="radio"
-                name="room-type"
+                name="type"
                 id="public"
                 value="public"
                 defaultChecked={true}
-                onClick={clickHandler}
+                onClick={changeTypeHandler}
               />
             </label>
             <label htmlFor="private">
               PRIVATE
               <input
                 type="radio"
-                name="room-type"
+                name="type"
                 id="private"
                 value="private"
-                onClick={clickHandler}
+                onClick={changeTypeHandler}
               />
             </label>
           </div>
@@ -67,11 +129,10 @@ const ChatRoomConfigModal = () => {
           <input
             className={styles.input}
             type="text"
-            name="room-name"
             maxLength={20}
             placeholder="방 제목 입력"
-            value={enteredName}
-            onChange={changeNameHandler}
+            value={enteredTitle}
+            onChange={changeTitleHandler}
           />
         </div>
         <div className={styles['input-field']}>
@@ -79,16 +140,17 @@ const ChatRoomConfigModal = () => {
           <input
             className={styles.input}
             type="password"
-            name="room-password"
             maxLength={8}
             placeholder={
-              selectedType === 'private' ? '' : '비밀번호 입력 (최대 8자)'
+              enteredType === 'private' ? '' : '비밀번호 입력 (최대 8자)'
             }
             value={enteredPassword}
             onChange={changePasswordHandler}
-            disabled={selectedType === 'private'}
+            disabled={enteredType === 'private'}
           />
         </div>
+        {isLoading && <div className={styles.loading}>..loading..</div>}
+        <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"
@@ -99,20 +161,21 @@ const ChatRoomConfigModal = () => {
           <button
             type="button"
             className={`${styles['footer-button']} ${styles.delete}`}
-            onClick={onDeleteHandler}
+            onClick={deleteHandler}
           >
             DELETE
           </button>
           <button
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
-            onClick={closeHandler}
+            onClick={closeModalHandler}
           >
             CANCEL
           </button>
         </div>
-      </Form>
-    </Modal>
-  );
+      </form>
+    );
+  }
+  return <Modal onClose={closeModalHandler}>{contents}</Modal>;
 };
 export default ChatRoomConfigModal;

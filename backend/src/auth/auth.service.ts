@@ -1,11 +1,12 @@
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { HttpStatus, Injectable, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { UserRepository } from 'src/user/user.repository';
 import { Auth } from './entities/auth.entity';
+import { SocketException } from 'src/events/socket.exception';
+import { User } from 'src/user/entities/user.entity';
+
 
 @Injectable()
 export class AuthService {
@@ -78,20 +79,43 @@ export class AuthService {
     return jwtToken;
   }
 
-  checkAuthByIntraUID(intraUID: string): Promise<Auth> {
-    const auth = this.authRepository.getAuthByIntraID(intraUID);
+  async checkAuthByIntraUIDWithHttpException(intraUID: string): Promise<Auth> {
+    const auth = await this.authRepository.getAuthByIntraID(intraUID);
 
     if (!auth) {
-			throw new UnauthorizedException(`token이 유효하지 않습니다.`);
+			throw new UnauthorizedException(`토큰이 유효하지 않습니다.`);
+		}
+
+    return (auth);
+  }
+
+  async checkAuthByIntraUIDWithWsException(intraUID: string): Promise<Auth> {
+    const auth = await this.authRepository.getAuthByIntraID(intraUID);
+
+    if (!auth) {
+			throw new SocketException('Unauthorized',`토큰이 유효하지 않습니다.`);
 		}
 
     return (auth);
   }
 
   async checkAuthByJWT(token: string): Promise<Auth> {
-    const decode = this.jwtService.verify(token);
-    const auth = this.checkAuthByIntraUID(decode.intraUID);
+    try {
+      const decode = this.jwtService.verify(token);
+      const auth = await this.checkAuthByIntraUIDWithWsException(decode.intraUID);
 
-    return (auth);
+      return (auth);
+    } catch (e) {
+      throw new SocketException('Unauthorized', `토큰이 유효하지 않습니다.`);
+    }
+  }
+
+  async getUserByAuthWithWsException(auth: Auth): Promise<User> {
+    const user = await auth.user;
+
+    if (!user) {
+      throw new SocketException('NotFound', `해당 토큰의 유저를 찾을수 없습니다.`);
+    }
+    return (user);
   }
 }

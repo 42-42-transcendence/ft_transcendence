@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, UseFilters, forwardRef } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -22,7 +22,11 @@ import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { EventsService } from './events.service';
 import { Chat } from 'src/chat/entities/chat.entity';
+import { SocketExceptionFilter } from './socket.filter';
 
+
+
+// @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:3000',
@@ -49,14 +53,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async handleConnection(client: Socket) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await auth.user;
+    const user = await this.authService.getUserByAuthWithWsException(auth);
     this.eventsService.addClient(user.userID, client);
     console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
   }
 
   async handleDisconnect(client: Socket) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await auth.user;
+    const user = await this.authService.getUserByAuthWithWsException(auth);
     const channelMembers = await user.channelMembers;
 
     const leaveChannels = channelMembers.map(async channelMember => {
@@ -74,7 +78,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('joinChannel')
   async joinChannelSession(client: Socket, data: any): Promise<any> {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await auth.user;
+    const user = await this.authService.getUserByAuthWithWsException(auth);
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
     const messages = await channel.chats;
     const channelMembers = await channel.channelMembers;
@@ -100,8 +104,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('sendMessage')
   async sendMessage(client: Socket, data: any) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const user = await this.authService.getUserByAuthWithWsException(auth);
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
-    const user = await auth.user;
     const createChatMessageDto = {
       content: data.message,
       chatType: ChatType.NORMAL,

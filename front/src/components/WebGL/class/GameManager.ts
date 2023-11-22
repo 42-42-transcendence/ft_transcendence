@@ -1,5 +1,3 @@
-import { Paddle } from './Paddle';
-import { Ball } from './Ball';
 import data from "../interface/gameData";
 import {vec2} from "gl-matrix";
 
@@ -15,6 +13,7 @@ export class GameManager {
         const radius = data.ball.radius;
 
         if (ballPos[0] + radius > 1.0 || ballPos[0] - radius < -1.0) {
+            console.log("점수 획득"); // 디버깅
             return ballPos[0] + radius > 1.0 ? 'player1' : 'player2';
         }
         return '';

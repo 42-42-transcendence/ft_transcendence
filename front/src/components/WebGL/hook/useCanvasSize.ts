@@ -1,4 +1,4 @@
-import { useEffect, RefObject } from 'react';
+import { useEffect} from 'react';
 import { debounce } from 'lodash'; // lodash의 debounce 함수 사용
 import data from '../interface/gameData';
 
@@ -8,7 +8,6 @@ function useCanvasSize() {
 // 창 크기가 변할 때 실행될 함수
 const updateCanvasSize = debounce(() => {
     const canvasRef = data.canvasRef;
-    const profileRef = data.profileRef;
 
 	if (!canvasRef) return;
     canvasRef.width = window.innerWidth / 1.5;

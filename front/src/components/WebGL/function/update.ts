@@ -4,10 +4,7 @@ import { GameManager } from "../class/GameManager";
 
 function update(delta: number) {
 	/* 공 위치 업데이트 */
-	PhysicsEngine.updateBallPosition(delta);
-	// PhysicsEngine.collisionGuarantee(data.ball, delta);
-	/* 패들 & 공 충돌 감지 */
-	PhysicsEngine.handleBallPaddleCollision();
+	PhysicsEngine.GuaranteeConflict(data.ball, delta);
 	/* 공이 라인을 넘어가는지 확인 */
 	const player = GameManager.checkOverLine(data.ball.position);
 	/* 공이 라인을 넘어갔다면 점수 업데이트 */

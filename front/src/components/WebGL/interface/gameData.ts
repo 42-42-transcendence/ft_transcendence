@@ -1,4 +1,3 @@
-import { vec2 } from 'gl-matrix';
 import Ball from '../class/Ball';
 import Paddle from '../class/Paddle';
 

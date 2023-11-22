@@ -1,5 +1,14 @@
 import { vec2 } from "gl-matrix";
 
+export enum PaddlePos{
+    LeftFront,
+    LeftUp,
+    LeftDown,
+    RightFront,
+    RightUp,
+    RightDown
+}
+
 export class Paddle {
     position: vec2;
     paddleSpeed: number;
@@ -28,5 +37,3 @@ export class Paddle {
         ]);
     }
 }
-
-export default Paddle;

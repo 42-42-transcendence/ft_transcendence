@@ -1,5 +1,12 @@
 import {vec2} from "gl-matrix";
 
+export enum BallCorner {
+    TopRight,
+    BottomRight,
+    TopLeft,
+    BottomLeft
+}
+
 export class Ball {
     position: vec2;
     direction: vec2;
@@ -26,4 +33,3 @@ export class Ball {
         ]);
     }
 }
-export default Ball;

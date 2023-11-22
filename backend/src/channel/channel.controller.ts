@@ -339,6 +339,13 @@ export class ChannelController {
   }
 
 
+  @ApiOperation({
+    summary: '특정 인원을 추방시키고 채널에 못들어오게 한다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Post(':id/kick')
   async kickFromChannel(
     @GetAuth() auth: Auth,
@@ -383,6 +390,60 @@ export class ChannelController {
 
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    
+    return ({ message: content });
+  }
+
+  @ApiOperation({
+    summary: '특정 인원을 채널에 초대한다.'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Post(':id/kick')
+  async inviteToChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('invitedUser') invitedUserID: string,
+  ): Promise<{ message: string }> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const invitedUser = await this.userService.getUserByIdWithException(invitedUserID);
+    const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, invitedUser);
+
+    if (!subjectUserRole) {
+      throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (subjectUserRole.role === ChannelMemberRole.BLOCK 
+        || subjectUserRole.role === ChannelMemberRole.INVITE ) {
+      throw new BadRequestException(`${user.nickname}님은 초대권한이 없습니다.`);
+    }
+
+    if (objectUserRole) {
+      if (objectUserRole.role === ChannelMemberRole.INVITE) {
+        throw new BadRequestException(`${invitedUser.nickname}님은 이미 초대를 보냈습니다.`);
+      }
+      else if (objectUserRole.role === ChannelMemberRole.BLOCK) {
+        throw new BadRequestException(`${invitedUser.nickname}님은 초대할 수 없습니다.`);
+      }
+      else {
+        throw new BadRequestException(`${invitedUser.nickname}님은 이미 채널에 존재합니다.`);
+      }
+    }
+
+    await this.channelMemberService.relationChannelMember({
+      channel,
+      user: invitedUser,
+      role: ChannelMemberRole.INVITE
+    });
+
+    const content = `${invitedUser.nickname}님께 초대를 보냈습니다.`;
+    await this.eventsGateway.updatedSystemMessage(content, channel, user);
+
+    // noti로 해당 인물에게 초대 알림을 보내야함
     
     return ({ message: content });
   }

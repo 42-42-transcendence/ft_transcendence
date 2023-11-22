@@ -42,7 +42,7 @@ export class ChannelController {
 
     if (channels.length === 0) {
       for (let idx = 0; idx < 10; idx++) {
-        await this.channelService.createDummy();
+        await this.channelService.createChannelDummy();
       }
       return (await this.channelService.getAllChannels());
     }
@@ -66,6 +66,7 @@ export class ChannelController {
     const role = ChannelMemberRole.OWNER;
 
     await this.channelMemberService.relationChannelMember({ channel, user, role });
+    await this.channelService.enterUserToChannel(channel);
 
     return (channel);
   }
@@ -126,8 +127,9 @@ export class ChannelController {
       if (!member || (member && member.role === ChannelMemberRole.BLOCK)) {
         return ({ isAuthenticated: false });
       }
-      else if (member.role === ChannelMemberRole.INVITE) {
+      if (member.role === ChannelMemberRole.INVITE) {
         await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
+        await this.channelService.enterUserToChannel(channel);
       }
     }
 
@@ -137,6 +139,7 @@ export class ChannelController {
         user,
         role: ChannelMemberRole.GUEST
       });
+      await this.channelService.enterUserToChannel(channel);
     }
 
     const content = `${user.nickname}님께서 입장하셨습니다.`;
@@ -151,6 +154,7 @@ export class ChannelController {
 
     return ({ isAuthenticated: true });
   }
+
 
   @ApiOperation({
     summary: '해당 채널을 나간다'
@@ -167,6 +171,7 @@ export class ChannelController {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     await this.channelMemberService.deleteChannelMember(channel, user);
+    await this.channelService.leaveUserToChannel(channel);
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
 
     const chat = await this.chatService.createChatMessage({
@@ -181,6 +186,7 @@ export class ChannelController {
 
     return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};
   }
+
 
   @Delete(':id/delete')
   async deleteChannel(
@@ -217,17 +223,6 @@ export class ChannelController {
     return (channel);
   }
 
-  @ApiOperation({
-    summary: '채널 내 멤버 전체 조회'
-  })
-  @ApiOkResponse({
-    description: '성공',
-    type: [ChannelMember]
-  })
-  @Get(':id/members')
-  getJoinChannelMembers(@Param('id') channelID: string): Promise<ChannelMember[]> {
-    return (this.channelService.getJoinChannelMembers(channelID));
-  }
 
   @ApiOperation({
     summary: '채널 id 삭제'

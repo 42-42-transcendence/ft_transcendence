@@ -9,6 +9,8 @@ import { UserAchievementModule } from 'src/user-achievement/user-achievement.mod
 export class UserService {
 	constructor(private userRepository: UserRepository) {}
 
+
+
 	async getJoinChannels(userID: string): Promise<ChannelMember[]> {
 		return (this.userRepository.getJoinChannels(userID));
 	}
@@ -49,4 +51,13 @@ export class UserService {
 	// 	});
 	// 	return (blockedList);
 	// }
+
+	async createUserDummy(): Promise<User> {
+		return (this.userRepository.createUserDummy());
+	}
+
+	async getAllUsers(): Promise<User[]> {
+		return (this.userRepository.getAllUsers());
+	}
+	
 }

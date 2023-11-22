@@ -41,10 +41,9 @@ export class ChannelRepository extends Repository<Channel> {
 			throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 	}
 
-	async createDummy() {
+	async createChannelDummy() {
 		const dummy = this.create({
 			title: faker.company.name(),
-			total: faker.number.int({ min: 1, max: 10 }),
 			password: '',
 			type: ChannelTypeEnum.PUBLIC
 		})
@@ -65,6 +64,18 @@ export class ChannelRepository extends Repository<Channel> {
 		channel.password = updateChannelDto.password;
 		channel.type = updateChannelDto.type;
 
+		const updateChannel = await this.save(channel);
+		return (updateChannel);
+	}
+
+	async enterUserToChannel(channel: Channel): Promise<Channel> {
+		channel.total = channel.total + 1;
+		const updateChannel = await this.save(channel);
+		return (updateChannel);
+	}
+
+	async leaveUserToChannel(channel: Channel): Promise<Channel> {
+		channel.total = channel.total - 1;
 		const updateChannel = await this.save(channel);
 		return (updateChannel);
 	}

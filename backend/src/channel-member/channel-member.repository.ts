@@ -3,6 +3,8 @@ import { DataSource, Repository } from "typeorm";
 import { ChannelMember } from "./entities/channel-member.entity";
 import { ChannelMemberDto } from "./dto/channel-member.dto";
 import { ChannelMemberRole } from "./enums/channel-member-role.enum";
+import { Channel } from "src/channel/entities/channel.entity";
+import { User } from "src/user/entities/user.entity";
 
 @Injectable()
 export class ChannelMemberRepository extends Repository<ChannelMember> {
@@ -35,5 +37,21 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 
 		const result = await this.save(member);
 		return (result);
+	}
+
+	async getAllChannelMembers(): Promise<ChannelMember[]> {
+		return (await this.find());
+	}
+
+	async getChannelMemberByChannelUser(channel: Channel, user: User): Promise<ChannelMember> {
+		const member = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.channel', 'channel')
+			.leftJoinAndSelect('member.user', 'user')
+			.where('user.userID = :userID', { userID: user.userID })
+			.andWhere('channel.channelID = :channelID', { channelID: channel.channelID })
+			.getOne();
+
+		return (member);
 	}
 }

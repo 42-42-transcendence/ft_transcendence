@@ -32,7 +32,8 @@ export class User {
   nickname: string;
 
   @Column({
-    nullable: false
+    nullable: false,
+    default: UserStatus.ONLINE
   })
   status: UserStatus;
 

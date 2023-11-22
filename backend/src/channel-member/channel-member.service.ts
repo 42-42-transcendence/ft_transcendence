@@ -15,10 +15,7 @@ export class ChannelMemberService {
   }
 
   async getChannelMemberByChannelUser(channel: Channel, user: User): Promise<ChannelMember> {
-    const members = await channel.channelMembers;
-    const member = members.find(async member => (await member.user).userID = user.userID);
-
-    return (member);
+    return (await this.channelMemberRepository.getChannelMemberByChannelUser(channel, user));
   }
 
   async getChannelMemberByChannelUserWithException(channel: Channel, user: User): Promise<ChannelMember> {
@@ -66,5 +63,9 @@ export class ChannelMemberService {
     const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
     await this.channelMemberRepository.deleteChannelMember(member.channelMemberID);
+  }
+
+  async getAllChannelMembers(): Promise<ChannelMember[]> {
+    return (await this.channelMemberRepository.getAllChannelMembers());
   }
 }

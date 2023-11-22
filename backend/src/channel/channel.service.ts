@@ -49,8 +49,8 @@ export class ChannelService {
     await this.channelRepository.deleteChannelById(channelID);
   }
 
-  async createDummy() {
-    await this.channelRepository.createDummy();
+  async createChannelDummy() {
+    await this.channelRepository.createChannelDummy();
   }
 
   async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
@@ -64,5 +64,13 @@ export class ChannelService {
   async updateChannelInfo(channel: Channel, updateChannelDto: ChannelDto): Promise<Channel> {
     return (await this.channelRepository.updateChannelInfo(channel, updateChannelDto));
   }
+
+  async enterUserToChannel(channel: Channel): Promise<Channel> {
+		return (this.channelRepository.enterUserToChannel(channel));
+	}
+
+	async leaveUserToChannel(channel: Channel): Promise<Channel> {
+		return (this.channelRepository.leaveUserToChannel(channel));
+	}
 
 }

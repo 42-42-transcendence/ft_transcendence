@@ -18,7 +18,7 @@ export class Paddle {
 
     constructor(x: number, y: number, width: number = 0.05, height: number = 0.5) {
         this.position = vec2.fromValues(x, y);
-        this.paddleSpeed = 2.0;
+        this.paddleSpeed = 1.2;
         this.width = width;
         this.height = height;
         this.calculateVertices();

@@ -1,6 +1,6 @@
 import data from '../interface/gameData';
-import Ball from '../class/Ball';
-import Paddle from '../class/Paddle';
+import {Ball} from '../class/Ball';
+import {Paddle} from '../class/Paddle';
 import Line from '../class/Line';
 
 function initializeBuffer(buffer: WebGLBuffer | null, vertices: Float32Array) {

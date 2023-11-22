@@ -1,5 +1,5 @@
-import Ball from '../class/Ball';
-import Paddle from '../class/Paddle';
+import {Ball} from '../class/Ball';
+import {Paddle} from '../class/Paddle';
 
 let data: gameData = {
 	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],

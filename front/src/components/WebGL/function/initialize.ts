@@ -20,8 +20,9 @@ function initialize(state: any) {
 	}
 
 	if (state.gameMode === 'fast') {
-		data.paddle[0].height = 1.5;
-		console.log("fast mode");
+		data.ball.velocity = 3.0;
+		data.paddle[0].speed = 1.5;
+		data.paddle[1].speed = 1.5;
 	}
 }
 

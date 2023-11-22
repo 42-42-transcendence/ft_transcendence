@@ -401,7 +401,7 @@ export class ChannelController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Post(':id/kick')
+  @Post(':id/invite')
   async inviteToChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,

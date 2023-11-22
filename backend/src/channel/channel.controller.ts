@@ -140,17 +140,17 @@ export class ChannelController {
         role: ChannelMemberRole.GUEST
       });
       await this.channelService.enterUserToChannel(channel);
+  
+      const content = `${user.nickname}님께서 입장하셨습니다.`;
+      const chat = await this.chatService.createChatMessage({
+        content,
+        chatType: ChatType.SYSTEM,
+        userNickname: user.nickname,
+        channel,
+        user
+      });
+      this.eventsGateway.server.to(channel.channelID).emit("updatedMessage", { message: chat });
     }
-
-    const content = `${user.nickname}님께서 입장하셨습니다.`;
-    const chat = await this.chatService.createChatMessage({
-      content,
-      chatType: ChatType.SYSTEM,
-      userNickname: user.nickname,
-      channel,
-      user
-    });
-    this.eventsGateway.server.to(channel.channelID).emit("updatedMessage", { message: chat });
 
     return ({ isAuthenticated: true });
   }

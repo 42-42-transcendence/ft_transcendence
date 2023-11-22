@@ -164,8 +164,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     await Promise.all(emitUpdatedMembers);
   }
 
-  async deleteChannel(channel: Channel) {
-    const channelMembers = await channel.channelMembers;
-
+  async updatedSystemMessage(content: string, channel: Channel, user: User) {
+    const chat = await this.chatService.createChatMessage({
+      content,
+      chatType: ChatType.SYSTEM,
+      userNickname: user.nickname,
+      channel,
+      user
+    });
+    this.server.to(channel.channelID).emit("updatedMessage", { message: chat });
   }
 }

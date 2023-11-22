@@ -246,6 +246,7 @@ export class ChannelController {
     await this.channelService.deleteChannelById(channelID);
   }
 
+
   @ApiOperation({
     summary: '해당 채널의 정보를 수정한다'
   })
@@ -281,7 +282,7 @@ export class ChannelController {
     type: Promise<{ message: string }>
   })
   @Post(':id/staff')
-  async assignStaff(
+  async assignToChannelStaff(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
     @Body('newStaffUser') newStaffUserID: string,
@@ -292,8 +293,16 @@ export class ChannelController {
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, newStaffUser);
 
+    if (!subjectUserRole) {
+      throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
     if (subjectUserRole.role !== ChannelMemberRole.OWNER) {
       throw new BadRequestException(`${user.nickname}은 스태프 부여 권한이 없습니다.`);
+    }
+
+    if (!objectUserRole) {
+      throw new BadRequestException(`${newStaffUser.nickname}님은 채널에 존재하지 않습니다.`);
     }
 
     if (objectUserRole.role === ChannelMemberRole.OWNER) {
@@ -311,7 +320,10 @@ export class ChannelController {
       );
       await this.eventsGateway.updatedMembers(channel);
 
-      return ({ message: `${newStaffUser.nickname}님의 스태프 권한이 해제되었습니다.`} )
+      const content = `${newStaffUser.nickname}님의 스태프 권한이 해제되었습니다.`;
+      await this.eventsGateway.updatedSystemMessage(content, channel, user);
+
+      return ({ message: content } )
     }
 
     await this.channelMemberService.updateChannelMemberRoleByChannelMember(
@@ -319,7 +331,60 @@ export class ChannelController {
       ChannelMemberRole.STAFF
     );
     await this.eventsGateway.updatedMembers(channel);
-    return ({ message: `${newStaffUser.nickname}님이 스태프로 임명되었습니다.` });
+
+    const content = `${newStaffUser.nickname}님이 스태프로 임명되었습니다.`;
+    await this.eventsGateway.updatedSystemMessage(content, channel, user);
+
+    return ({ message: content });
+  }
+
+
+  @Post(':id/kick')
+  async kickFromChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('kickedUser') kickedUserID: string,
+  ): Promise<{ message: string }> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const kickedUser = await this.userService.getUserByIdWithException(kickedUserID);
+    const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, kickedUser);
+
+    if (!subjectUserRole) {
+      throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (subjectUserRole.role !== ChannelMemberRole.OWNER 
+        && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
+      throw new BadRequestException(`${user.nickname}님은 강퇴권한이 없습니다.`);
+    }
+
+    if (!objectUserRole || (objectUserRole.role === ChannelMemberRole.INVITE)) {
+      throw new BadRequestException(`${kickedUser.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${kickedUser.nickname}님은 채널 소유자입니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.BLOCK) {
+      throw new BadRequestException(`${kickedUser.nickname}님은 이미 추방되었습니다.`);
+    }
+
+    // 이 사이에 추방유저를 채널로비로 이동시키는 무언가가 있어야함.
+
+    await this.channelMemberService.updateChannelMemberRoleByChannelMember(
+      objectUserRole,
+      ChannelMemberRole.BLOCK
+    );
+    await this.channelService.leaveUserToChannel(channel);
+    await this.eventsGateway.updatedMembers(channel);
+
+    const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
+    await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    
+    return ({ message: content });
   }
 
 }

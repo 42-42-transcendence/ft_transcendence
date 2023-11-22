@@ -33,14 +33,6 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         console.log('connected socket');
       });
 
-      // notification
-      /**
-       * 친구 요청
-       * 채팅방 초대
-       * DM 알림
-       * 게임 초대
-       */
-
       newSocket.on('disconnect', () => {
         console.log('disconnected socket');
         setSocket(null);

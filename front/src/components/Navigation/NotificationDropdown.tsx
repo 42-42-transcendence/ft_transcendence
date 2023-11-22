@@ -1,9 +1,6 @@
-import { useEffect } from 'react';
 import styles from '../../styles/Dropdown.module.css';
 
 const NotificationDropdown = () => {
-  useEffect(() => {}, []);
-
   return (
     <ul className={styles.dropdown}>
       <li className={styles.list}>
@@ -15,6 +12,114 @@ const NotificationDropdown = () => {
       <li className={styles.list}>
         <small>! 메시지</small>
         <button>asdf님에게 온 DM</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
+      </li>
+      <li className={styles.list}>
+        <small>! 채팅 초대</small>
+        <button>홍길동님의 채팅 초대</button>
       </li>
       <li className={styles.list}>
         <small>! 채팅 초대</small>

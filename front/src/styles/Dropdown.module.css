@@ -1,6 +1,8 @@
 .dropdown {
   background-color: var(--tone-up-color);
   border-radius: 8px;
+  max-height: 300px;
+  overflow: auto;
 
   position: absolute;
   transform: translate(-90%, 8px);

@@ -14,6 +14,8 @@ import { EventsGateway } from 'src/events/events.gateway';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { UserService } from 'src/user/user.service';
+import { RelationService } from 'src/relation/relation.service';
+import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -24,6 +26,7 @@ export class ChannelController {
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private userService: UserService,
+    private relationService: RelationService,
     @Inject(forwardRef(() => EventsGateway))
     private eventsGateway: EventsGateway,
   ) {}
@@ -41,7 +44,7 @@ export class ChannelController {
     return (await this.channelService.getAllChannels());
   }
 
-  
+
   @ApiOperation({
     summary: '채널 생성'
   })
@@ -176,6 +179,13 @@ export class ChannelController {
   }
 
 
+  @ApiOperation({
+    summary: '해당 채널을 제거한다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Delete(':id')
   async deleteChannel(
     @GetAuth() auth: Auth,
@@ -193,24 +203,6 @@ export class ChannelController {
     await this.channelService.deleteChannelById(channelID);
 
     return ({ message: `해당 채널을 제거했습니다.` });
-  }
-
-
-  @ApiOperation({
-    summary: '채널 id 검색'
-  })
-  @ApiOkResponse({
-    description: '성공',
-    type: Channel
-  })
-  @Get(':id')
-  getChannelById(@Param('id') channelID: string): Promise<Channel> {
-
-    const channel = this.channelService.getChannelById(channelID);
-    if (!channel)
-      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
-
-    return (channel);
   }
 
 
@@ -285,7 +277,7 @@ export class ChannelController {
         objectUserRole,
         ChannelMemberRole.GUEST
       );
-      await this.eventsGateway.updatedMembers(channel);
+      await this.eventsGateway.updatedMembersForAllUsers(channel);
 
       const content = `${newStaffUser.nickname}님의 스태프 권한이 해제되었습니다.`;
       await this.eventsGateway.updatedSystemMessage(content, channel, user);
@@ -297,7 +289,7 @@ export class ChannelController {
       objectUserRole,
       ChannelMemberRole.STAFF
     );
-    await this.eventsGateway.updatedMembers(channel);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
 
     const content = `${newStaffUser.nickname}님이 스태프로 임명되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
@@ -354,7 +346,7 @@ export class ChannelController {
       ChannelMemberRole.BLOCK
     );
     await this.channelService.leaveUserToChannel(channel);
-    await this.eventsGateway.updatedMembers(channel);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
 
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
@@ -445,6 +437,44 @@ export class ChannelController {
     await this.channelService.enterUserToChannel(channel);
 
     return ({ channelID: channel.channelID });
+  }
+
+
+  // 이거 채널 밖에서 차단하는거 생각하면 User나 Relation에서 하는게 맞지않나?
+  @ApiOperation({
+    summary: '특정 인원의 메세지가 보이지 않도록 차단한다.'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Post(':id/block')
+  async blockUserFromChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('blockedUser') blockedUserID: string,
+  ): Promise<{ message: string }> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const blockedUser = await this.userService.getUserByIdWithException(blockedUserID);
+    const relation = await this.relationService.getRelationByUsers(user, blockedUser);
+
+    if (!relation) {
+      await this.relationService.createRelation({
+        subjectUser: user,
+        objectUser: blockedUser,
+        relationType: RelationTypeEnum.BLOCK
+      });
+    }
+    else if (relation.relationType === RelationTypeEnum.BLOCK) {
+      await this.relationService.deleteRelation(user, blockedUser);
+    }
+    else {
+      await this.relationService.updateRelationByRelation(relation, RelationTypeEnum.BLOCK);
+    }
+    await this.eventsGateway.updatedMembersForOneUser(user, channel);
+
+    return ({ message: `${blockedUser.nickname}님께 초대를 보냈습니다.` })
   }
 
 }

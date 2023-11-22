@@ -40,7 +40,11 @@ export class RelationService {
     const { subjectUser, objectUser, relationType } = relationDto;
     const relation = await this.getRelationByUsersWithException(subjectUser, objectUser);
 
-    return (this.relationRepository.updateRelation(relation, relationType));
+    return (await this.relationRepository.updateRelation(relation, relationType));
+  }
+
+  async updateRelationByRelation(relation: Relation, relationType: RelationTypeEnum): Promise<Relation> {
+    return (await this.relationRepository.updateRelation(relation, relationType));
   }
 
   async deleteRelation(subjectUser: User, objectUser: User) {

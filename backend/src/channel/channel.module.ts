@@ -9,6 +9,7 @@ import { ChannelMemberModule } from 'src/channel-member/channel-member.module';
 import { EventsModule } from 'src/events/events.module';
 import { ChatModule } from 'src/chat/chat.module';
 import { UserModule } from 'src/user/user.module';
+import { RelationModule } from 'src/relation/relation.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from 'src/user/user.module';
     ChatModule,
     AuthModule,
     UserModule,
+    RelationModule,
     forwardRef(() => EventsModule),
   ],
   controllers: [ChannelController],

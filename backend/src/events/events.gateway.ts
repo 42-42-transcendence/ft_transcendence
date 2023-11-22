@@ -123,9 +123,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     client.to(channelID).emit("updatedMessage", { message: chat });
   }
 
-  async updatedMembers(channel: Channel) {
+  async updatedMembersForAllUsers(channel: Channel) {
     const channelMembers = await channel.channelMembers;
-
     const emitUpdatedMembers = channelMembers.map(async member => {
       const user = await member.user;
       const client = this.eventsService.getClient(user.userID);
@@ -136,6 +135,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
     });
     await Promise.all(emitUpdatedMembers);
+  }
+
+  async updatedMembersForOneUser(user: User, channel: Channel) {
+    const client = this.eventsService.getClient(user.userID);
+    const channelMembers = await channel.channelMembers;
+    const members = await this.eventsService.createEventsMembers(channelMembers, user);
+    this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
   }
 
   async updatedSystemMessage(content: string, channel: Channel, user: User) {

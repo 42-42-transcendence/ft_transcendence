@@ -37,7 +37,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
     }
     setFeedbackMessage('');
 
-    const ret = await request<string>(
+    const ret = await request<{ message: string }>(
       `${SERVER_URL}/api/channel/${channelID}`,
       {
         method: 'POST',
@@ -75,8 +75,8 @@ const ChatInvitationModal = ({ channelID }: Props) => {
             onChange={changeNameHandler}
           />
         </div>
-        {isLoading && <div className={styles['form-loading']}>..loading..</div>}
-        <div className={styles['form-feedback']}>{feedbackMessage}</div>
+        {isLoading && <div className={styles.loading}>..loading..</div>}
+        <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"

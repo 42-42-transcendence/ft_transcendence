@@ -26,7 +26,6 @@ const ChattingForm = ({ socket, channelID }: Props) => {
     }
 
     socket.emit('sendMessage', channelID, enteredInput);
-
     setEnteredInput('');
   };
 

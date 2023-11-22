@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import styles from '../../styles/Dropdown.module.css';
 
 const NotificationDropdown = () => {
+  useEffect(() => {}, []);
+
   return (
     <ul className={styles.dropdown}>
       <li className={styles.list}>

@@ -127,8 +127,8 @@ const CreatingChatRoomModal = () => {
             disabled={enteredType === 'private'}
           />
         </div>
-        {isLoading && <div className={styles['form-loading']}>..loading..</div>}
-        <div className={styles['form-feedback']}>{feedbackMessage}</div>
+        {isLoading && <div className={styles.loading}>..loading..</div>}
+        <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"

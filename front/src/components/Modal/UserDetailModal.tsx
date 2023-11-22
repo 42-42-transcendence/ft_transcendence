@@ -2,7 +2,7 @@ import Modal from '../../UI/Modal';
 import useCloseModal from '../../store/Modal/useCloseModal';
 import styles from '../../styles/Modal.module.css';
 import AvatarImage from '../../UI/AvatarImage';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { User } from '../Social';
 import type { Role } from '../Chatting';
@@ -23,7 +23,8 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const navigate = useNavigate();
   const closeModalHandler = useCloseModal();
   const { myID } = useAuthState();
-  const { request } = useRequest();
+  const { error, request } = useRequest();
+  const params = useParams();
 
   const [userInfo, setUserInfo] = useState<User | null>({
     id: 'heryu',
@@ -43,20 +44,126 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   //   fetchUserInfo();
   // }, [request]);
 
-  const navigateProfile = () => {
+  const profileHandler = () => {
     closeModalHandler();
     navigate(`/profile/${targetUserID}`);
   };
 
-  const navigateDashboard = () => {
+  const dashboardHandler = () => {
     closeModalHandler();
     navigate(`/dashboard/${targetUserID}`);
+  };
+
+  const directMessageHandler = async () => {
+    const ret = await request<{ channelID: string }>(
+      `${SERVER_URL}/api/channel/dm`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+      navigate(`/chatting/${ret.channelID}`);
+    }
+  };
+
+  const gameHandler = () => {};
+  const friendHandler = () => {};
+
+  const blockHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${params.channelID}/block`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
+
+  const kickHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${params.channelID}/kick`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
+
+  const banHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${params.channelID}/ban`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
+
+  const muteHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${params.channelID}/mute`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
+
+  const staffHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${params.channelID}/staff`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
   };
 
   let contents: React.ReactNode = '';
   if (channelState && Object.values(channelState).includes(null)) {
     contents = <div className={styles.header}>Something Wrong</div>;
-  } else if (!userInfo) {
+  } else if (userInfo === null) {
     contents = <div className={styles.header}>유저를 찾을 수 없습니다.</div>;
   } else if (myID === targetUserID) {
     contents = (
@@ -68,10 +175,10 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           </div>
         </div>
         <div className={styles.wrapper}>
-          <button className={styles['list-button']} onClick={navigateProfile}>
+          <button className={styles['list-button']} onClick={profileHandler}>
             프로필 보기
           </button>
-          <button className={styles['list-button']} onClick={navigateDashboard}>
+          <button className={styles['list-button']} onClick={dashboardHandler}>
             전적 보기
           </button>
         </div>
@@ -86,16 +193,18 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
             <h3>{userInfo.id}</h3>
           </div>
         </div>
+        <div className={styles.feedback}>{error}</div>
         <div className={styles.wrapper}>
-          <button className={styles['list-button']} onClick={navigateProfile}>
+          <button className={styles['list-button']} onClick={profileHandler}>
             프로필 보기
           </button>
-          <button className={styles['list-button']} onClick={navigateDashboard}>
+          <button className={styles['list-button']} onClick={dashboardHandler}>
             전적 보기
           </button>
           <button
             className={styles['list-button']}
             disabled={userInfo.relation === 'block'}
+            onClick={directMessageHandler}
           >
             다이렉트 메시지
           </button>
@@ -104,40 +213,48 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
             disabled={
               userInfo.relation === 'block' || userInfo.status !== 'online'
             }
+            onClick={gameHandler}
           >
             게임 신청
-          </button>
-          <button className={styles['list-button']}>
-            차단{userInfo.relation === 'block' ? ' 풀기' : ''}
           </button>
           <button
             className={styles['list-button']}
             disabled={userInfo.relation === 'block'}
+            onClick={friendHandler}
           >
             친구 {userInfo.relation === 'friend' ? '삭제' : '추가'}
+          </button>
+          <button className={styles['list-button']} onClick={blockHandler}>
+            차단{userInfo.relation === 'block' ? ' 풀기' : ''}
           </button>
           {channelState && channelState.myRole !== 'guest' && (
             <>
               <button
                 className={styles['list-button']}
                 disabled={channelState.targetRole === 'owner'}
+                onClick={kickHandler}
               >
                 강퇴
               </button>
               <button
                 className={styles['list-button']}
                 disabled={channelState.targetRole === 'owner'}
+                onClick={banHandler}
               >
                 영구 추방
               </button>
               <button
                 className={styles['list-button']}
                 disabled={channelState.targetRole === 'owner'}
+                onClick={muteHandler}
               >
                 채팅 금지{channelState.targetIsMuted ? ' 풀기' : ''}
               </button>
               {channelState.myRole === 'owner' && (
-                <button className={styles['list-button']}>
+                <button
+                  className={styles['list-button']}
+                  onClick={staffHandler}
+                >
                   스태프 {channelState.targetRole === 'guest' ? '설정' : '해제'}
                 </button>
               )}

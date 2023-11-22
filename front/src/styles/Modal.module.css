@@ -170,14 +170,14 @@
   color: #777777;
 }
 
-.form-feedback {
+.feedback {
   color: var(--focus-color);
   text-align: center;
   margin: 8px auto;
   max-width: 300px;
 }
 
-.form-loading {
+.loading {
   width: 100%;
   text-align: center;
   margin: 8px 0;

@@ -23,14 +23,14 @@ const Social = () => {
   const showUserDetail = useModalState('showUserDetail');
   const showAddFriend = useModalState('showAddFriend');
 
-  const [activatedUser, setActivatedUser] = useState<string | null>(null);
+  const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
 
   const changeOptionHandler = (option: string) => {
     setSelectedOption(option);
   };
 
-  const setActivatedUserHandler = (userID: string) => {
-    setActivatedUser(userID);
+  const setActivatedUserIDHandler = (userID: string) => {
+    setActivatedUserID(userID);
   };
 
   return (
@@ -41,12 +41,12 @@ const Social = () => {
       />
       <SocialList
         selectedOption={selectedOption}
-        onActive={setActivatedUserHandler}
+        onActive={setActivatedUserIDHandler}
       />
       <SocialIconList />
       {showAddFriend && <AddFriendModal />}
       {showUserDetail && (
-        <UserDetailModal targetUserID={activatedUser as string} />
+        <UserDetailModal targetUserID={activatedUserID as string} />
       )}
     </div>
   );

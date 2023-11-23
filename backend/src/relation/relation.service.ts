@@ -8,43 +8,42 @@ import { RelationTypeEnum } from './enums/relation-type.enum';
 
 @Injectable()
 export class RelationService {
-  constructor(private relationRepository: RelationRepository){}
+  constructor(private relationRepository: RelationRepository) {}
 
   async createRelation(relationDto: RelationDto): Promise<Relation> {
-    return (this.relationRepository.createRelation(relationDto));
+    return this.relationRepository.createRelation(relationDto);
   }
 
   async getRelationByUsers(subjectUser: User, objectUser: User): Promise<Relation> {
-    return (await this.relationRepository.getRelationByUsers(subjectUser, objectUser));
+    return await this.relationRepository.getRelationByUsers(subjectUser, objectUser);
   }
 
   async getRelationByUsersWithException(subjectUser: User, objectUser: User): Promise<Relation> {
     const relation = await this.getRelationByUsers(subjectUser, objectUser);
 
-    if (!relation)
-      throw new NotFoundException('없는 User 관계입니다.');
+    if (!relation) throw new NotFoundException('없는 User 관계입니다.');
 
-    return (relation);
+    return relation;
   }
 
   async isBlockRelation(subjectUser: User, objectUser: User): Promise<RelationTypeEnum> {
     const relation = await this.getRelationByUsers(subjectUser, objectUser);
 
-    if (!relation || (relation.relationType !== RelationTypeEnum.BLOCK)) {
-      return (RelationTypeEnum.UNKNOWN);
+    if (!relation || relation.relationType !== RelationTypeEnum.BLOCK) {
+      return RelationTypeEnum.UNKNOWN;
     }
-    return (RelationTypeEnum.BLOCK);
+    return RelationTypeEnum.BLOCK;
   }
 
   async updateRelation(relationDto: RelationDto): Promise<Relation> {
     const { subjectUser, objectUser, relationType } = relationDto;
     const relation = await this.getRelationByUsersWithException(subjectUser, objectUser);
 
-    return (await this.relationRepository.updateRelation(relation, relationType));
+    return await this.relationRepository.updateRelation(relation, relationType);
   }
 
   async updateRelationByRelation(relation: Relation, relationType: RelationTypeEnum): Promise<Relation> {
-    return (await this.relationRepository.updateRelation(relation, relationType));
+    return await this.relationRepository.updateRelation(relation, relationType);
   }
 
   async deleteRelation(subjectUser: User, objectUser: User) {
@@ -52,5 +51,4 @@ export class RelationService {
 
     this.relationRepository.deleteRelation(relation.relationID);
   }
-
 }

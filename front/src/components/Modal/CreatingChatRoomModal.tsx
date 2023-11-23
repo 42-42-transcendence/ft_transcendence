@@ -66,7 +66,7 @@ const CreatingChatRoomModal = () => {
     if (ret !== null) {
       closeHandler();
       navigate(`/chatting/${ret.channelID}`, {
-        state: { initialRedirect: true },
+        state: { redirect: true },
       });
     }
   };

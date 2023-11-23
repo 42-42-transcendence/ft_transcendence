@@ -76,16 +76,18 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const friendHandler = () => {};
 
   const blockHandler = async () => {
-    const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/channel/${params.channelID}/block`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ targetUserID: targetUserID }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const channelID = params.channelID;
+    const url = channelID
+      ? `${SERVER_URL}/api/channel/${params.channelID}/block`
+      : `${SERVER_URL}/api/user/block`;
+
+    const ret = await request<{ message: string }>(url, {
+      method: 'POST',
+      body: JSON.stringify({ targetUserID: targetUserID }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (ret !== null) {
       closeModalHandler();

@@ -54,9 +54,11 @@
 }
 
 .icon_item {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   padding: 6px;
+
+  position: relative;
 }
 
 .toggle {
@@ -71,4 +73,15 @@
 .toggle img {
   width: 100%;
   height: 100%;
+}
+
+.new {
+  background-color: var(--focus-color);
+  padding: 4px;
+  border-radius: 50%;
+  color: var(--text-white);
+  font-size: 12px;
+  position: absolute;
+  top: -8px;
+  right: 0;
 }

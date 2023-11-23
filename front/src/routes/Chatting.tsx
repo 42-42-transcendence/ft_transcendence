@@ -57,7 +57,7 @@ const ChattingPage = () => {
   );
 
   useEffect(() => {
-    if (location.state?.initialRedirect === true) {
+    if (location.state?.redirect === true) {
       setIsAuthenticated(true);
       return;
     }
@@ -70,10 +70,7 @@ const ChattingPage = () => {
       );
 
       if (ret === null) return;
-      else if (
-        ret.isPasswordRequired === false ||
-        location.state?.initialRedirect === true
-      ) {
+      else if (ret.isPasswordRequired === false) {
         requestAuthenticated();
       } else {
         openModalHandler();

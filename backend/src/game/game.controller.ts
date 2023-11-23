@@ -23,11 +23,11 @@ export class GameController {
     return this.gameService.findAllGame();
 }
 
-  @ApiOperation({ summary: '특정 게임 조회' })
-  @ApiParam({ name: 'id', required: true, description: '게임 ID' })
+  @ApiOperation({ summary: 'gameId로 게임 조회' })
+  @ApiParam({ name: 'gameId', required: true, description: '게임 ID' })
   @ApiOkResponse({ description: 'ID로 조회 성공' , type: Game})
-  @Get(':id')
-  async getById(@Param('id') id : string) : Promise<Game> {
+  @Get(':gameId')
+  async getById(@Param('gameId') id : string) : Promise<Game> {
     return this.gameService.findGameById(id);
 }
 

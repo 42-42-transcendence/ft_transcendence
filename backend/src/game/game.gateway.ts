@@ -1,37 +1,39 @@
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from "./game.service";
-import { GameDataDto } from "./dto/game-data.dto";
+import { GameObjectsDto } from "./dto/game-data.dto";
 import { JoinGameDto } from "./dto/in-game.dto";
+// import { GameServiceInterface } from './game.service.interface';
 import { GameOptionDto } from "./dto/in-game.dto";
 import { GameModeEnum } from './enums/gameMode.enum';
+import { forwardRef, Inject } from '@nestjs/common';
 
 
-@WebSocketGateway()
+@WebSocketGateway({
+cors: {
+    origin: process.env.FRONT_URL
+  }
+})
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server : Server;
 
-  constructor(private readonly gameService: GameService) {}
+  constructor(@Inject(forwardRef(() => GameService)) private readonly gameService: GameService) {}
 
   afterInit() {}
 
-  handleConnection(@ConnectedSocket() client: Socket) {
+  async handleConnection(@ConnectedSocket() client: Socket) {
     // for test
     console.log('Client connected');
   }
-  /* client
-  useEffect(() => {
-    socket.emit('checkCreated');
-}*/
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
     //   if (this.gameService.isPlayer(client.id)) {
     //       const gameId : string = this.gameService.getPlayerGameId(client.id);
     //       if (gameId && this.gameService.isInGame(gameId))
     //       {
-    //           const gameData : GameDataDto = this.gameService.getGameData(gameId);
-    //           if (gameData)
-    //               this.server.to(gameId).emit("updateGame", gameData);
+    //           const GameData : GameObjectsDto = this.gameService.getGameData(gameId);
+    //           if (GameData)
+    //               this.server.to(gameId).emit("updateGame", GameData);
     //       }
     //       else {
     //           this.gameService.deleteGameOption(gameId);
@@ -48,10 +50,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           const gameId : string = this.gameService.getPlayerGameId(client.id);
           if (gameId && this.gameService.isInGame(gameId))
           {
-              const gameData : GameDataDto = this.gameService.getGameData(gameId);
-              if (gameData) {
+              const GameData : GameObjectsDto = this.gameService.getGameData(gameId);
+              if (GameData) {
                   client.leave(gameId);
-                  this.server.to(gameId).emit("updateGame", gameData);
+                  this.server.to(gameId).emit("updateGame", GameData);
               }
           }
           else {
@@ -63,9 +65,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('checkInGame')
-  checkInGame (
-      @ConnectedSocket() client: Socket,
-      @MessageBody() dto : JoinGameDto) : void {
+  checkInGame (@ConnectedSocket() client: Socket, @MessageBody() dto : JoinGameDto) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
           const gameOptions = this.gameService.getGameOptions(queue.gameId);
@@ -74,10 +74,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
       else {
           const gameId : string = this.gameService.reconnectToGame(client.id, dto.displayName);
-          const gameData : GameDataDto = this.gameService.getGameData(gameId);
+          const GameData : GameObjectsDto = this.gameService.getGameData(gameId);
           if (gameId) {
               client.join(gameId);
-              this.server.to(gameId).emit("updateGame", gameData);
+              this.server.to(gameId).emit("updateGame", GameData);
           }
       }
   }
@@ -96,15 +96,25 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   reconnectGame (@ConnectedSocket() client: Socket) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
-          const gameData : GameDataDto = this.gameService.getGameData(queue.gameId);
-          if (gameData) {
+          const GameData : GameObjectsDto = this.gameService.getGameData(queue.gameId);
+          if (GameData) {
               client.join(queue.gameId);
-              this.server.to(queue.gameId).emit("updateGame", gameData);
+              this.server.to(queue.gameId).emit("updateGame", GameData);
           }
       }
       else
           client.emit("notReconnected");
   }
+
+  @SubscribeMessage('update')
+  async emitGameUpdate(gameId: string, gameData: GameObjectsDto): Promise<void> {
+    const player1 = gameData.players.player1;
+    const player2 = gameData.players.player2;
+
+    // Implement the logic to emit updates to the players using WebSockets
+    this.server.to(player1).emit("updateGame", gameData);
+    this.server.to(player2).emit("updateGame", gameData);
+}
 
   @SubscribeMessage('cancel')
   async cancelGame (@ConnectedSocket() client: Socket) : Promise<void> {
@@ -117,6 +127,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           }
       }
   }
+
+//   @SubscribeMessage('start')
 
   @SubscribeMessage('create')
   async createGame (
@@ -162,7 +174,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('init')
   initialData(
       @ConnectedSocket() client: Socket,
-      @MessageBody() dto : GameDataDto
+      @MessageBody() dto : GameObjectsDto
   ) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
@@ -174,7 +186,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('KeyRelease')
   onKeyRelease(
       @ConnectedSocket() client: Socket,
-      @MessageBody() dto : GameDataDto
+      @MessageBody() dto : GameObjectsDto
   ) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
@@ -190,7 +202,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('UpKey')
   UpKeyPressed(
       @ConnectedSocket() client: Socket,
-      @MessageBody() dto : GameDataDto
+      @MessageBody() dto : GameObjectsDto
   ) : void {
     //   const queue = this.gameService.getQueue(client.id);
     //   if (queue) {
@@ -207,7 +219,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('DownKey')
   DownKeyPressed(
       @ConnectedSocket() client: Socket,
-      @MessageBody() dto : GameDataDto
+      @MessageBody() dto : GameObjectsDto
   ) : void {
     //   const queue = this.gameService.getQueue(client.id);
     //   if (queue) {
@@ -224,7 +236,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 //   @SubscribeMessage('end')
 //   async gameEnd(
 //       @ConnectedSocket() client: Socket,
-//       @MessageBody() dto : GameScoreDto
+//       @MessageBody() dto : GameInfoDto
 //   ) : Promise<void> {
 //       const gameId = this.gameService.getPlayerGameId(client.id);
 //       if (gameId) {
@@ -253,4 +265,3 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 //       this.server.emit('userUpdate');
 //   }
 }
-

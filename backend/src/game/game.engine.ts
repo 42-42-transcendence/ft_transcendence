@@ -1,73 +1,139 @@
-// import data from '../interface/gameData';
-// import { vec2 } from 'gl-matrix';
+import { vec2 } from 'gl-matrix';
+import { GameData, Paddle, Ball } from "./dto/in-game.dto";
+import { GameModeEnum } from './enums/gameMode.enum';
 
-// function update(delta: number) {
-// 	const ball = data.ball;
-// 	const paddle = data.paddle;
+let data: GameData = {
+	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
+	ball: new Ball(),
+	keyPress: {
+		up: false,
+		down: false,
+	},
+	scores: [0, 0],
+	// gl: null,
+	// paddleBuffer: null,
+	// ballBuffer: null,
+	// lineBuffer: null,
+	// positionLoc: 0,
+	// viewPortLoc: null,
+	lastTime: 0,
+	// isFirstRender: true,
+	// profileRef: [null, null],
+	// scoreRef: [null, null],
+	// canvasRef: null,
+	// program: [null, null],
+	mode: 'normal',
+	// items: [],
+};
+export class GameEngine {
+	// startGame(gameId: number, GameData: GameData, mode: GameModeEnum) {
+	// 	GameData.subscription = subject.subscribe(() => {
+	// 	  const { ballCoords, ballVelocity } = GameData;
+	// 	  const nextX = ballCoords.x + ballVelocity.vx;
+	// 	  nextX < 0 || nextX > 1
+	// 		? this.updateScore(gameId, GameData, subject)
+	// 		: this.updateBallData(GameData, mode);
+	// 	  this.gameGateway.emitGameData(gameId, {
+	// 		scores: GameData.scores,
+	// 		ballCoords: GameData.ballCoords,
+	// 		paddlePositions: GameData.paddlePositions,
+	// 		mode,
+	// 	  });
+	// 	});
+	//   }
 
-// 	vec2.add(ball.position, ball.position, vec2.scale(vec2.create(), ball.direction, ball.velocity * delta));
+    static checkBallPaddleCollision(ballPos: vec2, paddle: Paddle) {
+        const radius = data.ball.radius;
 
-// 	/* 패들 & 공 충돌 감지 */
-// 	for (let i = 0; i < 2; i++) {
-// 		let paddleTop = paddle[i].position[1] + paddle[i].height / 2.0;
-// 		let paddleBottom = paddle[i].position[1] - paddle[i].height / 2.0;
-// 		let paddleLeft = paddle[i].position[0] - paddle[i].width / 2.0;
-// 		let paddleRight = paddle[i].position[0] + paddle[i].width / 2.0;
+        const paddleHeightHalf = paddle.height / 2.0;
+        const paddleWidthHalf = paddle.width / 2.0;
+        let paddleTop = paddle.position[1] + paddleHeightHalf;
+        let paddleBottom = paddle.position[1] - paddleHeightHalf;
+        let paddleLeft = paddle.position[0] - paddleWidthHalf;
+        let paddleRight = paddle.position[0] + paddleWidthHalf;
 
-// 		const BallTop = ball.position[1] + ball.radius;
-// 		const BallBottom = ball.position[1] - ball.radius;
-// 		const BallLeft = ball.position[0] - ball.radius;
-// 		const BallRight = ball.position[0] + ball.radius;
+        const BallTop = ballPos[1] + radius;
+        const BallBottom = ballPos[1] - radius;
+        const BallLeft = ballPos[0] - radius;
+        const BallRight = ballPos[0] + radius;
 
-// 		if (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft) {
-// 			let normalReflect = vec2.fromValues(i == 0 ? 1 : -1, 0); // 왼쪽 패들이면 1, 오른쪽 패들이면 -1
-// 			normalReflect[1] = (ball.position[1] - paddle[i].position[1]) / paddle[i].height * 3.0;
-// 			if (i === 0 && BallLeft < paddle[i].position[0] || i === 1 && BallRight > paddle[i].position[0])
-// 				normalReflect[0] *= -1;
-// 			vec2.normalize(ball.direction, normalReflect);
-// 		}
-// 	}
+        return (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft);
+    }
+    static handleBallPaddleCollision() {
+        const ball = data.ball;
+        const paddle = data.paddle;
 
-// 	/* 공이 라인을 넘어가는지 확인 */
-// 	if (ball.position[0] + ball.radius > 1.0 || ball.position[0] - ball.radius < -1.0) {
-// 		if (ball.position[0] + ball.radius > 1.0) {
-// 			if (!data.scoreRef[0]) return;
-// 			data.scoreRef[0].innerText = String(++data.scores[0]);
-// 		} else {
-// 			if (!data.scoreRef[1]) return;
-// 			data.scoreRef[1].innerText = String(++data.scores[1]);
-// 		}
-// 		ball.position[0] = 0;
-// 		ball.position[1] = 0;
-// 		ball.direction = vec2.fromValues(1.0, 0);
-// 	}
+        for (let i = 0; i < 2; i++) {
+            if (this.checkBallPaddleCollision(ball.position, paddle[i])) {
+                let normalReflect = vec2.fromValues(i == 0 ? 1 : -1, 0); // 왼쪽 패들이면 1, 오른쪽 패들이면 -1
+                normalReflect[1] = (ball.position[1] - paddle[i].position[1]) / paddle[i].height * 3.0;
+                // if (i === 0 && BallLeft < paddle[i].position[0] || i === 1 && BallRight > paddle[i].position[0])
+                //     normalReflect[0] *= -1;
+                vec2.normalize(ball.direction, normalReflect);
+            }
+        }
+    }
 
-// 	if (data.scores[0] === 5 || data.scores[1] === 5) {
-// 		// 게임 종료 조건.
-// 	}
+    static handleBallWallCollision() {
+        const ball = data.ball;
+        if (ball.position[1] + ball.radius > 1.0 || ball.position[1] - ball.radius < -1.0) {
+            ball.direction[1] *= -1; // 위, 아래 벽에 닿을 경우 공의 반사를 구현 (정반사)
+        }
+    }
 
-// 	/* 공이 위, 아래 벽을 넘어가는지 확인 */
-// 	if (ball.position[1] + ball.radius > 1.0 || ball.position[1] - ball.radius < -1.0) {
-// 		ball.direction[1] *= -1; // 위, 아래 벽에 닿을 경우 공의 반사를 구현 (정반사)
-// 	}
+    static collisionGuarantee(ball: Ball, delta: number) {
+        for (let i = 0; i < 2; i++) {
+            const dir = i === 0 ? 1 : -1;
+            const x1 = ball.position[0];
+            const y1 = ball.position[1];
+            const x2 = data.paddle[i].position[0];
+            const y2 = data.paddle[i].position[1];
+            const wh = data.paddle[i].width / 2.0;
+            const hh = data.paddle[i].height / 2.0;
+            const dx = ball.direction[0] * ball.velocity;
+            const dy= ball.direction[1] * ball.velocity;
 
-// 	/* player1 패들 이동 */
-// 	if (data.keyPress.up) {
-// 		paddle[0].position[1] += paddle[0].paddleSpeed * delta
-// 	} else if (data.keyPress.down) {
-// 		paddle[0].position[1] -= paddle[0].paddleSpeed * delta;
-// 	} else {
-// 		paddle[0].position[1] += 0;
-// 	}
+            const t = (x2 - x1 + (wh * dir) - hh) / dx;
+            const k = y2 - y1 - dy * t;
 
-//     // 위치 제한?
+            /* 충돌이 없다면 */
+            if ((k < 0 || k > hh * 2) && t > delta) {
+                this.updateBallPosition(delta);
+                return;
+            }
+            /* 충돌이 있다면 */
+            this.updateBallPosition(t);
+            const restAfterCollision = delta - t;
+            this.handleBallPaddleCollision();
+            this.updateBallPosition(restAfterCollision);
+        }
+    }
+    static calculateBallPosition(ball: Ball, delta: number) : vec2 {
+        let tempVec2 = vec2.create();
+        vec2.add(tempVec2, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta));
+        return tempVec2;
+    }
 
-// 	/* 패들 위치 제한 */
-// 	if (paddle[0].position[1] - paddle[0].height / 2.0 < -1.0) {
-// 		paddle[0].position[1] = -1.0 + paddle[0].height / 2.0;
-// 	}
-// 	if (paddle[0].position[1] + paddle[0].height / 2.0 > 1.0)
-// 		paddle[0].position[1] = 1.0 - paddle[0].height / 2.0;
-// }
+    static updateBallPosition(delta: number) {
+        data.ball.position = this.calculateBallPosition(data.ball, delta);
+    }
 
-// export default update;
+    static updatePaddlePosition(delta: number) {
+        const paddle = data.paddle;
+        /* 현재 player1의 패들 위치만 고려 */
+        if (data.keyPress.up) {
+            paddle[0].position[1] += paddle[0].paddleSpeed * delta
+        } else if (data.keyPress.down) {
+            paddle[0].position[1] -= paddle[0].paddleSpeed * delta;
+        } else {
+            paddle[0].position[1] += 0;
+        }
+
+        /* 패들 위치 제한 */
+        if (paddle[0].position[1] - paddle[0].height / 2.0 < -1.0) {
+            paddle[0].position[1] = -1.0 + paddle[0].height / 2.0;
+        }
+        if (paddle[0].position[1] + paddle[0].height / 2.0 > 1.0)
+            paddle[0].position[1] = 1.0 - paddle[0].height / 2.0;
+    }
+}

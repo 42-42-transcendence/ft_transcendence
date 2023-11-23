@@ -39,19 +39,6 @@ export class UserService {
 		return (user);
 	}
 
-	// async getBlockedList(user: User): Promise<string[]> {
-	// 	const relations = await user.objectRelations;
-	// 	let blockedList: string[] = [];
-
-	// 	relations.forEach(async relation => {
-	// 		if (relation.relationType === RelationTypeEnum.BLOCK) {
-	// 			const user = await relation.subjectUser;
-	// 			blockedList.push(user.nickname);
-	// 		}
-	// 	});
-	// 	return (blockedList);
-	// }
-
 	async createUserDummy(): Promise<User> {
 		return (this.userRepository.createUserDummy());
 	}
@@ -59,5 +46,5 @@ export class UserService {
 	async getAllUsers(): Promise<User[]> {
 		return (this.userRepository.getAllUsers());
 	}
-	
+
 }

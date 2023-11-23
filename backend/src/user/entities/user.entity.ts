@@ -52,7 +52,7 @@ export class User {
   @OneToOne(() => Auth, (auth) => auth.user, {
     onDelete: 'CASCADE'
   })
-  auth: Promise<Auth>
+  auth: Auth;
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   // userAchievements: UserAchievement[];

@@ -17,8 +17,10 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 
 		const channelMember = new ChannelMember();
 
-		channelMember.channel = Promise.resolve(channel);
-		channelMember.user = Promise.resolve(user);
+		channelMember.channel = channel;
+		// channelMember.channel = Promise.resolve(channel);
+		channelMember.user = user;
+		// channelMember.user = Promise.resolve(user);
 		channelMember.role = role;
 
 		const result = await this.save(channelMember);
@@ -50,6 +52,17 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		return (await this.find());
 	}
 
+	async getChannelMembersWithUserFromChannel(channel: Channel): Promise<ChannelMember[]> {
+		const members = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.channel', 'channel')
+			.leftJoinAndSelect('member.user', 'user')
+			.where('channel.channelID = :channelID', { channelID: channel.channelID })
+			.getMany();
+
+		return (members);
+	}
+
 	async getChannelMemberByChannelUser(channel: Channel, user: User): Promise<ChannelMember> {
 		const member = await this
 			.createQueryBuilder('member')
@@ -60,5 +73,21 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 			.getOne();
 
 		return (member);
+	}
+
+	async getChannelFromChannelMember(member: ChannelMember): Promise<Channel> {
+		const memberWithChannel = await this.findOne({
+			where: { channelMemberID: member.channelMemberID },
+			relations: ['channel']
+		});
+		return (memberWithChannel.channel);
+	}
+
+	async getUserFromChannelMember(member: ChannelMember): Promise<User> {
+		const memberWithChannel = await this.findOne({
+			where: { channelMemberID: member.channelMemberID },
+			relations: ['user']
+		});
+		return (memberWithChannel.user);
 	}
 }

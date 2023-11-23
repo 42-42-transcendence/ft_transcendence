@@ -14,6 +14,10 @@ export class ChatRepository extends Repository<Chat> {
 		super(Chat, dataSource.createEntityManager());
 	}
 
+	async getAllChats(): Promise<Chat[]> {
+		return (await this.find());
+	}
+
 	async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
 		const { content, chatType, user, channel } = createChatMessageDto;
 

@@ -5,6 +5,7 @@ import { Channel } from 'src/channel/entities/channel.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ChannelMember } from './entities/channel-member.entity';
 import { ChannelMemberRole } from './enums/channel-member-role.enum';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelMemberService {
@@ -74,4 +75,16 @@ export class ChannelMemberService {
   async getAllChannelMembers(): Promise<ChannelMember[]> {
     return (await this.channelMemberRepository.getAllChannelMembers());
   }
+
+  async getChannelMembersWithUserFromChannel(channel: Channel): Promise<ChannelMember[]> {
+    return (await this.channelMemberRepository.getChannelMembersWithUserFromChannel(channel));
+  }
+
+  async getChannelFromChannelMember(member: ChannelMember): Promise<Channel> {
+		return (this.channelMemberRepository.getChannelFromChannelMember(member));
+	}
+
+  async getUserFromChannelMember(member: ChannelMember): Promise<User> {
+    return (this.channelMemberRepository.getUserFromChannelMember(member));
+	}
 }

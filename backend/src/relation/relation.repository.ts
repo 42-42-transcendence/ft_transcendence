@@ -16,8 +16,8 @@ export class RelationRepository extends Repository<Relation> {
 		const { subjectUser, objectUser, relationType } = relationDto;
 
 		const relation = new Relation();
-		relation.subjectUser = Promise.resolve(subjectUser);
-		relation.objectUser = Promise.resolve(objectUser);
+		relation.subjectUser = subjectUser;
+		relation.objectUser = objectUser;
 		relation.relationType = relationType;
 		const result = await this.save(relation);
 

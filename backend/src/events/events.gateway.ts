@@ -64,7 +64,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const channelMembers = await user.channelMembers;
 
     const leaveChannels = channelMembers.map(async channelMember => {
-      const channel = await channelMember.channel;
+      const channel = await this.channelMemberService.getChannelFromChannelMember(channelMember);
 
       await this.leaveChannelSession(client, { channelID: channel.channelID });
     });
@@ -142,7 +142,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async updatedMembersForAllUsers(channel: Channel) {
     const channelMembers = await channel.channelMembers;
     const emitUpdatedMembers = channelMembers.map(async member => {
-      const user = await member.user;
+      const user = await this.channelMemberService.getUserFromChannelMember(member);
       const client = this.eventsService.getClient(user.userID);
       if (client === undefined || !client.rooms.has(channel.channelID)) {
         return ;

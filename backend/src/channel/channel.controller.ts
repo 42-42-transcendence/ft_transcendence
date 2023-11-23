@@ -481,7 +481,7 @@ export class ChannelController {
     }
     await this.eventsGateway.updatedMembersForOneUser(user, channel);
 
-    return ({ message: `${blockedUser.nickname}님께 초대를 보냈습니다.` })
+    return ({ message: `${blockedUser.nickname}님을 차단했습니다.` })
   }
 
 

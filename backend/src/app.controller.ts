@@ -17,15 +17,12 @@ export class AppController implements OnModuleInit{
   ) {}
 
   async onModuleInit() {
-    const channels = await this.channelService.getAllChannels();
-    const users = await this.userService.getAllUsers();
-
-    if (channels.length === 0) {
+    if ((await this.channelService.getAllChannels()).length === 0) {
       for (let idx = 0; idx < 3; idx++) {
         await this.channelService.createChannelDummy();
       }
     }
-    if (users.length === 0) {
+    if ((await this.userService.getAllUsers()).length === 0) {
       for (let idx = 0; idx < 7; idx++) {
         await this.userService.createUserDummy();
       }
@@ -68,7 +65,21 @@ export class AppController implements OnModuleInit{
     }
 
     // 이 뒤는 chatdummy 구현 해보기
-    // const channelMembers = await this.channelMemberService.getAllChannelMembers();
+    if ((await this.chatService.getAllChats()).length === 0) {
+      const newChannels = await this.channelService.getAllChannels();
+
+      for (let i = 0; i < newChannels.length; i++) {
+        const channel = newChannels[i];
+        const members = await this.channelMemberService.getChannelMembersWithUserFromChannel(channel);
+        const chatCount = Math.floor(Math.random() * 10) + 15;
+
+        for (let j = 0; j < chatCount; j++) {
+          const memberIdx = Math.floor(Math.random() * members.length);
+          const member = members[memberIdx];
+          await this.chatService.createChatDummy(channel, member.user);
+        }
+      }
+    }
   }
 
   @Get()

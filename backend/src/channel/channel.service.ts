@@ -32,19 +32,6 @@ export class ChannelService {
     return (channel);
   }
 
-  async getChannelAllInfoById(channelID: string): Promise<Channel> {
-    const channel = await this.getChannelByIdWithException(channelID);
-    const channelMembers = await channel.channelMembers;
-
-    const relationUsers = channelMembers.map(async channelMember => {
-      await channelMember.user;
-    })
-    await Promise.all(relationUsers);
-    await channel.chats;
-
-    return (channel);
-  }
-
   async deleteChannelById(channelID: string): Promise<void> {
     await this.channelRepository.deleteChannelById(channelID);
   }

@@ -23,8 +23,7 @@ export class ChannelMember {
   @ManyToOne(() => Channel, (channel) => channel.channelMembers, {
     onDelete: 'CASCADE'
   })
-  // @JoinColumn({ referencedColumnName: 'channelID' })
-  channel: Promise<Channel>;
+  channel: Channel;
 
   @ApiProperty({
     description: 'User 외래키',
@@ -34,8 +33,7 @@ export class ChannelMember {
   @ManyToOne(() => User, (user) => user.channelMembers, {
     onDelete: 'CASCADE'
   })
-  // @JoinColumn({ referencedColumnName: 'userID' })
-  user: Promise<User>;
+  user: User;
 
   @ApiProperty({
     description: 'User의 채널 권한',

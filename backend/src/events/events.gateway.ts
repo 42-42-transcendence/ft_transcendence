@@ -75,6 +75,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
   }
 
+
   @SubscribeMessage('joinChannel')
   async joinChannelSession(client: Socket, data: any): Promise<any> {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
@@ -106,22 +107,37 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await this.authService.getUserByAuthWithWsException(auth);
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
-    const createChatMessageDto = {
-      content: data.message,
-      chatType: ChatType.NORMAL,
-      userNickname: user.nickname,
-      user,
-      channel,
-    };
+    const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
 
-    const chat = await this.chatService.createChatMessage(createChatMessageDto);
-    client.to(channel.channelID).emit("updatedMessage", { message: chat });
+    if (!member.isMuted) {
+      const createChatMessageDto = {
+        content: data.message,
+        chatType: ChatType.NORMAL,
+        userNickname: user.nickname,
+        user,
+        channel,
+      };
+      const chat = await this.chatService.createChatMessage(createChatMessageDto);
+      client.to(channel.channelID).emit("updatedMessage", { message: chat });
+    }
+    else {
+      const createChatMessageDto = {
+        content: `${user.nickname}님은 현재 뮤트상태입니다.`,
+        chatType: ChatType.SYSTEM,
+        userNickname: user.nickname,
+        user,
+        channel,
+      };
+      const chat = await this.chatService.createChatMessage(createChatMessageDto);
+      this.server.to(channel.channelID).to(client.id).emit("updatedMessage", { message: chat });
+    }
   }
 
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
     client.to(channelID).emit("updatedMessage", { message: chat });
   }
+
 
   async updatedMembersForAllUsers(channel: Channel) {
     const channelMembers = await channel.channelMembers;

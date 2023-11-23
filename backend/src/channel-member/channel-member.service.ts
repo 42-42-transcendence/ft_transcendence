@@ -59,6 +59,12 @@ export class ChannelMemberService {
     return (await this.channelMemberRepository.updateChannelMemberRole(member, role));
   }
 
+  updateChannelMemberIsMutedByChannelMember(
+    member: ChannelMember, isMuted: boolean
+  ): Promise<ChannelMember> {
+    return (this.channelMemberRepository.updateChannMemberIsMuted(member, isMuted));
+  }
+
   async deleteChannelMember(channel: Channel, user: User) {
     const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 

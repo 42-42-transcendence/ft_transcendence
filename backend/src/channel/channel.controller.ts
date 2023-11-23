@@ -128,7 +128,7 @@ export class ChannelController {
     if (member && (member.role === ChannelMemberRole.BLOCK)) {
       return ({ isAuthenticated: false });
     }
-    
+
     if (member && (member.role === ChannelMemberRole.INVITE)) {
       await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       await this.channelService.enterUserToChannel(channel);
@@ -306,7 +306,7 @@ export class ChannelController {
     type: Promise<{ message: string }>
   })
   @Post(':id/kick')
-  async kickFromChannel(
+  async kickUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
     @Body('kickedUser') kickedUserID: string,
@@ -321,7 +321,7 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
     }
 
-    if (subjectUserRole.role !== ChannelMemberRole.OWNER 
+    if (subjectUserRole.role !== ChannelMemberRole.OWNER
         && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
       throw new BadRequestException(`${user.nickname}님은 강퇴권한이 없습니다.`);
     }
@@ -350,7 +350,7 @@ export class ChannelController {
 
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
-    
+
     return ({ message: content });
   }
 
@@ -378,7 +378,7 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
     }
 
-    if (subjectUserRole.role === ChannelMemberRole.BLOCK 
+    if (subjectUserRole.role === ChannelMemberRole.BLOCK
         || subjectUserRole.role === ChannelMemberRole.INVITE ) {
       throw new BadRequestException(`${user.nickname}님은 초대권한이 없습니다.`);
     }
@@ -405,7 +405,7 @@ export class ChannelController {
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
 
     // noti로 해당 인물에게 초대 알림을 보내야함
-    
+
     return ({ message: content });
   }
 
@@ -476,5 +476,66 @@ export class ChannelController {
 
     return ({ message: `${blockedUser.nickname}님께 초대를 보냈습니다.` })
   }
+
+
+  // 일단 토글 되는 방식으로만 해본다.
+  @ApiOperation({
+    summary: '특정 인원을 (일정 시간동안) 뮤트시킨다.'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Post(':id/staff')
+  async muteUserFromChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('mutedUser') mutedUserID: string,
+    ): Promise<{ message: string }> {
+      const user = await auth.user;
+      const channel = await this.channelService.getChannelByIdWithException(channelID);
+      const mutedUser = await this.userService.getUserByIdWithException(mutedUserID);
+      const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+      const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, mutedUser);
+
+      if (!subjectUserRole) {
+        throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
+      }
+
+      if (subjectUserRole.role !== ChannelMemberRole.OWNER
+          && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
+        throw new BadRequestException(`${user.nickname}님은 뮤트권한이 없습니다.`);
+      }
+
+      if (!objectUserRole
+          || (objectUserRole.role === ChannelMemberRole.INVITE
+              || objectUserRole.role === ChannelMemberRole.BLOCK)) {
+        throw new BadRequestException(`${mutedUser.nickname}님은 채널에 존재하지 않습니다.`);
+      }
+
+      if (objectUserRole.role === ChannelMemberRole.OWNER) {
+        throw new BadRequestException(`${mutedUser.nickname}님은 채널 소유자입니다.`);
+      }
+
+      if (objectUserRole.isMuted === true) {
+        this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
+        const content = `${mutedUser.nickname}님께서 뮤트가 해제되었습니다.`;
+        await this.eventsGateway.updatedSystemMessage(content, channel, user);
+
+        return ({ message: content });
+      }
+
+      this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, true);
+        // setTimeout(() => {
+        //   if (objectUserRole.isMuted === true) {
+        //     this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
+        //   }
+        // }, 1000 * 60 * 10);
+
+      const content = `${mutedUser.nickname}님께서 뮤트되었습니다.`;
+      await this.eventsGateway.updatedSystemMessage(content, channel, user);
+
+      return ({ message: content });
+    }
 
 }

@@ -34,8 +34,15 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 
 	async updateChannelMemberRole(member: ChannelMember, role: ChannelMemberRole): Promise<ChannelMember> {
 		member.role = role;
-
 		const result = await this.save(member);
+
+		return (result);
+	}
+
+	async updateChannMemberIsMuted(member: ChannelMember, isMuted: boolean): Promise<ChannelMember> {
+		member.isMuted = isMuted;
+		const result = await this.save(member);
+
 		return (result);
 	}
 

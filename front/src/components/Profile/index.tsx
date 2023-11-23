@@ -28,7 +28,7 @@ export type ProfileInfo = {
 
 const Profile = () => {
   const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
-  const { error, request } = useRequest();
+  const { request } = useRequest();
   const params = useParams();
 
   const showAchievementDetail = useModalState('showAchievementDetail');
@@ -57,7 +57,7 @@ const Profile = () => {
     setActivedAchievement({ title, description });
   };
 
-  if (profileInfo === null) return <h1>{error}</h1>;
+  if (profileInfo === null) return <h1>유저 정보를 불러 올 수 없습니다.</h1>;
   return (
     <>
       <div className={styles.profile}>

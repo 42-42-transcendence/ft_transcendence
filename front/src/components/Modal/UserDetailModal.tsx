@@ -27,7 +27,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const params = useParams();
 
   const [userInfo, setUserInfo] = useState<User | null>({
-    id: 'heryu',
+    nickname: 'heryu',
     image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
     relation: 'friend',
     status: 'online',
@@ -173,7 +173,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
         <div className={styles.header}>
           <div className={styles['user-wrapper']}>
             <AvatarImage radius="64px" imageURI={userInfo.image} />
-            <h3>{userInfo.id}</h3>
+            <h3>{userInfo.nickname}</h3>
           </div>
         </div>
         <div className={styles.wrapper}>
@@ -192,7 +192,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
         <div className={styles.header}>
           <div className={styles['user-wrapper']}>
             <AvatarImage radius="64px" imageURI={userInfo.image} />
-            <h3>{userInfo.id}</h3>
+            <h3>{userInfo.nickname}</h3>
           </div>
         </div>
         <div className={styles.feedback}>{error}</div>

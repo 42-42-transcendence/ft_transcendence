@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '../../styles/Social.module.css';
 import SocialList from './SocialList';
@@ -7,23 +7,39 @@ import SocialIconList from './SocialIconList';
 import AddFriendModal from '../Modal/AddFriendModal';
 import useModalState from '../../store/Modal/useModalState';
 import UserDetailModal from '../Modal/UserDetailModal';
+import useRequest from '../../http/useRequest';
+import { SERVER_URL } from '../../App';
 
 export type Status = 'offline' | 'online' | 'in-game';
 export type Relation = 'unknown' | 'friend' | 'block';
 export type User = {
-  id: string;
+  nickname: string;
   image: string;
   status: Status;
   relation: Relation;
 };
 
 const Social = () => {
-  const [selectedOption, setSelectedOption] = useState<string>('friends');
+  const [selectedOption, setSelectedOption] = useState<string>('friend');
+  const [users, setUsers] = useState<User[]>([]);
+  const { request } = useRequest();
 
   const showUserDetail = useModalState('showUserDetail');
   const showAddFriend = useModalState('showAddFriend');
 
   const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const ret = await request<User[]>(`${SERVER_URL}/api/social`, {
+        method: 'GET',
+      });
+
+      setUsers(ret || []);
+    };
+
+    fetchUsers();
+  }, [request]);
 
   const changeOptionHandler = (option: string) => {
     setSelectedOption(option);
@@ -40,7 +56,7 @@ const Social = () => {
         onChangeOption={changeOptionHandler}
       />
       <SocialList
-        selectedOption={selectedOption}
+        filteredUsers={users.filter((user) => user.relation === selectedOption)}
         onActive={setActivatedUserIDHandler}
       />
       <SocialIconList />

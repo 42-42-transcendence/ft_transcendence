@@ -6,7 +6,7 @@ type Props = {
   onChangeOption: (option: string) => void;
 };
 
-const filterOptionList = ['friends', 'block'];
+const filterOptionList = ['friend', 'block'];
 
 const SocialSidebar = ({ selectedOption, onChangeOption }: Props) => {
   const optionRadioList = filterOptionList.map((option, index) => (

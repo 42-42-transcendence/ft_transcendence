@@ -32,9 +32,7 @@ const Dashboard = () => {
         }
       );
 
-      if (ret === null) return;
-
-      setRecodes(ret);
+      setRecodes(ret || []);
     };
 
     fetchRecodes();

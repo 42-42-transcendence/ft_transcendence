@@ -7,18 +7,18 @@ type Props = User & {
   onActive: (userID: string) => void;
 };
 
-const SocialUserItem = ({ id, image, status, relation, onActive }: Props) => {
+const SocialUserItem = ({ nickname, image, status, onActive }: Props) => {
   const openModalHandler = useOpenModal('showUserDetail');
 
   const activeHandler = () => {
     openModalHandler();
-    onActive(id);
+    onActive(nickname);
   };
 
   return (
     <li>
       <UserItem
-        id={id}
+        id={nickname}
         image={image}
         className={`${styles.item} ${styles[status]}`}
         clickHandler={activeHandler}

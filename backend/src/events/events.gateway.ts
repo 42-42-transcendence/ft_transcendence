@@ -175,7 +175,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     if (client) {
       this.server.to(channel.channelID).to(client.id).emit(
-        'kickOutChannel',
+        'firedChannel',
         { message: message }
       )
     };

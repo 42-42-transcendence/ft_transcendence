@@ -200,7 +200,7 @@ export class ChannelController {
     }
 
     this.eventsGateway.server.to(channel.channelID).emit(
-      "kickOutChannel",
+      "firedChannel",
       { message: `${channel.title}채널이 제거되었습니다.` }
     );
 

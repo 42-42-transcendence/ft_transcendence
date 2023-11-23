@@ -3,6 +3,12 @@ import PhysicsEngine from "../class/PhysicsEngine";
 import { GameManager } from "../class/GameManager";
 
 function update(delta: number) {
+	if (data.mode === 'object') {
+		/* 아이템 생성 */
+		GameManager.createItem();
+		/* 아이템 업데이트 */
+		PhysicsEngine.checkItemCollision(data.items, data.paddle, delta);
+	}
 	/* 공 위치 업데이트 */
 	PhysicsEngine.GuaranteeConflict(data.ball, delta);
 	/* 공이 라인을 넘어가는지 확인 */

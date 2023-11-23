@@ -1,12 +1,32 @@
 import data from "../interface/gameData";
+import {Item} from "./Item";
 import {vec2} from "gl-matrix";
 
+export enum CanvasPosition {
+    TopRight,
+    BottomRight,
+    TopLeft,
+    BottomLeft
+}
+
 export class GameManager {
+    static lastItemCreationTime: number = Date.now();
     static scoreUpdate(player: string) {
         const idx = player === 'player1' ? 0 : 1;
         ++data.scores[idx];
         data.scoreRef[idx]!.innerText = String(data.scores[idx]);
         this.resetBallPosition();
+    }
+
+    static createItem() {
+        const currentTime = Date.now();
+        console.log(data.items.length);
+        if (currentTime - this.lastItemCreationTime >= 1000 && data.items.length < 5) {
+            const newItem = this.createRandomItem();
+            console.log(newItem.direction[0], newItem.direction[1]);
+            data.items.push(newItem);
+            this.lastItemCreationTime = currentTime;
+        }
     }
 
     static checkOverLine(ballPos: vec2) : string {
@@ -17,6 +37,19 @@ export class GameManager {
             return ballPos[0] + radius > 1.0 ? 'player1' : 'player2';
         }
         return '';
+    }
+
+    static createRandomItem() {
+        let randomX = Math.random();
+        if (randomX < 0.5) {
+            randomX = randomX * 0.6 - 0.5;
+        } else {
+            randomX = randomX * 0.6 + 0.2;
+        }
+        let randomY = Math.random() - 0.5;
+        const direction = vec2.normalize(vec2.create(), vec2.fromValues(randomX, randomY));
+
+        return new Item(direction);
     }
 
     static resetBallPosition() {

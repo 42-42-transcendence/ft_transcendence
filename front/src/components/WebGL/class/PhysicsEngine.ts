@@ -2,6 +2,8 @@ import {vec2} from "gl-matrix";
 import data from "../interface/gameData";
 import {Ball, BallCorner} from "./Ball";
 import {Paddle, PaddlePos} from "./Paddle";
+import {Item} from "./Item";
+import {CanvasPosition} from "./GameManager";
 
 class PhysicsEngine {
     static checkBallPaddleCollision(ballPos: vec2, paddle: Paddle) {
@@ -110,6 +112,60 @@ class PhysicsEngine {
         }
         return {c, d, r};
     }
+
+    private static makeCanvasPosition(canvasPosition: CanvasPosition) {
+        let c = vec2.create();
+        let d = vec2.create();
+        let r = 2.0;
+
+        switch (canvasPosition) {
+            case CanvasPosition.TopRight:
+                c = vec2.fromValues(1.0, 1.0);
+                d = vec2.fromValues(-1.0, 0.0);
+                break;
+            case CanvasPosition.BottomRight:
+                c = vec2.fromValues(1.0, -1.0);
+                d = vec2.fromValues(0.0, 1.0);
+                break;
+            case CanvasPosition.TopLeft:
+                c = vec2.fromValues(-1.0, 1.0);
+                d = vec2.fromValues(0.0, -1.0);
+                break;
+            case CanvasPosition.BottomLeft:
+                c = vec2.fromValues(-1.0, -1.0);
+                d = vec2.fromValues(1.0, 0.0);
+                break;
+        }
+        return {c, d, r};
+    }
+
+    private static checkAndHandleWallCollision(item: Item, delta: number) {
+        const a = vec2.fromValues(item.position[0], item.position[1]);
+        const b = vec2.fromValues(item.direction[0], item.direction[1]);
+
+        // 캔버스 경계(벽) 설정
+        const walls = [
+            CanvasPosition.TopLeft,
+            CanvasPosition.BottomRight,
+            CanvasPosition.TopRight,
+            CanvasPosition.BottomLeft,
+        ];
+
+        // 각 벽과의 충돌 검사
+        walls.forEach(wall => {
+            const {r, c, d} = this.makeCanvasPosition(wall);
+            const {p, q} = this.calculateConflict(a, b, c, d);
+
+            if (!this.checkConflict(p, q, r, delta)) {
+                if (wall === walls[0] || wall === walls[1]) {
+                    item.direction[0] *= -1;
+                } else {
+                    item.direction[1] *= -1;
+                }
+            }
+        });
+    }
+
     static calCheckConflict(ball: Ball, delta: number, paddle: Paddle[]) {
         let closestP = -1; // 초기에는 충돌이 없음을 가정
 
@@ -128,7 +184,6 @@ class PhysicsEngine {
             paddlePositions.forEach(paddlePos => {
                 const { c, d , r} = this.makePaddlePosition(paddle, paddlePos);
                 const { p, q } = this.calculateConflict(ballPos, ballDirection, c, d);
-                console.log((q > 0 && q < r) && p < delta && p > 0);
                 if (!this.checkConflict(p, q, r, delta)) {
                     if ((closestP === -1 || p < closestP) && p > 0) {
                         closestP = p; // 가장 빠른 충돌 시간 갱신
@@ -137,6 +192,63 @@ class PhysicsEngine {
             });
         });
         return closestP;
+    }
+
+    private static handleCollision(item: Item, paddle: Paddle, delta: number, paddlePosMapping: Map<PaddlePos, PaddlePos[]>): boolean {
+        for (const [keyPos, valuePoses] of paddlePosMapping) {
+            // 키에 대한 충돌 검사
+            if (this.isColliding(item, paddle, delta, keyPos)) {
+                this.applyEffectToPaddle(paddle);
+                return true;
+            }
+            // 값 배열에 대한 충돌 검사
+            for (const valuePos of valuePoses) {
+                if (this.isColliding(item, paddle, delta, valuePos)) {
+                    this.applyEffectToPaddle(paddle);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static checkItemCollision(items: Item[], paddles: Paddle[], delta: number) {
+        const paddlePosMapping = new Map<PaddlePos, PaddlePos[]>([
+            [PaddlePos.LeftFront, [PaddlePos.LeftUp, PaddlePos.LeftDown]],
+            [PaddlePos.RightFront, [PaddlePos.RightUp, PaddlePos.RightDown]],
+        ]);
+
+        for (let i = data.items.length - 1; i >= 0; i--) {
+            const item = data.items[i];
+            let collisionDetected = false;
+
+            for (const paddle of paddles) {
+                if (this.handleCollision(item, paddle, delta, paddlePosMapping)) {
+                    items.splice(i, 1);
+                    collisionDetected = true;
+                    break; // 충돌 감지되면 루프 종료
+                }
+            }
+
+            if (!collisionDetected) {
+                this.checkAndHandleWallCollision(item, delta);
+                item.move(delta);
+            }
+        }
+    }
+
+    private static isColliding(item: Item, paddle: Paddle, delta: number, LR: PaddlePos) : boolean {
+        const a = vec2.fromValues(item.position[0], item.position[1]);
+        const b = vec2.fromValues(item.direction[0], item.direction[1]);
+        // const {c, d, r} = this.makePaddlePosition([paddle], PaddlePos.LeftFront);
+        const {c, d, r} = this.makePaddlePosition(data.paddle, LR);
+
+        const {p, q} = this.calculateConflict(a, b, c, d);
+        return !this.checkConflict(p, q, r, delta);
+    }
+
+    private static applyEffectToPaddle(paddle: Paddle) {
+        console.log("아이템 효과 적용");
     }
 
     static GuaranteeConflict(ball: Ball, delta: number) {

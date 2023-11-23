@@ -23,6 +23,10 @@ function initialize(state: any) {
 		data.ball.velocity = 3.0;
 		data.paddle[0].speed = 1.5;
 		data.paddle[1].speed = 1.5;
+	} else if (state.gameMode === 'object') {
+		data.ball.velocity = 1.5;
+		data.paddle[0].speed = 1.0;
+		data.paddle[1].speed = 1.0;
 	}
 }
 

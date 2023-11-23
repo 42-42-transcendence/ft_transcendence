@@ -2,6 +2,7 @@ import data from '../interface/gameData';
 import {Ball} from '../class/Ball';
 import {Paddle} from '../class/Paddle';
 import Line from '../class/Line';
+import {Item} from '../class/Item';
 
 function initializeBuffer(buffer: WebGLBuffer | null, vertices: Float32Array) {
 	if (!data.gl) throw new Error('data.gl is null');
@@ -16,8 +17,20 @@ function drawPaddle(paddle: Paddle) {
 	paddle.calculateVertices();
 	if (!data.gl) throw new Error('data.gl is null');
 	data.gl.useProgram(data.program[0]);
+	data.gl.uniform4f(data.uColorLocation, 1.0, 0.0, 0.0, 1.0);
 	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
 	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, paddle.paddleVertices);
+	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
+	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+}
+
+function drawItem(item: Item) {
+	item.calculateVertices();
+	if (!data.gl) throw new Error('data.gl is null');
+	data.gl.useProgram(data.program[0]);
+	data.gl.uniform4f(data.uColorLocation, 1.0, 0.0, 1.0, 1.0);
+	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
+	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, item.itemVertices);
 	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
 	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
 }
@@ -26,6 +39,7 @@ function drawBall(ball: Ball) {
 	ball.calculateVertices();
 	if (!data.gl) throw new Error('data.gl is null');
 	data.gl.useProgram(data.program[0]);
+	data.gl.uniform4f(data.uColorLocation, 1.0, 0.0, 0.0, 1.0);
 	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
 	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, ball.ballVertices);
 	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
@@ -62,4 +76,7 @@ export function render() {
 	drawBall(data.ball);
 	drawPaddle(data.paddle[0]);
 	drawPaddle(data.paddle[1]);
+	for (let i = 0; i < data.items.length; i++) {
+		drawItem(data.items[i]);
+	}
 }

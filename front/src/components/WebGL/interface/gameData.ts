@@ -23,6 +23,7 @@ let data: gameData = {
 	program: [null, null],
 	mode: 'normal',
 	items: [],
+	uColorLocation: null,
 };
 
 export default data;

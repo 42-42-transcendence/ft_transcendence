@@ -41,4 +41,5 @@ interface gameData {
 	program: (WebGLProgram | null)[];
 	mode: string;
 	items: Item[];
+	uColorLocation: WebGLUniformLocation | null;
 }

@@ -1,16 +1,62 @@
-import { Form } from 'react-router-dom';
-
+import { useEffect, useState } from 'react';
 import Modal from '../../UI/Modal';
 import useCloseModal from '../../store/Modal/useCloseModal';
-
 import styles from '../../styles/Modal.module.css';
+import useRequest from '../../http/useRequest';
+import { SERVER_URL } from '../../App';
 
 const AddFriendModal = () => {
-  const closeHandler = useCloseModal();
+  const [enteredNickname, setEnteredNickName] = useState<string>('');
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+  const [successModalMessage, setSuccessModalMessage] = useState<string>('');
+  const { error, request } = useRequest();
+  const closeModalHandler = useCloseModal();
 
-  return (
-    <Modal onClose={closeHandler}>
-      <Form method="POST">
+  useEffect(() => {
+    if (error) {
+      setFeedbackMessage(error);
+    }
+  }, [error]);
+
+  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEnteredNickName(e.target.value);
+  };
+
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (
+      enteredNickname.trim().length < 4 ||
+      enteredNickname.trim().length > 8
+    ) {
+      setFeedbackMessage('닉네임 길이는 4~8자 입니다.');
+      return;
+    }
+    setFeedbackMessage('');
+
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/friend/${enteredNickname}`,
+      {
+        method: 'GET',
+      }
+    );
+
+    if (ret !== null) {
+      setSuccessModalMessage('요청에 성공하였습니다.');
+      setTimeout(() => {
+        closeModalHandler();
+      }, 1000);
+    }
+  };
+
+  let contents: React.ReactNode = '';
+  if (successModalMessage) {
+    contents = (
+      <h1 className={styles['success-message']}>{successModalMessage}</h1>
+    );
+  } else {
+    contents = (
+      <form onSubmit={submitHandler}>
         <div className={styles.header}>친구 요청</div>
         <div className={styles['input-field']}>
           <label className={styles.title}>닉네임</label>
@@ -19,9 +65,12 @@ const AddFriendModal = () => {
             type="text"
             name="name"
             maxLength={8}
-            placeholder="친구 닉네임 입력"
+            placeholder="닉네임 입력"
+            onChange={changeHandler}
+            value={enteredNickname}
           />
         </div>
+        <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"
@@ -32,13 +81,15 @@ const AddFriendModal = () => {
           <button
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
-            onClick={closeHandler}
+            onClick={closeModalHandler}
           >
             CANCEL
           </button>
         </div>
-      </Form>
-    </Modal>
-  );
+      </form>
+    );
+  }
+
+  return <Modal onClose={closeModalHandler}>{contents}</Modal>;
 };
 export default AddFriendModal;

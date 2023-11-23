@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import styles from '../../styles/Social.module.css';
 import SocialList from './SocialList';
@@ -29,17 +29,21 @@ const Social = () => {
 
   const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const ret = await request<User[]>(`${SERVER_URL}/api/social`, {
-        method: 'GET',
-      });
+  const fetchUsers = useCallback(async () => {
+    const ret = await request<User[]>(`${SERVER_URL}/api/social`, {
+      method: 'GET',
+    });
 
-      setUsers(ret || []);
-    };
-
-    fetchUsers();
+    setUsers(ret || []);
   }, [request]);
+
+  const refreshUsersHandler = () => {
+    fetchUsers();
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const changeOptionHandler = (option: string) => {
     setSelectedOption(option);
@@ -59,7 +63,7 @@ const Social = () => {
         filteredUsers={users.filter((user) => user.relation === selectedOption)}
         onActive={setActivatedUserIDHandler}
       />
-      <SocialIconList />
+      <SocialIconList onRefreshHandler={refreshUsersHandler} />
       {showAddFriend && <AddFriendModal />}
       {showUserDetail && (
         <UserDetailModal targetUserID={activatedUserID as string} />

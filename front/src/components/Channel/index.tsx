@@ -29,23 +29,23 @@ const Channel = () => {
     setSelectedFilter(filter);
   };
 
-  const setRequestData = useCallback(async () => {
-    const channels = await request<ChannelType[]>(`${SERVER_URL}/api/channel`, {
+  const fetchChannels = useCallback(async () => {
+    const ret = await request<ChannelType[]>(`${SERVER_URL}/api/channel`, {
       method: 'GET',
     });
 
-    if (channels !== null) {
-      setChannels(channels.reverse());
+    if (ret !== null) {
+      setChannels(ret.reverse());
     }
   }, [request]);
 
   const refreshChannelHandler = () => {
-    setRequestData();
+    fetchChannels();
   };
 
   useEffect(() => {
-    setRequestData();
-  }, [setRequestData]);
+    fetchChannels();
+  }, [fetchChannels]);
 
   return (
     <>

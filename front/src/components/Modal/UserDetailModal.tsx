@@ -73,7 +73,28 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   };
 
   const gameHandler = () => {};
-  const friendHandler = () => {};
+
+  const addFriendHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/friend/${targetUserID}`,
+      { method: 'GET' }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
+
+  const deleteFriendHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/friend/${targetUserID}`,
+      { method: 'DELETE' }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
 
   const blockHandler = async () => {
     const channelID = params.channelID;
@@ -222,7 +243,11 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           <button
             className={styles['list-button']}
             disabled={userInfo.relation === 'block'}
-            onClick={friendHandler}
+            onClick={
+              userInfo.relation === 'friend'
+                ? deleteFriendHandler
+                : addFriendHandler
+            }
           >
             친구 {userInfo.relation === 'friend' ? '삭제' : '추가'}
           </button>

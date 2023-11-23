@@ -16,7 +16,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
   const [enteredName, setEnteredName] = useState<string>('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [successModalMessage, setSuccessModalMessage] = useState<string>('');
-  const { isLoading, error, request } = useRequest();
+  const { error, request } = useRequest();
 
   useEffect(() => {
     if (error) {
@@ -75,7 +75,6 @@ const ChatInvitationModal = ({ channelID }: Props) => {
             onChange={changeNameHandler}
           />
         </div>
-        {isLoading && <div className={styles.loading}>..loading..</div>}
         <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button

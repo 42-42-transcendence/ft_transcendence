@@ -18,10 +18,10 @@ export type Recode = {
 };
 
 const Dashboard = () => {
-  const params = useParams();
   const [selectedOption, setSelectedOption] = useState<string>('all');
   const [recodes, setRecodes] = useState<Recode[]>([]);
   const { request } = useRequest();
+  const params = useParams();
 
   useEffect(() => {
     const fetchRecodes = async () => {
@@ -32,9 +32,7 @@ const Dashboard = () => {
         }
       );
 
-      if (ret === null) {
-        return;
-      }
+      if (ret === null) return;
 
       setRecodes(ret);
     };

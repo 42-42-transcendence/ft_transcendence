@@ -170,4 +170,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     });
     this.server.to(channel.channelID).emit("updatedMessage", { message: chat });
   }
+
+  async kickOutSpecificClient(message: string, user: User, channel: Channel) {
+    const client = this.eventsService.getClient(user.userID);
+    if (client) {
+      this.server.to(channel.channelID).to(client.id).emit(
+        'kickOutChannel',
+        { message: message }
+      )
+    };
+  }
 }

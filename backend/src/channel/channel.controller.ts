@@ -199,6 +199,11 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}님은 채널을 제거할 권한이 없습니다.`);
     }
 
+    this.eventsGateway.server.to(channel.channelID).emit(
+      "kickOutChannel",
+      { message: `${channel.title}채널이 제거되었습니다.` }
+    );
+
     // this.eventsGateway.server.to(channel.channelID).emit("firedMessage", { message: `${kickedUser.nickname}님께서는 추방되었습니다.` });
     await this.channelService.deleteChannelById(channelID);
 
@@ -338,13 +343,15 @@ export class ChannelController {
       throw new BadRequestException(`${kickedUser.nickname}님은 이미 추방되었습니다.`);
     }
 
-    // 이 사이에 추방유저를 채널로비로 이동시키는 무언가가 있어야함.
-    // this.eventsGateway.server.to(channel.channelID).emit("firedMessage", { message: `${kickedUser.nickname}님께서는 추방되었습니다.` });
-
     await this.channelMemberService.updateChannelMemberRoleByChannelMember(
       objectUserRole,
       ChannelMemberRole.BLOCK
     );
+    await this.eventsGateway.kickOutSpecificClient(
+      `${kickedUser.nickname}님은 ${channel.title}에서 추방되었습니다.`,
+      kickedUser,
+      channel
+    )
     await this.channelService.leaveUserToChannel(channel);
     await this.eventsGateway.updatedMembersForAllUsers(channel);
 

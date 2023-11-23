@@ -32,7 +32,7 @@ export type Message = {
   chatID: number;
   userNickname: string;
   chatType: 'normal' | 'system';
-  date: string;
+  createdAt: string;
   content: string;
 };
 type ChannelAllInfo = {
@@ -79,7 +79,7 @@ const Chatting = () => {
 
   const unsubscribeHandler = async () => {
     await request<{ message: string }>(
-      `${SERVER_URL}/api/channel/${params.channelID}`,
+      `${SERVER_URL}/api/channel/${params.channelID}/leave`,
       { method: 'GET' }
     );
 
@@ -102,7 +102,7 @@ const Chatting = () => {
   const cleanupSocketEvent = useCallback(() => {
     if (socket) {
       socket.off('updatedMessage');
-      socket.off('updatedMember');
+      socket.off('updatedMembers');
       socket.off('updatedChannelTitle');
       socket.off('firedChannel');
     }
@@ -117,7 +117,7 @@ const Chatting = () => {
     [members]
   );
 
-  const updatedMemberHandler = useCallback((members: ChatMember[]) => {
+  const updatedMembesrHandler = useCallback((members: ChatMember[]) => {
     setMembers(members);
   }, []);
 
@@ -162,15 +162,15 @@ const Chatting = () => {
   useEffect(() => {
     if (socket) {
       socket.on('updatedMessage', updatedMessageHandler);
-      socket.on('updatedMember', updatedMemberHandler);
+      socket.on('updatedMembers', updatedMembesrHandler);
       socket.on('updatedChannelTitle', updatedChannelTitleHandler);
       socket.on('firedChannel', firedChannelHandler);
     }
-    return cleanupSocketEvent();
+    return cleanupSocketEvent;
   }, [
     socket,
     updatedMessageHandler,
-    updatedMemberHandler,
+    updatedMembesrHandler,
     updatedChannelTitleHandler,
     firedChannelHandler,
     cleanupSocketEvent,

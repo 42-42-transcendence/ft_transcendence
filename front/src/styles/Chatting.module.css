@@ -113,6 +113,7 @@
   padding: 8px 16px;
   background-color: var(--tone-up-color);
   max-width: 300px;
+  word-wrap: break-word;
   text-align: left;
   border-radius: 8px;
 }

@@ -1,4 +1,4 @@
-import { Form, useActionData } from 'react-router-dom';
+import { useActionData } from 'react-router-dom';
 
 import styles from '../../styles/SettingProfileForm.module.css';
 import AvatarInput from './AvatarInput';
@@ -12,12 +12,12 @@ const InitProfileForm = () => {
   const erorrMessage = actionData?.errorMessage;
 
   return (
-    <Form method="PUT" encType="multipart/form-data" className={styles.form}>
+    <form className={styles.form}>
       <AvatarInput />
       <NameInput />
       <span className={styles.feedback}>{erorrMessage}</span>
       <button className={styles.submit}>완 료</button>
-    </Form>
+    </form>
   );
 };
 

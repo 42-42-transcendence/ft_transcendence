@@ -8,9 +8,7 @@ import DashboardPage from './Dashboard';
 import ProfilePage from './Profile';
 import ChannelsPage from './Channels';
 import LoginPage from './Login';
-import SettingProfilePage, {
-  action as settingProfileAction,
-} from './SettingProfile';
+import SettingProfilePage from './SettingProfile';
 import GamePage from './Game';
 import TwoFactorAuthPage from './TwoFactorAuth';
 import ChattingPage from './Chatting';
@@ -73,7 +71,6 @@ const router = createBrowserRouter([
       {
         path: '/setting-profile',
         element: <SettingProfilePage />,
-        action: settingProfileAction,
       },
     ],
   },

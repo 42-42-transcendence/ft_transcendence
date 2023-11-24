@@ -1,6 +1,7 @@
 import styles from '../../styles/Channel.module.css';
 import ChannelItem from './ChannelItem';
 import type { ChannelType } from '.';
+import loadingImage from '../../assets/loading.gif';
 
 type Props = {
   filteredChannels: ChannelType[];
@@ -21,9 +22,8 @@ const ChannelList = ({ filteredChannels, isLoading, error }: Props) => {
   ));
 
   let contents: React.ReactNode = channelItemList;
-
   if (error) contents = <h1>{error}</h1>;
-  else if (isLoading) contents = <h1>...Loading...</h1>;
+  else if (isLoading) contents = <img src={loadingImage} alt="loading" />;
   else if (channelItemList.length === 0)
     contents = <h1>No Chatting Channels.</h1>;
 

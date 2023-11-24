@@ -75,12 +75,12 @@ const ChatInvitationModal = ({ channelID }: Props) => {
             onChange={changeNameHandler}
           />
         </div>
-        {isLoading && <div className={styles.loading}>..loading..</div>}
         <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"
             className={`${styles['footer-button']} ${styles.confirm}`}
+            disabled={isLoading}
           >
             SEND
           </button>
@@ -88,6 +88,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
             onClick={closeModalHandler}
+            disabled={isLoading}
           >
             CANCEL
           </button>

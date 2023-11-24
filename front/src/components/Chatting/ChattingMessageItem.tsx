@@ -1,5 +1,6 @@
 import { Message } from '.';
 import AvatarImage from '../../UI/AvatarImage';
+import useAuthState from '../../store/Auth/useAuthState';
 import styles from '../../styles/Chatting.module.css';
 import SystemMessageItem from './SystemMessageItem';
 
@@ -20,6 +21,7 @@ const formatTimeToHHMM = (dateStr: string): string => {
 };
 
 const ChattingMessageItem = ({ message, image }: Props) => {
+  const authState = useAuthState();
   if (message.chatType === 'system') {
     return (
       <li className={styles['message-item']}>
@@ -27,8 +29,8 @@ const ChattingMessageItem = ({ message, image }: Props) => {
       </li>
     );
   }
-  // check me
-  const isOther = message.userNickname !== '이지수';
+
+  const isOther = message.userNickname !== authState.myID;
 
   return (
     <li className={styles['message-item']}>
@@ -41,7 +43,7 @@ const ChattingMessageItem = ({ message, image }: Props) => {
       <div className={`${styles['message-box']} ${!isOther && styles.me}`}>
         <div className={styles.message}>{message.content}</div>
         <small className={styles['message-date']}>
-          {formatTimeToHHMM(message.date)}
+          {formatTimeToHHMM(message.createdAt)}
         </small>
       </div>
     </li>

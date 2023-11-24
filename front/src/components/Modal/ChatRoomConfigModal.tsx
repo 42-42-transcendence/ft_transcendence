@@ -149,12 +149,12 @@ const ChatRoomConfigModal = ({ channelID }: Props) => {
             disabled={enteredType === 'private'}
           />
         </div>
-        {isLoading && <div className={styles.loading}>..loading..</div>}
         <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"
             className={`${styles['footer-button']} ${styles.confirm}`}
+            disabled={isLoading}
           >
             EDIT
           </button>
@@ -162,6 +162,7 @@ const ChatRoomConfigModal = ({ channelID }: Props) => {
             type="button"
             className={`${styles['footer-button']} ${styles.delete}`}
             onClick={deleteHandler}
+            disabled={isLoading}
           >
             DELETE
           </button>
@@ -169,6 +170,7 @@ const ChatRoomConfigModal = ({ channelID }: Props) => {
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
             onClick={closeModalHandler}
+            disabled={isLoading}
           >
             CANCEL
           </button>

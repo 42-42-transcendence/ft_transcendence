@@ -1,14 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Inject, forwardRef, BadRequestException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { ChannelDto } from './dto/channel.dto';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Channel } from './entities/channel.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
-import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { ChatService } from 'src/chat/chat.service';
@@ -16,6 +15,8 @@ import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { UserService } from 'src/user/user.service';
 import { RelationService } from 'src/relation/relation.service';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotiType } from 'src/notification/enums/noti-type.enum';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -27,6 +28,7 @@ export class ChannelController {
     private chatService: ChatService,
     private userService: UserService,
     private relationService: RelationService,
+    private notificationService: NotificationService,
     @Inject(forwardRef(() => EventsGateway))
     private eventsGateway: EventsGateway,
   ) {}
@@ -359,6 +361,9 @@ export class ChannelController {
 
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    await this.eventsGateway.updateNotification(
+      `${kickedUser.nickname}님은 ${channel.title}채널에서 추방되셨습니다.`, NotiType.KICKED, kickedUser
+    )
 
     return ({ message: content });
   }
@@ -412,8 +417,9 @@ export class ChannelController {
 
     const content = `${invitedUser.nickname}님께 초대를 보냈습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
-
-    // noti로 해당 인물에게 초대 알림을 보내야함
+    await this.eventsGateway.updateNotification(
+      `${user.nickname}님이 ${channel.title}로 초대하셨습니다.`, NotiType.INVITE, invitedUser
+    );
 
     return ({ message: content });
   }
@@ -444,6 +450,9 @@ export class ChannelController {
     await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user: invitedUser, role });
     await this.channelService.enterUserToChannel(channel);
+    await this.eventsGateway.updateNotification(
+      `${user.nickname}님으로부터 DM이 도착했습니다.`, NotiType.DM, invitedUser
+    )
 
     return ({ channelID: channel.channelID });
   }

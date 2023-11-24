@@ -19,6 +19,8 @@ import { UserService } from 'src/user/user.service';
 import { EventsService } from './events.service';
 import { Chat } from 'src/chat/entities/chat.entity';
 import { SocketExceptionFilter } from './socket.filter';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotiType } from 'src/notification/enums/noti-type.enum';
 
 
 
@@ -34,6 +36,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private authService: AuthService,
+    private notificationService: NotificationService,
     private eventsService: EventsService,
     @Inject(forwardRef(() => ChannelService))
     private channelService: ChannelService,
@@ -51,6 +54,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await this.authService.getUserByAuthWithWsException(auth);
     this.eventsService.addClient(user.userID, client);
+
     console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
   }
 
@@ -173,5 +177,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (client) {
       this.server.to(channel.channelID).to(client.id).emit('firedChannel', message)
     };
+  }
+
+  async updateNotification(message: string, notiType: NotiType, user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const noti = this.notificationService.createNotification({ message, notiType, user });
+    if (client) {
+      client.emit("updatedNotificaion", noti);
+    }
   }
 }

@@ -7,6 +7,7 @@ import { Auth } from 'src/auth/entities/auth.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserStatus } from '../enums/user-status.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
 
 @Entity()
 export class User {
@@ -68,6 +69,9 @@ export class User {
 
   @OneToMany(() => Relation, (relation) => relation.objectUser)
   objectRelations: Promise<Relation[]>;
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Promise<Notification[]>
 
   // @OneToMany(() => Game, (game) => game.playerOne)
   // initiatedGames: Game[];

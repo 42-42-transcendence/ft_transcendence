@@ -14,6 +14,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EventsModule } from './events/events.module';
     UserAchievementModule,
     AuthModule,
     EventsModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

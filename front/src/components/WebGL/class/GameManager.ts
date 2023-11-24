@@ -1,6 +1,7 @@
 import data from "../interface/gameData";
 import {Item} from "./Item";
 import {vec2} from "gl-matrix";
+import PhysicsEngine from "./PhysicsEngine";
 
 export enum CanvasPosition {
     TopRight,
@@ -20,10 +21,8 @@ export class GameManager {
 
     static createItem() {
         const currentTime = Date.now();
-        console.log(data.items.length);
         if (currentTime - this.lastItemCreationTime >= 1000 && data.items.length < 5) {
             const newItem = this.createRandomItem();
-            console.log(newItem.direction[0], newItem.direction[1]);
             data.items.push(newItem);
             this.lastItemCreationTime = currentTime;
         }
@@ -34,6 +33,7 @@ export class GameManager {
 
         if (ballPos[0] + radius > 1.0 || ballPos[0] - radius < -1.0) {
             console.log("점수 획득"); // 디버깅
+            PhysicsEngine._paddlePos = null;
             return ballPos[0] + radius > 1.0 ? 'player1' : 'player2';
         }
         return '';

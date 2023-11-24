@@ -6,6 +6,7 @@ import {Item} from "./Item";
 import {CanvasPosition} from "./GameManager";
 
 class PhysicsEngine {
+    static _paddlePos : PaddlePos | null = null;
     static checkBallPaddleCollision(ballPos: vec2, paddle: Paddle) {
         const radius = data.ball.radius;
 
@@ -168,23 +169,25 @@ class PhysicsEngine {
 
     static calCheckConflict(ball: Ball, delta: number, paddle: Paddle[]) {
         const cornerPaddleArray = [
-            { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
-            { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
-            { corner: BallCorner.BottomLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftDown] },
-            { corner: BallCorner.TopLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftUp] }
+            { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
+            { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
+            { corner: BallCorner.BottomLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftUp] },
+            { corner: BallCorner.TopLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftDown] }
         ];
 
-        for (const { corner, paddlePos } of cornerPaddleArray) {
-            const ballPos = this.makeBallPosition(ball, corner);
-            const ballDirection = vec2.scale(vec2.create(), ball.direction, ball.velocity);
+            for (const { corner, paddlePos } of cornerPaddleArray) {
+                const ballPos = this.makeBallPosition(ball, corner);
 
-            for (const pos of paddlePos) {
-                const { c, d, r } = this.makePaddlePosition(paddle, pos);
-                const { p, q } = this.calculateConflict(ballPos, ballDirection, c, d);
-                if (!this.checkConflict(p, q, r, delta) && p > 0) {
-                    return p; // 충돌 감지 시 바로 p 반환
+                for (const pos of paddlePos) {
+                    const factor = this.calculateFactor(this._paddlePos);
+                    const ballDirection = vec2.scale(vec2.create(), ball.direction, ball.velocity * factor);
+                    const { c, d, r } = this.makePaddlePosition(paddle, pos);
+                    const { p, q } = this.calculateConflict(ballPos, ballDirection, c, d);
+
+                    if (!this.checkConflict(p, q, r, delta) && p > 0) {
+                        return {p, pos}; // 충돌 감지 시 바로 p 반환
+                    }
                 }
-            }
         }
         return -1; // 충돌이 없는 경우
     }
@@ -196,10 +199,10 @@ class PhysicsEngine {
 
             for (let j = 0; j < paddles.length; j++) {
                 const paddle = paddles[j];
-                const paddlePositions = this.getPaddlePositions(paddle, j); // 패들의 모든 위치를 가져옴
+                const paddlePositions = this.getPaddlePositions(j); // 패들의 모든 위치를 가져옴
 
                 for (const pos of paddlePositions) {
-                    if (this.isColliding(item, paddle, delta, pos)) {
+                    if (this.isColliding(item, delta, pos)) {
                         this.applyEffectToPaddle(paddle);
                         items.splice(i, 1);
                         collisionDetected = true;
@@ -216,7 +219,7 @@ class PhysicsEngine {
         }
     }
 
-    private static getPaddlePositions(paddle: Paddle, index: number): PaddlePos[] {
+    private static getPaddlePositions(index: number): PaddlePos[] {
         if (index === 0) { // 왼쪽 패들
             return [PaddlePos.LeftFront, PaddlePos.LeftUp, PaddlePos.LeftDown];
         } else { // 오른쪽 패들
@@ -224,11 +227,9 @@ class PhysicsEngine {
         }
     }
 
-
-    private static isColliding(item: Item, paddle: Paddle, delta: number, paddlePos: PaddlePos) : boolean {
+    private static isColliding(item: Item, delta: number, paddlePos: PaddlePos) : boolean {
         const a = vec2.fromValues(item.position[0], item.position[1]);
         const b = vec2.fromValues(item.direction[0], item.direction[1]);
-        // const {c, d, r} = this.makePaddlePosition([paddle], PaddlePos.LeftFront);
         const {c, d, r} = this.makePaddlePosition(data.paddle, paddlePos);
 
         const {p, q} = this.calculateConflict(a, b, c, d);
@@ -239,37 +240,55 @@ class PhysicsEngine {
         let rand = Math.random() * 3;
         if (rand < 1) {
             if (paddle.height < 0.8)
-                paddle.height += 0.01;
+                paddle.height += 0.05;
+            console.log("패들 길이 증가!");
         } else if (rand < 2) {
             if (paddle.paddleSpeed < 2.0)
-                paddle.paddleSpeed += 0.1;
+                paddle.paddleSpeed += 0.12;
+            console.log("패들 속도 증가!");
         } else {
-            // paddle.height *= 1.0;
+            if (paddle.ballVelocityFactor < 3.0)
+                paddle.ballVelocityFactor += 0.1;
+            console.log("공 속도 증가!");
         }
     }
 
     static GuaranteeConflict(ball: Ball, delta: number) {
-        /* 충돌이 없다면 */
         const p = this.calCheckConflict(ball, delta, data.paddle);
+
         if (p === -1) {
             this.updateBallPosition(delta);
             return ;
         }
-        this.updateBallPosition(p);
-        this.handleBallPaddleCollision()
-        const restAfterCollision = delta - p;
-        // this.updateBallPosition(restAfterCollision);
+        this.updateBallPosition(p.p);
+        this.handleBallPaddleCollision();
+        const restAfterCollision = delta - p.p;
+        this._paddlePos = p.pos;
         this.GuaranteeConflict(ball, restAfterCollision);
         // 상하 라인 충돌도 구현.
     }
-    static calculateBallPosition(ball: Ball, delta: number) : vec2 {
+
+    static calculateFactor(paddlePos: PaddlePos | null) {
+        let factor;
+        if (null === paddlePos) {
+            factor = 1.0;
+        } else if (paddlePos < 3) {
+            factor = data.paddle[0].ballVelocityFactor;
+        } else {
+            factor = data.paddle[1].ballVelocityFactor;
+        }
+        return factor;
+    }
+
+    static calculateBallPosition(ball: Ball, delta: number, factor: number) : vec2 {
         let tempVec2 = vec2.create();
-        vec2.add(tempVec2, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta));
+        vec2.add(tempVec2, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta * factor));
         return tempVec2;
     }
 
     static updateBallPosition(delta: number) {
-        data.ball.position = this.calculateBallPosition(data.ball, delta);
+        const factor = this.calculateFactor(this._paddlePos);
+        data.ball.position = this.calculateBallPosition(data.ball, delta, factor);
     }
 
     static updatePaddlePosition(delta: number) {

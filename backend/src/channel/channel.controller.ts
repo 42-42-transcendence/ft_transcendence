@@ -207,8 +207,6 @@ export class ChannelController {
       "firedChannel",
       { message: `${channel.title}채널이 제거되었습니다.` }
     );
-
-    // this.eventsGateway.server.to(channel.channelID).emit("firedMessage", { message: `${kickedUser.nickname}님께서는 추방되었습니다.` });
     await this.channelService.deleteChannelById(channelID);
 
     return ({ message: `해당 채널을 제거했습니다.` });
@@ -257,7 +255,7 @@ export class ChannelController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const newStaffUser = await this.userService.getUserByIdWithException(targetUserID);
+    const newStaffUser = await this.userService.getUserByNicknameWithException(targetUserID);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, newStaffUser);
 
@@ -322,7 +320,7 @@ export class ChannelController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const kickedUser = await this.userService.getUserByIdWithException(targetUserID);
+    const kickedUser = await this.userService.getUserByNicknameWithException(targetUserID);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, kickedUser);
 
@@ -381,7 +379,7 @@ export class ChannelController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const invitedUser = await this.userService.getUserByIdWithException(targetUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUserID);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, invitedUser);
 
@@ -434,7 +432,7 @@ export class ChannelController {
     @Body('targetUserID') targetUserID: string,
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
-    const invitedUser = await this.userService.getUserByIdWithException(targetUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUserID);
     const channel = await this.channelService.createChannel({
       title: `${user.nickname}-${invitedUser.nickname} DM`,
       password: '',
@@ -467,11 +465,11 @@ export class ChannelController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const blockedUser = await this.userService.getUserByIdWithException(targetUserID);
+    const blockedUser = await this.userService.getUserByNicknameWithException(targetUserID);
     const relation = await this.relationService.getRelationByUsers(user, blockedUser);
 
     if (!relation) {
-      await this.relationService.createRelation({
+      const newRelation = await this.relationService.createRelation({
         subjectUser: user,
         objectUser: blockedUser,
         relationType: RelationTypeEnum.BLOCK
@@ -505,7 +503,7 @@ export class ChannelController {
     ): Promise<{ message: string }> {
       const user = await auth.user;
       const channel = await this.channelService.getChannelByIdWithException(channelID);
-      const mutedUser = await this.userService.getUserByIdWithException(targetUserID);
+      const mutedUser = await this.userService.getUserByNicknameWithException(targetUserID);
       const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
       const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, mutedUser);
 

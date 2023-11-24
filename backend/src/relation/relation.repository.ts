@@ -40,13 +40,17 @@ export class RelationRepository extends Repository<Relation> {
 	}
 
 	async getRelationByUsers(subjectUser: User, objectUser: User): Promise<Relation> {
+
+		// where, andwhere의 변수를 같은 이름으로 지으면 안된다...
 		const relation = await this
 			.createQueryBuilder('relation')
 			.leftJoinAndSelect('relation.subjectUser', 'subjectUser')
 			.leftJoinAndSelect('relation.objectUser', 'objectUser')
-			.where('subjectUser.userID = :userID', { userID: subjectUser.userID })
-			.andWhere('objectUser.userID = :userID', { userID: objectUser.userID })
+			.where('subjectUser.userID = :subjectUserID', { subjectUserID: subjectUser.userID })
+			.andWhere('objectUser.userID = :objectUserID', { objectUserID: objectUser.userID })
 			.getOne();
+		
+		console.log('----------- get relation', relation);
 
 		return (relation);
 	}

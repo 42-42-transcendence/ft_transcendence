@@ -16,6 +16,10 @@ export class UserService {
 	}
 
 	async getUserByNickname(nickname: string): Promise<User> {
+		return (this.userRepository.getUserByNickname(nickname));
+	}
+
+	async getUserByNicknameWithException(nickname: string): Promise<User> {
 		const user = this.userRepository.getUserByNickname(nickname);
 
 		if (!user) {

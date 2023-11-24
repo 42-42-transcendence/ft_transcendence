@@ -21,7 +21,6 @@ export class ChannelRepository extends Repository<Channel> {
 
 		const channel = this.create({
 			title,
-			total: 1,
 			password,
 			type
 		});

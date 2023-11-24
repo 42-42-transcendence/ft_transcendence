@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, UseFilters, forwardRef } from '@nestjs/common';
+import { Inject, UseFilters, forwardRef } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -10,13 +10,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
-import { ChannelMemberDto } from 'src/channel-member/dto/channel-member.dto';
-import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
-import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 import { ChannelService } from 'src/channel/channel.service';
 import { Channel } from 'src/channel/entities/channel.entity';
 import { ChatService } from 'src/chat/chat.service';
-import { CreateChatMessageDto } from 'src/chat/dto/create-chat-message.dto';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -89,7 +85,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
     }
-    console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
+    console.log(`[socket.io] ----------- join ${channel.channelID} -----------------`);
 
     return { title, messages, members };
   }
@@ -101,6 +97,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
     }
   }
+
 
   @SubscribeMessage('sendMessage')
   async sendMessage(client: Socket, data: any) {
@@ -118,7 +115,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         channel,
       };
       const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      client.to(channel.channelID).emit("updatedMessage", { message: chat });
+      this.server.to(channel.channelID).emit("updatedMessage", { message: chat });
     }
     else {
       const createChatMessageDto = {

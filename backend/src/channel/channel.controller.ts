@@ -175,6 +175,10 @@ export class ChannelController {
     });
     this.eventsGateway.updatedMessage(user.userID, channel.channelID, chat);
 
+    if (channel.total === 0) {
+      this.channelService.deleteChannelById(channel.channelID);
+    }
+
     return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};
   }
 

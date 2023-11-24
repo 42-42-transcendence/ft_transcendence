@@ -5,6 +5,7 @@ import useCloseModal from '../../store/Modal/useCloseModal';
 import styles from '../../styles/Modal.module.css';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import loadingImage from '../../assets/loading.gif';
 
 type Props = {
   channelID: string;
@@ -149,8 +150,14 @@ const ChatRoomConfigModal = ({ channelID }: Props) => {
             disabled={enteredType === 'private'}
           />
         </div>
-        {isLoading && <div className={styles.loading}>..loading..</div>}
         <div className={styles.feedback}>{feedbackMessage}</div>
+        {isLoading && (
+          <img
+            className={styles.loading}
+            src={loadingImage}
+            alt="wait for a setting profile"
+          />
+        )}
         <div className={styles.footer}>
           <button
             type="submit"

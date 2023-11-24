@@ -16,31 +16,40 @@ const IconList = () => {
     setShowNotificationDropdown((prev) => !prev);
   };
   const offNotificationDropDownHandler = () => {
-    setShowNotificationDropdown(false);
+    setTimeout(() => {
+      setShowNotificationDropdown(false);
+    }, 150);
   };
 
-  const toggleShowUserDropdown = () => {
+  const toggleShowUserDropdownHandler = () => {
     setShowUserDropdown((prev) => !prev);
   };
-  const offNotificationHandler = () => {
+  const offUserDropDownHandler = () => {
     setTimeout(() => {
       setShowUserDropdown(false);
-    }, 100);
+    }, 150);
   };
 
   return (
     <ul className={styles.icon_list}>
-      <li onBlur={offNotificationDropDownHandler} className={styles.icon_item}>
+      <li
+        onBlur={offNotificationDropDownHandler}
+        className={`${styles.icon_item}`}
+      >
         <button
           onClick={toggleShowNotificationHandler}
           className={styles.toggle}
         >
           <img src={notificationIcon} alt="notification icon" />
         </button>
+        <small className={styles.new}>7</small>
         {showNotificationDropdown && <NotificationDropdown />}
       </li>
-      <li onBlur={offNotificationHandler} className={styles.icon_item}>
-        <button onClick={toggleShowUserDropdown} className={styles.toggle}>
+      <li onBlur={offUserDropDownHandler} className={styles.icon_item}>
+        <button
+          onClick={toggleShowUserDropdownHandler}
+          className={styles.toggle}
+        >
           <img src={userIcon} alt="user icon" />
         </button>
         {showUserDropdown && <UserDropdown />}

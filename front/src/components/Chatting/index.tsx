@@ -1,543 +1,247 @@
-import ChattingContents from './ChattingContents';
-import ChattingMemberList from './ChattingMemberList';
-
 import styles from '../../styles/Chatting.module.css';
+
+import { useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+
+import { useSocket } from '../../socket/SocketContext';
+import { SERVER_URL } from '../../App';
+import type { Relation } from '../Social';
+import ChattingMemberList from './ChattingMemberList';
+import ChattingMessageList from './ChattingMessageList';
+import ChattingForm from './ChattingForm';
 import ChattingSettingList from './ChattingSettingList';
 import useModalState from '../../store/Modal/useModalState';
+import useOpenModal from '../../store/Modal/useOpenModal';
+import useRequest from '../../http/useRequest';
+import ConfirmModal from '../Modal/ConfirmModal';
 import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
-import { useParams } from 'react-router-dom';
-import ChatMemberDetailModal from '../Modal/ChatMemberDetailModal';
-import { useEffect, useState } from 'react';
-import ConfirmModal from '../Modal/ConfirmModal';
-import { useSocket } from '../../socket/SocketContext';
+import MessageModal from '../Modal/MessageModal';
+import UserDetailModal from '../Modal/UserDetailModal';
+import useAuthState from '../../store/Auth/useAuthState';
 
-type Member = {
-  id: string;
+export type Role = 'owner' | 'staff' | 'guest';
+export type ChatMember = {
+  nickname: string;
   image: string;
-  role: 'owner' | 'staff' | 'member';
+  relation: Relation;
+  role: Role;
   isMuted: boolean;
 };
-
-type Content = {
-  key: number;
-  id: string;
-  message: string;
-  date: Date;
-  type: 'normal' | 'system';
+export type Message = {
+  chatID: number;
+  userNickname: string;
+  chatType: 'normal' | 'system';
+  createdAt: string;
+  content: string;
+};
+type ChannelAllInfo = {
+  title: string;
+  messages: Message[];
+  members: ChatMember[];
 };
 
-type DUMMY_TYPE = {
-  members: Member[];
-  contents: Content[];
-};
-
-const DUMMY_ITEMS: DUMMY_TYPE = {
-  members: [
-    {
-      id: '이지수',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'owner',
-      isMuted: false,
-    },
-    {
-      id: 'asdfsdf',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'staff',
-      isMuted: false,
-    },
-    {
-      id: '홍길동',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'staff',
-      isMuted: true,
-    },
-    {
-      id: 'cccc',
-      image:
-        'https://images.unsplash.com/photo-1682685797365-41f45b562c0a?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHwxfHx8ZW58MHx8fHx8',
-      role: 'staff',
-      isMuted: false,
-    },
-    {
-      id: 'a',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'member',
-      isMuted: false,
-    },
-    {
-      id: 'bbbbb',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'member',
-      isMuted: false,
-    },
-    {
-      id: 'cccccc',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'member',
-      isMuted: false,
-    },
-    {
-      id: 'dddddd',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'member',
-      isMuted: false,
-    },
-    {
-      id: 'eeeeee',
-      image:
-        'https://plus.unsplash.com/premium_photo-1664868839960-bb0ca1944bef?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D',
-      role: 'member',
-      isMuted: false,
-    },
-  ],
-  contents: [
-    {
-      key: 1,
-      id: '이지수',
-      message: '안녕하세요~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 123,
-      id: '이지수',
-      message: '님이 나갔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 345345345,
-      id: '이지수',
-      message: '안녕하세요~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 1211113,
-      id: '이지수',
-      message: '님이 들어왔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 2,
-      id: '김말봉',
-      message: 'helzzxzzxclo world',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 3,
-      id: '존재하지않는 사용자 명이라면?',
-      message: '12asdf3123',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 4,
-      id: 'cccc',
-      message: 'ㅁ나엄나어마너암넝',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 5,
-      id: '이지수',
-      message: '232333~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 6,
-      id: 'asdfsdf',
-      message: 'hello world',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 11123,
-      id: '이지수',
-      message: '님이 들어왔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 7,
-      id: '홍길동',
-      message: '안녕하nvbncbncbn세요ㅎㅎ',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 8,
-      id: 'aaaa',
-      message: 'ㅁadsf나엄asdfasdfasdfadf나어마너암넝',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 9,
-      id: '이지수',
-      message: '안녕asdfsdf하세요~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 11,
-      id: '김말봉',
-      message: 'heasdfllo world',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 12,
-      id: '홍길동',
-      message: '안녕하asdf세요ㅎㅎ',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 13,
-      id: 'cccc',
-      message: 'ㅁ나엄나어마너암넝',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 14,
-      id: '이지수',
-      message: '안녕하세요~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 15,
-      id: 'aaaa',
-      message: 'heasdfllo world',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 16,
-      id: '홍길동',
-      message: '안녕하asdf세요ㅎㅎ',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 17,
-      id: 'bbbb',
-      message: 'ㅁ나엄asdf나어마너암넝',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 1243,
-      id: '이지수',
-      message: '님이 들어왔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 18,
-      id: '이지수',
-      message: '안녕하세asdf요~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 121231233,
-      id: '이지수',
-      message: '님이 들어왔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 19,
-      id: 'asdfsdf',
-      message: 'hello world',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 10,
-      id: 'cccc',
-      message: '안녕asdf하세asdf요ㅎㅎ',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 21,
-      id: 'dddd',
-      message: 'ㅁ나asdf엄asdf나어마너암넝',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 22,
-      id: '이지수',
-      message: '안녕하asdf세요~!',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 23,
-      id: 'eeee',
-      message: 'helasdfasdflo world',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 24,
-      id: '홍길동',
-      message: '안녕fda하세asdf요ㅎㅎ',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 3123123,
-      id: '이지수',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 351518,
-      id: '이지수',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 38666,
-      id: '이지수',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 31111111111118,
-      id: '이지수',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 25,
-      id: 'cccc',
-      message: 'ㅁ나엄faasdfasdf나어마너암넝',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 55123,
-      id: '이지수',
-      message: '님이 들어왔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 26,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 27,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 28,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 29,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 30,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 31,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 32,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 33,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 34,
-      id: '존재하지 않는 유저',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 35,
-      id: 'a',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 36,
-      id: '이지수',
-      message: 'sdncvndff?????????<h1>asdf</h1>',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 37,
-      id: 'cccc',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 38,
-      id: '이지수',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-    {
-      key: 663,
-      id: '이지수',
-      message: '님이 들어왔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 66312,
-      id: '이지수',
-      message: '님이 나갔습니다.',
-      date: new Date(),
-      type: 'system',
-    },
-    {
-      key: 39,
-      id: '존재하지 않는 유저',
-      message:
-        'sdncvncvbaskdj fklasjdfkl jasdkfj klaj dfkl jasdkfjaskdfj askdjf asj fdlksjadff',
-      date: new Date(),
-      type: 'normal',
-    },
-  ],
+const isBlockedMember = (targetID: string, members: ChatMember[]) => {
+  const flag = members.find(
+    (member) => member.nickname === targetID && member.relation === 'block'
+  );
+  if (!flag) return false;
+  else return true;
 };
 
 const Chatting = () => {
+  const { request } = useRequest();
+  const { myID } = useAuthState();
   const { socket } = useSocket();
   const params = useParams();
-  const type = params.type;
+  const navigate = useNavigate();
+  const openMessageModalHandler = useOpenModal('showMessage');
 
-  const [activeMemeber, setActiveMember] = useState<Member>({
-    id: '',
-    image: '',
-    role: 'member',
-    isMuted: false,
-  });
+  const [channelTitle, setChannelTitle] = useState<string>('Chatting Room');
+  const [firedMessage, setFiredMessage] = useState<string>('');
+  const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
 
-  const activeMemberHandler = (member: Member) => {
-    setActiveMember({ ...member });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [members, setMembers] = useState<ChatMember[]>([]);
+
+  const chatMember = members.find((member) => member.nickname === myID);
+  const targetMember = members.find(
+    (member) => member.nickname === activatedUserID
+  );
+
+  const myRole = chatMember?.role ?? null;
+  const targetRole = targetMember?.role ?? null;
+  const targetIsMuted = targetMember?.isMuted ?? null;
+
+  const setActivatedUserIDHandler = (userID: string) => {
+    setActivatedUserID(userID);
   };
+
+  const unsubscribeHandler = async () => {
+    await request<{ message: string }>(
+      `${SERVER_URL}/api/channel/${params.channelID}/leave`,
+      { method: 'GET' }
+    );
+
+    navigate('/channels');
+  };
+
+  const joinChannelAckHandler = useCallback(
+    ({ title, messages, members }: ChannelAllInfo) => {
+      setChannelTitle(title);
+      setMembers(members);
+      setMessages(
+        messages.filter(
+          (message) => !isBlockedMember(message.userNickname, members)
+        )
+      );
+    },
+    []
+  );
+
+  const cleanupSocketEvent = useCallback(() => {
+    if (socket) {
+      socket.off('updatedMessage');
+      socket.off('updatedMembers');
+      socket.off('updatedChannelTitle');
+      socket.off('firedChannel');
+    }
+  }, [socket]);
+
+  const updatedMessageHandler = useCallback(
+    (message: Message) => {
+      if (isBlockedMember(message.userNickname, members)) return;
+
+      setMessages((prevMessages) => [...prevMessages, message]);
+    },
+    [members]
+  );
+
+  const updatedMembesrHandler = useCallback((members: ChatMember[]) => {
+    setMembers(members);
+  }, []);
+
+  const updatedChannelTitleHandler = useCallback((title: string) => {
+    setChannelTitle(title);
+  }, []);
+
+  const firedChannelHandler = useCallback(
+    (message: string) => {
+      cleanupSocketEvent();
+      setFiredMessage(message);
+      openMessageModalHandler();
+    },
+    [cleanupSocketEvent, openMessageModalHandler]
+  );
+
+  const unloadHandler = useCallback(() => {
+    if (socket) {
+      socket.emit('leaveChannel', { channelID: params.channelID });
+    }
+    cleanupSocketEvent();
+  }, [socket, params.channelID, cleanupSocketEvent]);
 
   useEffect(() => {
     if (socket) {
-      socket.emit('joinChannel', { channelID: params.chatID });
-
-      socket.on('updatedMessage', () => {});
-
-      socket.on('updatedMembers', () => {});
+      socket.emit(
+        'joinChannel',
+        { channelID: params.channelID },
+        joinChannelAckHandler
+      );
+      window.addEventListener('beforeunload', unloadHandler);
     }
 
     return () => {
       if (socket) {
-        socket.emit('leaveChannel', { channelID: params.chatID });
-        socket.off('updatedMessage');
-        socket.off('updatedMembers');
+        socket.emit('leaveChannel', { channelID: params.channelID });
+        window.removeEventListener('beforeunload', unloadHandler);
       }
     };
-  }, [socket, params]);
+  }, [socket, params.channelID, joinChannelAckHandler, unloadHandler]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('updatedMessage', updatedMessageHandler);
+      socket.on('updatedMembers', updatedMembesrHandler);
+      socket.on('updatedChannelTitle', updatedChannelTitleHandler);
+      socket.on('firedChannel', firedChannelHandler);
+    }
+    return cleanupSocketEvent;
+  }, [
+    socket,
+    updatedMessageHandler,
+    updatedMembesrHandler,
+    updatedChannelTitleHandler,
+    firedChannelHandler,
+    cleanupSocketEvent,
+  ]);
 
   const showChatRoomConfig = useModalState('showChatRoomConfig');
   const showChatInvitation = useModalState('showChatInvitation');
-  const showChatMemberDetail = useModalState('showChatMemberDetail');
-  const showConfirmModal = useModalState('showConfirmModal');
+  const showUserDetail = useModalState('showUserDetail');
+  const showConfirm = useModalState('showConfirm');
+  const showMessage = useModalState('showMessage');
+
+  const renderChatRoomConfig = showChatRoomConfig && (
+    <ChatRoomConfigModal channelID={params.channelID as string} />
+  );
+
+  const renderChatInvitation = showChatInvitation && (
+    <ChatInvitationModal channelID={params.channelID as string} />
+  );
+
+  const renderUserDetail = showUserDetail && (
+    <UserDetailModal
+      targetUserID={activatedUserID as string}
+      channelState={{ myRole, targetRole, targetIsMuted }}
+    />
+  );
+
+  const renderConfirm = showConfirm && (
+    <ConfirmModal
+      title="채팅방 나가기"
+      message="정말로 나가시겠습니까?"
+      acceptCallback={unsubscribeHandler}
+    />
+  );
+
+  const renderMessage = showMessage && (
+    <MessageModal
+      title="채팅방 알림"
+      message={firedMessage}
+      acceptCallback={() => {
+        navigate('/channels');
+      }}
+    />
+  );
 
   return (
-    <div className={styles.container}>
-      <ChattingContents
-        members={DUMMY_ITEMS.members}
-        contents={DUMMY_ITEMS.contents}
-      />
-      <ChattingMemberList
-        members={DUMMY_ITEMS.members}
-        onActive={activeMemberHandler}
-      />
-      {type !== 'direct' && <ChattingSettingList />}
-
-      {showChatRoomConfig && <ChatRoomConfigModal />}
-      {showChatInvitation && <ChatInvitationModal />}
-      {showChatMemberDetail && <ChatMemberDetailModal member={activeMemeber} />}
-      {showConfirmModal && (
-        <ConfirmModal
-          title="채팅방 나가기"
-          message="정말로 나가시겠습니까?"
-          acceptHandler={() => {}}
-        />
-      )}
-    </div>
+    <>
+      <h1 className={styles['channel-title']}>{channelTitle}</h1>
+      <div className={styles.container}>
+        {myRole && (
+          <>
+            <div className={styles.contents}>
+              <ChattingMessageList members={members} messages={messages} />
+              <ChattingForm
+                socket={socket}
+                channelID={params.channelID as string}
+              />
+            </div>
+            <ChattingMemberList
+              members={members}
+              onActive={setActivatedUserIDHandler}
+            />
+            <ChattingSettingList myRole={myRole} />
+            {renderChatRoomConfig}
+            {renderChatInvitation}
+            {renderUserDetail}
+            {renderConfirm}
+          </>
+        )}
+        {renderMessage}
+      </div>
+    </>
   );
 };
 export default Chatting;

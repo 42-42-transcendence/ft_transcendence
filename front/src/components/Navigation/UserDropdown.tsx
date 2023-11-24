@@ -11,7 +11,7 @@ const UserDropdown = () => {
   const navigate = useNavigate();
 
   const navigateHandler = () => {
-    navigate(`/profile/${auth.userID}`);
+    navigate(`/profile/${auth.myID}`);
   };
 
   const logoutHandler = () => {

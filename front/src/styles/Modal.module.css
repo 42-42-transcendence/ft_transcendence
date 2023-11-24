@@ -58,7 +58,6 @@
 }
 
 .footer-button {
-  background-color: red;
   color: var(--text-white);
   padding: 8px 16px;
   font-size: 16px;
@@ -84,6 +83,11 @@
 }
 .delete:hover {
   background-color: var(--focus-hover-color);
+}
+
+.footer-button:disabled {
+  background-color: var(--tone-down-color);
+  color: #777777;
 }
 
 .user-wrapper {
@@ -170,15 +174,20 @@
   color: #777777;
 }
 
-.form-error {
+.feedback {
   color: var(--focus-color);
-  width: 100%;
   text-align: center;
-  margin: 8px 0;
+  margin: 8px auto;
+  max-width: 300px;
+  font-size: 14px;
 }
 
-.form-loading {
+.loading {
   width: 100%;
+}
+
+.success-message {
+  color: var(--active-color);
+  margin: 32px;
   text-align: center;
-  margin: 8px 0;
 }

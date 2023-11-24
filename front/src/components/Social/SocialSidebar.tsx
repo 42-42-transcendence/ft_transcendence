@@ -1,14 +1,14 @@
 import ToggleRadioButton from '../../UI/ToggleRadioButton';
-import styles from '../../styles/Friends.module.css';
+import styles from '../../styles/Social.module.css';
 
 type Props = {
   selectedOption: string;
   onChangeOption: (option: string) => void;
 };
 
-const filterOptionList = ['friends', 'block'];
+const filterOptionList = ['friend', 'block'];
 
-const FriendsSidebar = ({ selectedOption, onChangeOption }: Props) => {
+const SocialSidebar = ({ selectedOption, onChangeOption }: Props) => {
   const optionRadioList = filterOptionList.map((option, index) => (
     <ToggleRadioButton
       key={option}
@@ -24,4 +24,4 @@ const FriendsSidebar = ({ selectedOption, onChangeOption }: Props) => {
 
   return <ul className={styles.sidebar}>{optionRadioList}</ul>;
 };
-export default FriendsSidebar;
+export default SocialSidebar;

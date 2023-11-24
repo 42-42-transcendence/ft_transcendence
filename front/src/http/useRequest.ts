@@ -1,6 +1,10 @@
 import { useCallback, useState } from 'react';
 import useAuthState from '../store/Auth/useAuthState';
 
+/**
+ * 성공 시: json 형태로 <T> 형태로 리턴 (객체를 기대함)
+ * 실패 시: text로 받아서 error 설정 후 null 리턴
+ */
 const useRequest = () => {
   const authState = useAuthState();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -19,10 +23,14 @@ const useRequest = () => {
           },
         });
 
-        // 접근 권한 여부를 요청시마다 갱신이 필요함
         if (!response.ok) {
-          const errorMessage = await response.text();
-          throw new Error(errorMessage);
+          const error = await response.json();
+
+          if (!error.message)
+            throw new Error(
+              response.status + ' Error: Something wrong, Try again'
+            );
+          else throw new Error(error.message);
         }
 
         return await response.json();

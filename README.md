@@ -10,7 +10,7 @@
 - start
   - make start
 - open
-  - http://localhost:3001
+  - http://localhost:3000
 - clear
   - make fclean
 

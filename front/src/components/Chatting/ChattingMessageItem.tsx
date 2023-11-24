@@ -1,17 +1,16 @@
+import { Message } from '.';
 import AvatarImage from '../../UI/AvatarImage';
+import useAuthState from '../../store/Auth/useAuthState';
 import styles from '../../styles/Chatting.module.css';
 import SystemMessageItem from './SystemMessageItem';
 
 type Props = {
-  id: string;
-  message: string;
-  date: Date;
+  message: Message;
   image: string;
-  type: 'normal' | 'system';
 };
 
-// until
-const formatTimeToHHMM = (date: Date): string => {
+const formatTimeToHHMM = (dateStr: string): string => {
+  const date = new Date(dateStr);
   let hoursString = date.getHours().toString();
   let minutesString = date.getMinutes().toString();
 
@@ -21,29 +20,30 @@ const formatTimeToHHMM = (date: Date): string => {
   return `${hoursString}:${minutesString}`;
 };
 
-const ChattingMessageItem = ({ id, message, date, image, type }: Props) => {
-  if (type === 'system') {
+const ChattingMessageItem = ({ message, image }: Props) => {
+  const authState = useAuthState();
+  if (message.chatType === 'system') {
     return (
       <li className={styles['message-item']}>
-        <SystemMessageItem message={`${id}${message}`} />
+        <SystemMessageItem message={`${message.content}`} />
       </li>
     );
   }
 
-  const isOther = id !== '이지수';
+  const isOther = message.userNickname !== authState.myID;
 
   return (
     <li className={styles['message-item']}>
       {isOther && (
         <div className={styles.sender}>
           <AvatarImage imageURI={image} radius="32px" />
-          <span>{id}</span>
+          <span>{message.userNickname}</span>
         </div>
       )}
       <div className={`${styles['message-box']} ${!isOther && styles.me}`}>
-        <div className={styles.message}>{message}</div>
+        <div className={styles.message}>{message.content}</div>
         <small className={styles['message-date']}>
-          {formatTimeToHHMM(date)}
+          {formatTimeToHHMM(message.createdAt)}
         </small>
       </div>
     </li>

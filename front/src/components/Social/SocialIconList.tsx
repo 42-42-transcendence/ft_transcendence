@@ -1,9 +1,14 @@
 import plusIcon from '../../assets/plus-icon.svg';
 import refreshIcon from '../../assets/refresh-icon.svg';
-import styles from '../../styles/Friends.module.css';
+import styles from '../../styles/Social.module.css';
+
 import useOpenModal from '../../store/Modal/useOpenModal';
 
-const FriendIconList = () => {
+type Props = {
+  onRefreshHandler: () => void;
+};
+
+const SocialIconList = ({ onRefreshHandler }: Props) => {
   const openHandler = useOpenModal('showAddFriend');
 
   return (
@@ -14,11 +19,11 @@ const FriendIconList = () => {
         </button>
       </li>
       <li>
-        <button className={styles.icon}>
+        <button className={styles.icon} onClick={onRefreshHandler}>
           <img src={refreshIcon} alt="refresh channel icon" />
         </button>
       </li>
     </ul>
   );
 };
-export default FriendIconList;
+export default SocialIconList;

@@ -20,21 +20,20 @@ type loaderData = {
 
 const OAuth = () => {
   const dispatch = useDispatch();
-  const data = useLoaderData() as loaderData;
+  const { oAuthData } = useLoaderData() as loaderData;
 
   return (
     <Suspense fallback={<h1 style={{ textAlign: 'center' }}>...login...</h1>}>
-      <Await resolve={data.oAuthData}>
+      <Await resolve={oAuthData}>
         {(ret: oAuthResponseData | string) => {
           if (typeof ret === 'string') {
             return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
           } else {
             dispatch(authActions.setAuthToken(ret.jwtToken));
-            dispatch(authActions.setUserID(ret.userName));
+            dispatch(authActions.setMyID(ret.userName));
             return (
               <Navigate
-                // to={ret.isSignUp ? '/' : '/setting-profile'}
-                to="/"
+                to={ret.userName === '' ? '/setting-profile' : '/'}
                 replace={true}
               />
             );
@@ -45,12 +44,14 @@ const OAuth = () => {
   );
 };
 
-const requestOAuth = async (request: Request) => {
+const requestOAuth = async (
+  request: Request
+): Promise<oAuthResponseData | string> => {
   const url = new URL(request.url);
   const authCode = url.searchParams.get('code');
 
   try {
-    const res = await fetch('http://localhost:3001/api/auth', {
+    const res = await fetch(`http://localhost:3001/api/auth`, {
       method: 'POST',
       body: JSON.stringify({ code: authCode }),
       headers: {
@@ -66,8 +67,8 @@ const requestOAuth = async (request: Request) => {
     return data;
   } catch (e) {
     if (typeof e === 'string') return e;
-    if (e instanceof Error) return e.message;
-    return 'Something Wrong';
+    else if (e instanceof Error) return e.message;
+    else return 'Something Wrong';
   }
 };
 

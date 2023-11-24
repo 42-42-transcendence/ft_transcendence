@@ -1,49 +1,65 @@
 import { Socket, io } from 'socket.io-client';
 import { createContext, useContext, useEffect, useState } from 'react';
+import useAuthState from '../store/Auth/useAuthState';
+import { SERVER_URL } from '../App';
 
 type SocketContextType = {
-  socket: Socket | null;
+    socket: Socket | null;
 };
 
 const SocketContext = createContext<SocketContextType>({ socket: null });
 
 type ChildProps = {
-  children: React.ReactNode;
+    children: React.ReactNode;
 };
 
 const SocketContextProvider = ({ children }: ChildProps) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+    const authState = useAuthState();
+    const [socket, setSocket] = useState<Socket | null>(null);
 
-  useEffect(() => {
-    if (!socket) {
-      const newSocket = io('http://localhost:3000/');
+    useEffect(() => {
+        if (!socket) {
+            const newSocket = io(SERVER_URL, {
+                auth: {
+                    token: authState.token,
+                },
+                query: {
+                    userID: authState.myID,
+                },
+            });
 
-      // 확인차 출력
-      newSocket.on('connect', () => {
-        console.log('connected socket');
-      });
+            // 확인차 출력
+            newSocket.on('connect', () => {
+                console.log('connected socket');
+            });
 
-      setSocket(newSocket);
-    }
-    return () => {
-      if (socket) {
-        socket.disconnect();
-        setSocket(null);
-      }
-    };
-  }, [socket]);
+            newSocket.on('disconnect', () => {
+                console.log('disconnected socket');
+                setSocket(null);
+            });
 
-  return (
-    <SocketContext.Provider value={{ socket }}>
-      {children}
-    </SocketContext.Provider>
-  );
+            setSocket(newSocket);
+        }
+
+        return () => {
+            if (socket) {
+                socket.disconnect();
+                setSocket(null);
+            }
+        };
+    }, [socket, authState]);
+
+    return (
+        <SocketContext.Provider value={{ socket }}>
+            {children}
+        </SocketContext.Provider>
+    );
 };
 
 const useSocket = () => {
-  const ctx = useContext(SocketContext);
+    const ctx = useContext(SocketContext);
 
-  return ctx;
+    return ctx;
 };
 
 export { SocketContextProvider, useSocket };

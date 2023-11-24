@@ -20,10 +20,7 @@ const NavList = () => {
         </NavLink>
       </div>
       <li>
-        <NavLink
-          to={`/dashboard/${auth.userID}`}
-          className={checkNavActivation}
-        >
+        <NavLink to={`/dashboard/${auth.myID}`} className={checkNavActivation}>
           전적
         </NavLink>
       </li>
@@ -33,8 +30,8 @@ const NavList = () => {
         </NavLink>
       </li>
       <li>
-        <NavLink to="/friends" className={checkNavActivation}>
-          친구
+        <NavLink to="/social" className={checkNavActivation}>
+          소셜
         </NavLink>
       </li>
     </ul>

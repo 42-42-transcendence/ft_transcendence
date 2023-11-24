@@ -6,11 +6,16 @@ import styles from '../../styles/Modal.module.css';
 type Props = {
   title: string;
   message: string;
-  acceptHandler: () => void;
+  acceptCallback: () => void;
 };
 
-const ConfirmModal = ({ title, message, acceptHandler }: Props) => {
+const ConfirmModal = ({ title, message, acceptCallback }: Props) => {
   const closeHandler = useCloseModal();
+
+  const acceptHandler = () => {
+    acceptCallback();
+    closeHandler();
+  };
 
   return (
     <Modal onClose={closeHandler}>

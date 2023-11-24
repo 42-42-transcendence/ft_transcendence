@@ -6,17 +6,15 @@ import ErrorPage from './Error';
 import MainPage from './Main';
 import DashboardPage from './Dashboard';
 import ProfilePage from './Profile';
-import FriendsPage from './Friends';
 import ChannelsPage from './Channels';
 import LoginPage from './Login';
-import SettingProfilePage, {
-  action as settingProfileAction,
-} from './SettingProfile';
+import SettingProfilePage from './SettingProfile';
 import GamePage from './Game';
 import TwoFactorAuthPage from './TwoFactorAuth';
 import ChattingPage from './Chatting';
 import OAuth, { loader as oAuthLoader } from './OAuth';
 import ProtectedRouter from './ProtectedRouter';
+import SocialPage from './Social';
 
 const router = createBrowserRouter([
   {
@@ -44,12 +42,12 @@ const router = createBrowserRouter([
             element: <ChannelsPage />,
           },
           {
-            path: '/chatting/:type/:chatID',
+            path: '/chatting/:channelID',
             element: <ChattingPage />,
           },
           {
-            path: '/friends',
-            element: <FriendsPage />,
+            path: '/social',
+            element: <SocialPage />,
           },
           {
             path: '/profile/:userID',
@@ -73,7 +71,6 @@ const router = createBrowserRouter([
       {
         path: '/setting-profile',
         element: <SettingProfilePage />,
-        action: settingProfileAction,
       },
     ],
   },

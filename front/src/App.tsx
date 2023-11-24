@@ -11,3 +11,4 @@ function App() {
 }
 
 export default App;
+export const SERVER_URL = 'http://localhost:3001';

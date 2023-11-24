@@ -58,6 +58,10 @@
   font-size: 24px;
   color: var(--text-white);
 }
+.submit:disabled {
+  background-color: var(--tone-up-color);
+  color: #777777;
+}
 
 .upload {
   cursor: pointer;

@@ -7,9 +7,10 @@ import { useNavigate } from 'react-router-dom';
 
 type Props = {
   onPassowrdSubmit: (password: string) => Promise<void>;
+  isLoading: boolean;
 };
 
-const ChatPasswordModal = ({ onPassowrdSubmit }: Props) => {
+const ChatPasswordModal = ({ onPassowrdSubmit, isLoading }: Props) => {
   const navigate = useNavigate();
   const closeHandler = useCloseModal();
 
@@ -54,12 +55,14 @@ const ChatPasswordModal = ({ onPassowrdSubmit }: Props) => {
           <button
             type="submit"
             className={`${styles['footer-button']} ${styles.confirm}`}
+            disabled={isLoading}
           >
             SUBMIT
           </button>
           <button
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
+            disabled={isLoading}
             onClick={redirectHandler}
           >
             CANCEL

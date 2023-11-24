@@ -115,8 +115,10 @@ const InitProfileForm = () => {
         />
       </div>
       <span className={styles.feedback}>{feedbackMessage}</span>
-      <button className={styles.submit}>완 료</button>
-      {isLoading && <img src={loadingImage} alt="wait for a setting profile" />}
+      <button className={styles.submit} disabled={isLoading}>
+        제 출
+      </button>
+      {isLoading && <img src={loadingImage} alt="loading" />}
     </form>
   );
 };

@@ -20,7 +20,7 @@ export type Recode = {
 const Dashboard = () => {
   const [selectedOption, setSelectedOption] = useState<string>('all');
   const [recodes, setRecodes] = useState<Recode[]>([]);
-  const { request } = useRequest();
+  const { isLoading, error, request } = useRequest();
   const params = useParams();
 
   useEffect(() => {
@@ -52,6 +52,8 @@ const Dashboard = () => {
         filteredRecodes={recodes.filter(
           (recode) => recode.type === selectedOption || selectedOption === 'all'
         )}
+        isLoading={isLoading}
+        error={error}
       />
     </div>
   );

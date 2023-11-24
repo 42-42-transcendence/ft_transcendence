@@ -64,12 +64,12 @@ const Chatting = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<ChatMember[]>([]);
 
-  const myMember = members.find((member) => member.nickname === myID);
+  const chatMember = members.find((member) => member.nickname === myID);
   const targetMember = members.find(
     (member) => member.nickname === activatedUserID
   );
 
-  const myRole = myMember?.role ?? null;
+  const myRole = chatMember?.role ?? null;
   const targetRole = targetMember?.role ?? null;
   const targetIsMuted = targetMember?.isMuted ?? null;
 

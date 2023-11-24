@@ -8,6 +8,7 @@ import useModalState from '../store/Modal/useModalState';
 import BackLink from '../UI/BackLink';
 import useCloseModal from '../store/Modal/useCloseModal';
 import { SERVER_URL } from '../App';
+import loadingImage from '../assets/loading.gif';
 
 type RequestPasswordRequired = {
   isPasswordRequired: boolean;
@@ -89,8 +90,19 @@ const ChattingPage = () => {
       </>
     );
   } else if (showChatPassword)
-    return <ChatPasswordModal onPassowrdSubmit={requestAuthenticated} />;
-  else if (isLoading) return <h1>..Check Access Authentication..</h1>;
+    return (
+      <ChatPasswordModal
+        onPassowrdSubmit={requestAuthenticated}
+        isLoading={isLoading}
+      />
+    );
+  else if (isLoading)
+    return (
+      <div>
+        <h1>..Check Access Authentication..</h1>
+        <img src={loadingImage} alt="loading" />
+      </div>
+    );
   else if (isAuthenticated === true) return <Chatting />;
   else if (isAuthenticated === false) {
     return (

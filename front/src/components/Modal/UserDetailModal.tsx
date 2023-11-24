@@ -23,7 +23,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const navigate = useNavigate();
   const closeModalHandler = useCloseModal();
   const { myID } = useAuthState();
-  const { error, request } = useRequest();
+  const { isLoading, error, request } = useRequest();
   const params = useParams();
 
   const [userInfo, setUserInfo] = useState<User | null>({
@@ -198,10 +198,18 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           </div>
         </div>
         <div className={styles.wrapper}>
-          <button className={styles['list-button']} onClick={profileHandler}>
+          <button
+            className={styles['list-button']}
+            disabled={isLoading}
+            onClick={profileHandler}
+          >
             프로필 보기
           </button>
-          <button className={styles['list-button']} onClick={dashboardHandler}>
+          <button
+            className={styles['list-button']}
+            disabled={isLoading}
+            onClick={dashboardHandler}
+          >
             전적 보기
           </button>
         </div>
@@ -218,15 +226,23 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
         </div>
         <div className={styles.feedback}>{error}</div>
         <div className={styles.wrapper}>
-          <button className={styles['list-button']} onClick={profileHandler}>
+          <button
+            className={styles['list-button']}
+            disabled={isLoading}
+            onClick={profileHandler}
+          >
             프로필 보기
           </button>
-          <button className={styles['list-button']} onClick={dashboardHandler}>
+          <button
+            className={styles['list-button']}
+            disabled={isLoading}
+            onClick={dashboardHandler}
+          >
             전적 보기
           </button>
           <button
             className={styles['list-button']}
-            disabled={userInfo.relation === 'block'}
+            disabled={userInfo.relation === 'block' || isLoading}
             onClick={directMessageHandler}
           >
             다이렉트 메시지
@@ -234,7 +250,9 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           <button
             className={styles['list-button']}
             disabled={
-              userInfo.relation === 'block' || userInfo.status !== 'online'
+              userInfo.relation === 'block' ||
+              userInfo.status !== 'online' ||
+              isLoading
             }
             onClick={gameHandler}
           >
@@ -242,7 +260,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           </button>
           <button
             className={styles['list-button']}
-            disabled={userInfo.relation === 'block'}
+            disabled={userInfo.relation === 'block' || isLoading}
             onClick={
               userInfo.relation === 'friend'
                 ? deleteFriendHandler
@@ -251,28 +269,32 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           >
             친구 {userInfo.relation === 'friend' ? '삭제' : '추가'}
           </button>
-          <button className={styles['list-button']} onClick={blockHandler}>
+          <button
+            className={styles['list-button']}
+            disabled={isLoading}
+            onClick={blockHandler}
+          >
             차단{userInfo.relation === 'block' ? ' 풀기' : ''}
           </button>
           {channelState && channelState.myRole !== 'guest' && (
             <>
               <button
                 className={styles['list-button']}
-                disabled={channelState.targetRole === 'owner'}
+                disabled={channelState.targetRole === 'owner' || isLoading}
                 onClick={kickHandler}
               >
                 강퇴
               </button>
               <button
                 className={styles['list-button']}
-                disabled={channelState.targetRole === 'owner'}
+                disabled={channelState.targetRole === 'owner' || isLoading}
                 onClick={banHandler}
               >
                 영구 추방
               </button>
               <button
                 className={styles['list-button']}
-                disabled={channelState.targetRole === 'owner'}
+                disabled={channelState.targetRole === 'owner' || isLoading}
                 onClick={muteHandler}
               >
                 채팅 금지{channelState.targetIsMuted ? ' 풀기' : ''}
@@ -280,6 +302,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
               {channelState.myRole === 'owner' && (
                 <button
                   className={styles['list-button']}
+                  disabled={isLoading}
                   onClick={staffHandler}
                 >
                   스태프 {channelState.targetRole === 'guest' ? '설정' : '해제'}
@@ -300,6 +323,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
           type="button"
           className={`${styles['footer-button']} ${styles.cancel}`}
           onClick={closeModalHandler}
+          disabled={isLoading}
         >
           ClOSE
         </button>

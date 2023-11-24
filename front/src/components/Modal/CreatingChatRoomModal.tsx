@@ -127,12 +127,12 @@ const CreatingChatRoomModal = () => {
             disabled={enteredType === 'private'}
           />
         </div>
-        {isLoading && <div className={styles.loading}>..loading..</div>}
         <div className={styles.feedback}>{feedbackMessage}</div>
         <div className={styles.footer}>
           <button
             type="submit"
             className={`${styles['footer-button']} ${styles.confirm}`}
+            disabled={isLoading}
           >
             CREATE
           </button>
@@ -140,6 +140,7 @@ const CreatingChatRoomModal = () => {
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
             onClick={closeHandler}
+            disabled={isLoading}
           >
             CANCEL
           </button>

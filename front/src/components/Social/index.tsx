@@ -22,7 +22,7 @@ export type User = {
 const Social = () => {
   const [selectedOption, setSelectedOption] = useState<string>('friend');
   const [users, setUsers] = useState<User[]>([]);
-  const { request } = useRequest();
+  const { isLoading, error, request } = useRequest();
 
   const showUserDetail = useModalState('showUserDetail');
   const showAddFriend = useModalState('showAddFriend');
@@ -62,6 +62,8 @@ const Social = () => {
       <SocialList
         filteredUsers={users.filter((user) => user.relation === selectedOption)}
         onActive={setActivatedUserIDHandler}
+        isLoading={isLoading}
+        error={error}
       />
       <SocialIconList onRefreshHandler={refreshUsersHandler} />
       {showAddFriend && <AddFriendModal />}

@@ -22,10 +22,8 @@ const ChannelList = ({ filteredChannels, isLoading, error }: Props) => {
   ));
 
   let contents: React.ReactNode = channelItemList;
-
   if (error) contents = <h1>{error}</h1>;
-  else if (isLoading)
-    contents = <img src={loadingImage} alt="wait for a setting profile" />;
+  else if (isLoading) contents = <img src={loadingImage} alt="loading" />;
   else if (channelItemList.length === 0)
     contents = <h1>No Chatting Channels.</h1>;
 

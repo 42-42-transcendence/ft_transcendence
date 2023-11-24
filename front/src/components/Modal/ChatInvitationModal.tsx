@@ -16,7 +16,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
   const [enteredName, setEnteredName] = useState<string>('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [successModalMessage, setSuccessModalMessage] = useState<string>('');
-  const { error, request } = useRequest();
+  const { isLoading, error, request } = useRequest();
 
   useEffect(() => {
     if (error) {
@@ -80,6 +80,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
           <button
             type="submit"
             className={`${styles['footer-button']} ${styles.confirm}`}
+            disabled={isLoading}
           >
             SEND
           </button>
@@ -87,6 +88,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
             onClick={closeModalHandler}
+            disabled={isLoading}
           >
             CANCEL
           </button>

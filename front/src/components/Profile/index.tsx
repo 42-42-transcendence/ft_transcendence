@@ -3,6 +3,7 @@ import AvatarImage from '../../UI/AvatarImage';
 import Card from '../../UI/Card';
 
 import styles from '../../styles/Profile.module.css';
+import loadingImage from '../../assets/loading.gif';
 import useModalState from '../../store/Modal/useModalState';
 import AchievementItem from './AchievementItem';
 import AchievementDetailModal from '../Modal/AchievementDetailModal';
@@ -28,7 +29,7 @@ export type ProfileInfo = {
 
 const Profile = () => {
   const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
-  const { request } = useRequest();
+  const { isLoading, request } = useRequest();
   const params = useParams();
 
   const showAchievementDetail = useModalState('showAchievementDetail');
@@ -57,7 +58,9 @@ const Profile = () => {
     setActivedAchievement({ title, description });
   };
 
-  if (profileInfo === null) return <h1>유저 정보를 불러 올 수 없습니다.</h1>;
+  if (isLoading) return <img src={loadingImage} alt="loading" />;
+  else if (profileInfo === null)
+    return <h1>유저 정보를 불러 올 수 없습니다.</h1>;
   return (
     <>
       <div className={styles.profile}>

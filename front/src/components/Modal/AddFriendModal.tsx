@@ -9,7 +9,7 @@ const AddFriendModal = () => {
   const [enteredNickname, setEnteredNickName] = useState<string>('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [successModalMessage, setSuccessModalMessage] = useState<string>('');
-  const { error, request } = useRequest();
+  const { isLoading, error, request } = useRequest();
   const closeModalHandler = useCloseModal();
 
   useEffect(() => {
@@ -75,6 +75,7 @@ const AddFriendModal = () => {
           <button
             type="submit"
             className={`${styles['footer-button']} ${styles.confirm}`}
+            disabled={isLoading}
           >
             SEND
           </button>
@@ -82,6 +83,7 @@ const AddFriendModal = () => {
             type="button"
             className={`${styles['footer-button']} ${styles.cancel}`}
             onClick={closeModalHandler}
+            disabled={isLoading}
           >
             CANCEL
           </button>

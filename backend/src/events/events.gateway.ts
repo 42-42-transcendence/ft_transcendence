@@ -115,7 +115,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         channel,
       };
       const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      this.server.to(channel.channelID).emit("updatedMessage", { message: chat });
+      this.server.to(channel.channelID).emit("updatedMessage", chat);
     }
     else {
       const createChatMessageDto = {
@@ -126,13 +126,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         channel,
       };
       const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMessage", { message: chat });
+      this.server.to(channel.channelID).to(client.id).emit("updatedMessage", chat);
     }
   }
 
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
-    client.to(channelID).emit("updatedMessage", { message: chat });
+    client.to(channelID).emit("updatedMessage", chat);
   }
 
 
@@ -145,7 +145,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         return ;
       }
       const members = await this.eventsService.createEventsMembers(channelMembers, user);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
+      this.server.to(channel.channelID).to(client.id).emit("updatedMembers", members);
     });
     await Promise.all(emitUpdatedMembers);
   }
@@ -154,7 +154,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const channelMembers = await channel.channelMembers;
     const members = await this.eventsService.createEventsMembers(channelMembers, user);
-    this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
+    this.server.to(channel.channelID).to(client.id).emit("updatedMembers", members);
   }
 
   async updatedSystemMessage(content: string, channel: Channel, user: User) {
@@ -165,16 +165,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       channel,
       user
     });
-    this.server.to(channel.channelID).emit("updatedMessage", { message: chat });
+    this.server.to(channel.channelID).emit("updatedMessage", chat);
   }
 
   async kickOutSpecificClient(message: string, user: User, channel: Channel) {
     const client = this.eventsService.getClient(user.userID);
     if (client) {
-      this.server.to(channel.channelID).to(client.id).emit(
-        'firedChannel',
-        { message: message }
-      )
+      this.server.to(channel.channelID).to(client.id).emit('firedChannel', message)
     };
   }
 }

@@ -10,7 +10,7 @@ export class Item {
         this.position = vec2.fromValues(0, 0);
         this.direction = direction;
         this.velocity = 1.0;
-        this.radius = 0.02; // 공의 반지름
+        this.radius = 0.01; // 공의 반지름
         this.calculateVertices();
     }
 

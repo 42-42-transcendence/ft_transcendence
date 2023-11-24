@@ -53,7 +53,7 @@ class PhysicsEngine {
             return { p: -1, q: -1 };
         }
         const p = (this.crossProduct(vec2.sub(vec2.create(), c, a), d)) / this.crossProduct(b, d);
-        const q = (a[1] + p * b[1] - c[1]) / d[1];
+        const q = (this.crossProduct(vec2.sub(vec2.create(), a, c), b)) / this.crossProduct(d, b);
         return {p, q};
     }
 
@@ -102,12 +102,12 @@ class PhysicsEngine {
             case PaddlePos.RightUp:
                 c = vec2.fromValues(paddle[1].position[0] + paddle[1].width / 2.0, paddle[1].position[1] + paddle[1].height / 2.0);
                 d = vec2.fromValues(-1, 0);
-                r = -paddle[1].width;
+                r = paddle[1].width;
                 break;
             case PaddlePos.RightDown:
                 c = vec2.fromValues(paddle[1].position[0] + paddle[1].width / 2.0, paddle[1].position[1] - paddle[1].height / 2.0);
                 d = vec2.fromValues(-1, 0);
-                r = -paddle[1].width;
+                r = paddle[1].width;
                 break;
         }
         return {c, d, r};
@@ -167,67 +167,46 @@ class PhysicsEngine {
     }
 
     static calCheckConflict(ball: Ball, delta: number, paddle: Paddle[]) {
-        let closestP = -1; // 초기에는 충돌이 없음을 가정
+        const cornerPaddleArray = [
+            { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
+            { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
+            { corner: BallCorner.BottomLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftDown] },
+            { corner: BallCorner.TopLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftUp] }
+        ];
 
-        // 공의 모서리와 관련된 패들 부분 매핑
-        const cornerPaddleMapping = new Map<BallCorner, PaddlePos[]>([
-            [BallCorner.TopRight, [PaddlePos.RightFront, PaddlePos.RightUp]],
-            [BallCorner.BottomRight, [PaddlePos.RightFront, PaddlePos.RightDown]],
-            [BallCorner.BottomLeft, [PaddlePos.LeftFront, PaddlePos.LeftDown]],
-            [BallCorner.TopLeft, [PaddlePos.LeftFront, PaddlePos.LeftUp]],
-        ]);
-
-        cornerPaddleMapping.forEach((paddlePositions, ballCorner) => {
-            const ballPos = this.makeBallPosition(ball, ballCorner);
+        for (const { corner, paddlePos } of cornerPaddleArray) {
+            const ballPos = this.makeBallPosition(ball, corner);
             const ballDirection = vec2.scale(vec2.create(), ball.direction, ball.velocity);
 
-            paddlePositions.forEach(paddlePos => {
-                const { c, d , r} = this.makePaddlePosition(paddle, paddlePos);
+            for (const pos of paddlePos) {
+                const { c, d, r } = this.makePaddlePosition(paddle, pos);
                 const { p, q } = this.calculateConflict(ballPos, ballDirection, c, d);
-                if (!this.checkConflict(p, q, r, delta)) {
-                    if ((closestP === -1 || p < closestP) && p > 0) {
-                        closestP = p; // 가장 빠른 충돌 시간 갱신
-                    }
-                }
-            });
-        });
-        return closestP;
-    }
-
-    private static handleCollision(item: Item, paddle: Paddle, delta: number, paddlePosMapping: Map<PaddlePos, PaddlePos[]>): boolean {
-        for (const [keyPos, valuePoses] of paddlePosMapping) {
-            // 키에 대한 충돌 검사
-            if (this.isColliding(item, paddle, delta, keyPos)) {
-                this.applyEffectToPaddle(paddle);
-                return true;
-            }
-            // 값 배열에 대한 충돌 검사
-            for (const valuePos of valuePoses) {
-                if (this.isColliding(item, paddle, delta, valuePos)) {
-                    this.applyEffectToPaddle(paddle);
-                    return true;
+                if (!this.checkConflict(p, q, r, delta) && p > 0) {
+                    return p; // 충돌 감지 시 바로 p 반환
                 }
             }
         }
-        return false;
+        return -1; // 충돌이 없는 경우
     }
 
     static checkItemCollision(items: Item[], paddles: Paddle[], delta: number) {
-        const paddlePosMapping = new Map<PaddlePos, PaddlePos[]>([
-            [PaddlePos.LeftFront, [PaddlePos.LeftUp, PaddlePos.LeftDown]],
-            [PaddlePos.RightFront, [PaddlePos.RightUp, PaddlePos.RightDown]],
-        ]);
-
-        for (let i = data.items.length - 1; i >= 0; i--) {
-            const item = data.items[i];
+        for (let i = items.length - 1; i >= 0; i--) {
+            const item = items[i];
             let collisionDetected = false;
 
-            for (const paddle of paddles) {
-                if (this.handleCollision(item, paddle, delta, paddlePosMapping)) {
-                    items.splice(i, 1);
-                    collisionDetected = true;
-                    break; // 충돌 감지되면 루프 종료
+            for (let j = 0; j < paddles.length; j++) {
+                const paddle = paddles[j];
+                const paddlePositions = this.getPaddlePositions(paddle, j); // 패들의 모든 위치를 가져옴
+
+                for (const pos of paddlePositions) {
+                    if (this.isColliding(item, paddle, delta, pos)) {
+                        this.applyEffectToPaddle(paddle);
+                        items.splice(i, 1);
+                        collisionDetected = true;
+                        break; // 충돌 감지되면 내부 루프 종료
+                    }
                 }
+                if (collisionDetected) break; // 충돌 감지되면 외부 루프 종료
             }
 
             if (!collisionDetected) {
@@ -237,18 +216,36 @@ class PhysicsEngine {
         }
     }
 
-    private static isColliding(item: Item, paddle: Paddle, delta: number, LR: PaddlePos) : boolean {
+    private static getPaddlePositions(paddle: Paddle, index: number): PaddlePos[] {
+        if (index === 0) { // 왼쪽 패들
+            return [PaddlePos.LeftFront, PaddlePos.LeftUp, PaddlePos.LeftDown];
+        } else { // 오른쪽 패들
+            return [PaddlePos.RightFront, PaddlePos.RightUp, PaddlePos.RightDown];
+        }
+    }
+
+
+    private static isColliding(item: Item, paddle: Paddle, delta: number, paddlePos: PaddlePos) : boolean {
         const a = vec2.fromValues(item.position[0], item.position[1]);
         const b = vec2.fromValues(item.direction[0], item.direction[1]);
         // const {c, d, r} = this.makePaddlePosition([paddle], PaddlePos.LeftFront);
-        const {c, d, r} = this.makePaddlePosition(data.paddle, LR);
+        const {c, d, r} = this.makePaddlePosition(data.paddle, paddlePos);
 
         const {p, q} = this.calculateConflict(a, b, c, d);
         return !this.checkConflict(p, q, r, delta);
     }
 
     private static applyEffectToPaddle(paddle: Paddle) {
-        console.log("아이템 효과 적용");
+        let rand = Math.random() * 3;
+        if (rand < 1) {
+            if (paddle.height < 0.8)
+                paddle.height += 0.01;
+        } else if (rand < 2) {
+            if (paddle.paddleSpeed < 2.0)
+                paddle.paddleSpeed += 0.1;
+        } else {
+            // paddle.height *= 1.0;
+        }
     }
 
     static GuaranteeConflict(ball: Ball, delta: number) {
@@ -261,10 +258,9 @@ class PhysicsEngine {
         this.updateBallPosition(p);
         this.handleBallPaddleCollision()
         const restAfterCollision = delta - p;
-        this.updateBallPosition(restAfterCollision);
-        // this.GuaranteeConflict(ball, restAfterCollision);
-        // 게런티로 줬을 떄, 가끔 멈춰서 무한히 공이 멈추는데, 이유 찾아야함.
-        // 해결 후, 상하 라인 충돌도 구현.
+        // this.updateBallPosition(restAfterCollision);
+        this.GuaranteeConflict(ball, restAfterCollision);
+        // 상하 라인 충돌도 구현.
     }
     static calculateBallPosition(ball: Ball, delta: number) : vec2 {
         let tempVec2 = vec2.create();

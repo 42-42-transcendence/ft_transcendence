@@ -1,130 +1,29 @@
 import styles from '../../styles/Dropdown.module.css';
+import type { Notification } from '../../store/Notification/notification';
+import NotificationItem from './NotificationItem';
 
-const NotificationDropdown = () => {
+type Props = {
+  notifications: Notification[];
+};
+
+const NotificationDropdown = ({ notifications }: Props) => {
+  const notificationItemList = notifications.map((notification) => (
+    <NotificationItem
+      key={notification.notiID}
+      id={notification.notiID}
+      type={notification.type}
+      message={notification.message}
+      channelID={notification.channelID}
+    />
+  ));
+
   return (
     <ul className={styles.dropdown}>
-      <li className={styles.list}>
-        <small>! 친구 요청</small>
-        <button>
-          <div>asdasdasd님의 친구 요청</div>
-        </button>
-      </li>
-      <li className={styles.list}>
-        <small>! 메시지</small>
-        <button>asdf님에게 온 DM</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
-      <li className={styles.list}>
-        <small>! 채팅 초대</small>
-        <button>홍길동님의 채팅 초대</button>
-      </li>
+      {notificationItemList.length === 0 ? (
+        <h2 className={styles['no-content']}>No Notification.</h2>
+      ) : (
+        notificationItemList
+      )}
     </ul>
   );
 };

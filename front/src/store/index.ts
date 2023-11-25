@@ -4,10 +4,12 @@ import modalSlice from './Modal/modal';
 import authSlice from './Auth/auth';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import notificationSlice from './Notification/notification';
 
 const rootReducer = combineReducers({
   modal: modalSlice.reducer,
   auth: authSlice.reducer,
+  notification: notificationSlice.reducer,
 });
 
 const persistConfig = {

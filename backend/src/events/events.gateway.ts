@@ -174,7 +174,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async kickOutSpecificClient(message: string, user: User, channel: Channel) {
     const client = this.eventsService.getClient(user.userID);
-    if (client && client.rooms.has(channel.channelID)) {
+    if (client) {
       client.emit('firedChannel', message);
     };
   }

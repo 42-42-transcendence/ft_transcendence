@@ -310,7 +310,7 @@ export class ChannelController {
 
 
   @ApiOperation({
-    summary: '특정 인원을 추방시키고 채널에 못들어오게 한다'
+    summary: '특정 인원을 추방시킨다'
   })
   @ApiOkResponse({
     description: '성공',
@@ -346,13 +346,9 @@ export class ChannelController {
     }
 
     if (objectUserRole.role === ChannelMemberRole.BLOCK) {
-      throw new BadRequestException(`${kickedUser.nickname}님은 이미 추방되었습니다.`);
+      throw new BadRequestException(`${kickedUser.nickname}님은 이미 영구 추방되었습니다.`);
     }
 
-    await this.channelMemberService.updateChannelMemberRoleByChannelMember(
-      objectUserRole,
-      ChannelMemberRole.BLOCK
-    );
     await this.eventsGateway.kickOutSpecificClient(
       `${kickedUser.nickname}님은 ${channel.title}에서 추방되었습니다.`,
       kickedUser,
@@ -363,8 +359,67 @@ export class ChannelController {
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
     await this.eventsGateway.updatedMembersForAllUsers(channel);
+
+    return ({ message: content });
+  }
+
+
+  @ApiOperation({
+    summary: '특정 인원을 영구 추방시킨다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Post(':id/ban')
+  async banUserFromChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('targetUserID') targetUserID: string,
+  ): Promise<{ message: string }> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const banedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, banedUser);
+
+    if (!subjectUserRole) {
+      throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (subjectUserRole.role !== ChannelMemberRole.OWNER
+        && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
+      throw new BadRequestException(`${user.nickname}님은 강퇴권한이 없습니다.`);
+    }
+
+    if (!objectUserRole || (objectUserRole.role === ChannelMemberRole.INVITE)) {
+      throw new BadRequestException(`${banedUser.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${banedUser.nickname}님은 채널 소유자입니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.BLOCK) {
+      throw new BadRequestException(`${banedUser.nickname}님은 이미 영구 추방되었습니다.`);
+    }
+
+    await this.channelMemberService.updateChannelMemberRoleByChannelMember(
+      objectUserRole,
+      ChannelMemberRole.BLOCK
+    );
+    await this.eventsGateway.kickOutSpecificClient(
+      `${banedUser.nickname}님은 ${channel.title}에서 영구 추방되었습니다.`,
+      banedUser,
+      channel
+    )
+    await this.channelService.leaveUserToChannel(channel);
+
+    const content = `${banedUser.nickname}님께서 영구 추방되었습니다.`;
+    await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
     await this.eventsGateway.updateNotification(
-      `${kickedUser.nickname}님은 ${channel.title}채널에서 추방되셨습니다.`, NotiType.KICKED, kickedUser
+      `${banedUser.nickname}님은 ${channel.title}채널에서 영구 추방되었습니다.`, NotiType.BAN, banedUser
     )
 
     return ({ message: content });

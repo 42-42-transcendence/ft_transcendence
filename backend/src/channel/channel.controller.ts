@@ -238,7 +238,8 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}은 권한이 없습니다.`);
     }
 
-    await this.channelService.updateChannelInfo(channel, updateChannelDto);
+    const result = await this.channelService.updateChannelInfo(channel, updateChannelDto);
+    this.eventsGateway.server.to(result.channelID).emit("updatedChannelTitle", result.title);
 
     return ({ message: `해당 채널의 정보를 수정했습니다.` });
   }

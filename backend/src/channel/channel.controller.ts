@@ -133,19 +133,19 @@ export class ChannelController {
     }
 
     if (member && (member.role === ChannelMemberRole.INVITE)) {
-      await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       await this.channelService.enterUserToChannel(channel);
+      await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       this.eventsGateway.updatedSystemMessage(content, channel, user);
       this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     if (!member) {
+      await this.channelService.enterUserToChannel(channel);
       await this.channelMemberService.relationChannelMember({
         channel,
         user,
         role: ChannelMemberRole.GUEST
       });
-      await this.channelService.enterUserToChannel(channel);
       this.eventsGateway.updatedSystemMessage(content, channel, user);
       this.eventsGateway.updatedMembersForAllUsers(channel);
     }
@@ -169,7 +169,11 @@ export class ChannelController {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
-    if (member.role === ChannelMemberRole.OWNER && channel.total !== 1) {
+    // 현재 chat을 만들고 channel 정보업데이트를 하면, chat이 삭제되는 현상이 있음.
+    // orphanedRowAction 없다면, chat의 channel을 null로 만든다
+    // 해결할려면, 일단 channel 정보 먼저 업데이트하고, chat을 만드는 방법밖에 없음...
+    await this.channelService.leaveUserToChannel(channel);
+    if (member.role === ChannelMemberRole.OWNER && channel.total > 1) {
       const newOwner = await this.channelMemberService.delegateChannelOwner(channel);
       const newOwnerUser = await this.channelMemberService.getUserFromChannelMember(newOwner);
       const content = `${user.nickname}님이 ${newOwnerUser.nickname}님에게 OWNER를 위임했습니다.`;
@@ -178,11 +182,10 @@ export class ChannelController {
     await this.channelMemberService.deleteChannelMemberById(member.channelMemberID);
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
-    const newChannel = await this.channelService.leaveUserToChannel(channel);
     await this.eventsGateway.updatedMembersForAllUsers(channel);
 
-    if (newChannel.total === 0) {
-      await this.channelService.deleteChannelById(newChannel.channelID);
+    if (channel.total === 0) {
+      await this.channelService.deleteChannelById(channel.channelID);
     }
 
     return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};

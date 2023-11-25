@@ -20,7 +20,7 @@ export class ChannelMemberService {
   }
 
   async getChannelMemberByChannelUserWithException(channel: Channel, user: User): Promise<ChannelMember> {
-    const member = this.getChannelMemberByChannelUser(channel, user);
+    const member = await this.channelMemberRepository.getChannelMemberByChannelUser(channel, user);
 
     if (!member)
       throw new NotFoundException('없는 channel-member 관계입니다.');
@@ -96,7 +96,7 @@ export class ChannelMemberService {
     const staff = await this.channelMemberRepository.findChannelStaff(channel);
 
     if (staff) {
-      const newOwner = this.channelMemberRepository.updateChannelMemberRole(staff, ChannelMemberRole.OWNER);
+      const newOwner = await this.channelMemberRepository.updateChannelMemberRole(staff, ChannelMemberRole.OWNER);
       return (newOwner);
     }
 

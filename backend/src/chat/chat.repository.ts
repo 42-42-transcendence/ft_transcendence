@@ -25,7 +25,7 @@ export class ChatRepository extends Repository<Chat> {
 			userNickname: createChatMessageDto.userNickname,
 			user: createChatMessageDto.user,
 			channel: createChatMessageDto.channel,
-		})
+		});
 
 		const result = await this.save(chat);
 		return (result);

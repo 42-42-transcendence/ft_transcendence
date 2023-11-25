@@ -16,15 +16,15 @@ export class ChannelService {
   }
 
   async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
-    return (this.channelRepository.createChannel(createChannelDto));
+    return (await this.channelRepository.createChannel(createChannelDto));
   }
 
   async getChannelById(channelID: string): Promise<Channel> {
-    return (this.channelRepository.getChannelById(channelID));
+    return (await this.channelRepository.getChannelById(channelID));
   }
 
   async getChannelByIdWithException(channelID: string): Promise<Channel> {
-    const channel = this.channelRepository.getChannelById(channelID);
+    const channel = await this.channelRepository.getChannelById(channelID);
 
     if (!channel)
       throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
@@ -41,7 +41,7 @@ export class ChannelService {
   }
 
   async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
-    return (this.channelRepository.getJoinChannelMembers(channelID));
+    return (await this.channelRepository.getJoinChannelMembers(channelID));
   }
 
   async joinChannel(user: User, channelID: string) {
@@ -53,11 +53,11 @@ export class ChannelService {
   }
 
   async enterUserToChannel(channel: Channel): Promise<Channel> {
-		return (this.channelRepository.enterUserToChannel(channel));
+		return (await this.channelRepository.enterUserToChannel(channel));
 	}
 
 	async leaveUserToChannel(channel: Channel): Promise<Channel> {
-		return (this.channelRepository.leaveUserToChannel(channel));
+		return (await this.channelRepository.leaveUserToChannel(channel));
 	}
 
 }

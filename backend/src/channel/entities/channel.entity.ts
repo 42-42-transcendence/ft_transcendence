@@ -63,8 +63,9 @@ export class Channel {
   })
   channelMembers: Promise<ChannelMember[]>;
 
+  // cascade 옵션이 없어도 자식의 설정만 잘 되어있다면, 부모가 삭제될때 자식도 같이 삭제된다.
   @OneToMany(() => Chat, (chat) => chat.channel, {
-    cascade: true
+    cascade: ['insert', 'update', 'remove']
   })
   chats: Promise<Chat[]>;
 }

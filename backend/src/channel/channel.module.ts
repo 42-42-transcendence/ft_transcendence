@@ -1,26 +1,31 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { ChannelController } from './channel.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Channel } from './entities/channel.entity';
 import { ChannelRepository } from './channel.repository';
 import { AuthModule } from 'src/auth/auth.module';
-import { ChannelMemberRepository } from 'src/channel-member/channel-member.repository';
-import { ChannelMemberService } from 'src/channel-member/channel-member.service';
+import { ChannelMemberModule } from 'src/channel-member/channel-member.module';
 import { EventsModule } from 'src/events/events.module';
+import { ChatModule } from 'src/chat/chat.module';
+import { UserModule } from 'src/user/user.module';
+import { RelationModule } from 'src/relation/relation.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Channel]),
+    ChannelMemberModule,
+    ChatModule,
     AuthModule,
-    EventsModule
+    UserModule,
+    RelationModule,
+    forwardRef(() => EventsModule),
   ],
   controllers: [ChannelController],
   providers: [
     ChannelService,
     ChannelRepository,
-    ChannelMemberService,
-    ChannelMemberRepository
   ],
+  exports: [ChannelService, ChannelRepository]
 })
 export class ChannelModule {}

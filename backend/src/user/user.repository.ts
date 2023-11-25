@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
+import { UserStatus } from "./enums/user-status.enum";
+import { faker } from "@faker-js/faker";
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -11,7 +13,8 @@ export class UserRepository extends Repository<User> {
 
 	async createUser(name: string):Promise<User> {
 		const user = this.create({
-			nickname: name
+			nickname: name,
+			status: UserStatus.ONLINE,
 		})
 		const result = await this.save(user);
 
@@ -30,5 +33,22 @@ export class UserRepository extends Repository<User> {
 		const user = await this.getUserById(userID);
 
 		return (await user.channelMembers);
+	}
+
+	async getUserByNickname(nickname: string): Promise<User> {
+		return (await this.findOneBy({ nickname }));
+	}
+
+	async createUserDummy(): Promise<User> {
+		const dummy = this.create({
+			nickname: faker.person.firstName(),
+		});
+
+		const result = this.save(dummy);
+		return (result);
+	}
+
+	async getAllUsers(): Promise<User[]> {
+		return (await this.find());
 	}
 }

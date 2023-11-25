@@ -6,6 +6,7 @@ import { Relation } from '../../relation/entities/relation.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserStatus } from '../enums/user-status.enum';
 
 @Entity()
 export class User {
@@ -30,6 +31,12 @@ export class User {
   })
   nickname: string;
 
+  @Column({
+    nullable: false,
+    default: UserStatus.ONLINE
+  })
+  status: UserStatus;
+
   // @Column({ nullable: false })
   // isSecondAuth: boolean;
 
@@ -42,8 +49,10 @@ export class User {
   // @Column({ nullable: false })
   // point: number;
 
-  @OneToOne(() => Auth, (auth) => auth.user)
-  auth: Promise<Auth>
+  @OneToOne(() => Auth, (auth) => auth.user, {
+    onDelete: 'CASCADE'
+  })
+  auth: Auth;
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   // userAchievements: UserAchievement[];
@@ -54,11 +63,11 @@ export class User {
   @OneToMany(() => Chat, (chat) => chat.user)
   chats: Promise<Chat[]>;
 
-  // @OneToMany(() => Relation, (relation) => relation.requester)
-  // initiatedRelations: Relation[];
+  @OneToMany(() => Relation, (relation) => relation.subjectUser)
+  subjectRelations: Promise<Relation[]>;
 
-  // @OneToMany(() => Relation, (relation) => relation.responder)
-  // receivedRelations: Relation[];
+  @OneToMany(() => Relation, (relation) => relation.objectUser)
+  objectRelations: Promise<Relation[]>;
 
   // @OneToMany(() => Game, (game) => game.playerOne)
   // initiatedGames: Game[];

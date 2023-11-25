@@ -6,7 +6,11 @@ import { JoinGameDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 
 
-@WebSocketGateway()
+@WebSocketGateway(8080, {
+    cors: {
+        origin: 'http://localhost:3000'
+    }
+})
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server : Server;
 

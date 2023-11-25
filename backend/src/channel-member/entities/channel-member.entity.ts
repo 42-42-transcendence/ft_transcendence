@@ -20,8 +20,9 @@ export class ChannelMember {
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: 'string'
   })
-  @ManyToOne(() => Channel, (channel) => channel.channelMembers)
-  // @JoinColumn({ referencedColumnName: 'channelID' })
+  @ManyToOne(() => Channel, (channel) => channel.channelMembers, {
+    onDelete: 'CASCADE'
+  })
   channel: Channel;
 
   @ApiProperty({
@@ -29,8 +30,9 @@ export class ChannelMember {
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: 'string'
   })
-  @ManyToOne(() => User, (user) => user.channelMembers)
-  // @JoinColumn({ referencedColumnName: 'userID' })
+  @ManyToOne(() => User, (user) => user.channelMembers, {
+    onDelete: 'CASCADE'
+  })
   user: User;
 
   @ApiProperty({
@@ -44,5 +46,10 @@ export class ChannelMember {
     default: ChannelMemberRole.GUEST,
   })
   role: ChannelMemberRole;
+
+  @Column({
+    default: false,
+  })
+  isMuted: boolean;
 
 }

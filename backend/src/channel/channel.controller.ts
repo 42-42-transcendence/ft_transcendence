@@ -206,9 +206,7 @@ export class ChannelController {
     }
 
     this.eventsGateway.server.to(channel.channelID).emit(
-      "firedChannel",
-      { message: `${channel.title}채널이 제거되었습니다.` }
-    );
+      "firedChannel", `${channel.title}채널이 제거되었습니다.`);
     await this.channelService.deleteChannelById(channelID);
 
     return ({ message: `해당 채널을 제거했습니다.` });

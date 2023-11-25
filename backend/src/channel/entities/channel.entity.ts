@@ -58,9 +58,13 @@ export class Channel {
   type: ChannelTypeEnum;
 
 
-  @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel)
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.channel, {
+    cascade: true
+  })
   channelMembers: Promise<ChannelMember[]>;
 
-  @OneToMany(() => Chat, (chat) => chat.channel)
+  @OneToMany(() => Chat, (chat) => chat.channel, {
+    cascade: true
+  })
   chats: Promise<Chat[]>;
 }

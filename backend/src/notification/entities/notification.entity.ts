@@ -14,7 +14,8 @@ export class Notification {
     notiType: NotiType;
 
     @ManyToOne(() => User, (user) => user.notifications, {
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        orphanedRowAction: 'delete'
     })
     user: User;
 }

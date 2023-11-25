@@ -19,18 +19,15 @@ export class ChatRepository extends Repository<Chat> {
 	}
 
 	async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
-		const { content, chatType, user, channel } = createChatMessageDto;
-
 		const chat = this.create({
-			content,
-			chatType,
-			userNickname: user.nickname,
-			user,
-			channel
+			content: createChatMessageDto.content,
+			chatType: createChatMessageDto.chatType,
+			userNickname: createChatMessageDto.userNickname,
+			user: createChatMessageDto.user,
+			channel: createChatMessageDto.channel,
 		})
 
 		const result = await this.save(chat);
-
 		return (result);
 	}
 

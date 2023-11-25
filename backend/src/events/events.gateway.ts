@@ -162,7 +162,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   async updatedSystemMessage(content: string, channel: Channel, user: User) {
-    console.log('---------------------------------- updatedSystemMsg',channel)
     const chat = await this.chatService.createChatMessage({
       content,
       chatType: ChatType.SYSTEM,
@@ -170,7 +169,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       channel,
       user
     });
-    console.log('---------------------------------- updatedSystemMsg',chat);
     this.server.to(channel.channelID).emit("updatedMessage", chat);
   }
 

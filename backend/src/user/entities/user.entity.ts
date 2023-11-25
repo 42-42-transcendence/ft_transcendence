@@ -51,26 +51,35 @@ export class User {
   // point: number;
 
   @OneToOne(() => Auth, (auth) => auth.user, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
   auth: Auth;
 
   // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   // userAchievements: UserAchievement[];
 
-  @OneToMany(() => ChannelMember, (channelMember) => channelMember.user)
+  @OneToMany(() => ChannelMember, (channelMember) => channelMember.user, {
+    cascade: true
+  })
   channelMembers: Promise<ChannelMember[]>;
 
   @OneToMany(() => Chat, (chat) => chat.user)
   chats: Promise<Chat[]>;
 
-  @OneToMany(() => Relation, (relation) => relation.subjectUser)
+  @OneToMany(() => Relation, (relation) => relation.subjectUser, {
+    cascade: true
+  })
   subjectRelations: Promise<Relation[]>;
 
-  @OneToMany(() => Relation, (relation) => relation.objectUser)
+  @OneToMany(() => Relation, (relation) => relation.objectUser, {
+    cascade: true
+  })
   objectRelations: Promise<Relation[]>;
 
-  @OneToMany(() => Notification, (notification) => notification.user)
+  @OneToMany(() => Notification, (notification) => notification.user, {
+    cascade: true
+  })
   notifications: Promise<Notification[]>
 
   // @OneToMany(() => Game, (game) => game.playerOne)

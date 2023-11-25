@@ -27,8 +27,10 @@ export class Chat {
   @JoinColumn({ referencedColumnName: 'nickname' })
   user: User;
 
+  // orphanedRowAction이 부모가 삭제 될 때, 자식도 삭제하게 한다.
   @ManyToOne(() => Channel, (channel) => channel.chats, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
   channel: Channel;
 }

@@ -134,9 +134,12 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
+
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
-    client.to(channelID).emit("updatedMessage", chat);
+    if (client && client.rooms.has(channelID)) {
+      client.to(channelID).emit("updatedMessage", chat);
+    }
   }
 
 
@@ -145,11 +148,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const emitUpdatedMembers = channelMembers.map(async member => {
       const user = await this.channelMemberService.getUserFromChannelMember(member);
       const client = this.eventsService.getClient(user.userID);
-      if (client === undefined || !client.rooms.has(channel.channelID)) {
-        return ;
-      }
       const members = await this.eventsService.createEventsMembers(channelMembers, user);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMembers", members);
+      if (client && client.rooms.has(channel.channelID)) {
+        client.emit("updatedMembers", members);
+      }
     });
     await Promise.all(emitUpdatedMembers);
   }
@@ -158,7 +160,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const channelMembers = await channel.channelMembers;
     const members = await this.eventsService.createEventsMembers(channelMembers, user);
-    this.server.to(channel.channelID).to(client.id).emit("updatedMembers", members);
+    if (client && client.rooms.has(channel.channelID)) {
+      client.emit("updatedMembers", members);
+    }
   }
 
   async updatedSystemMessage(content: string, channel: Channel, user: User) {
@@ -174,8 +178,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async kickOutSpecificClient(message: string, user: User, channel: Channel) {
     const client = this.eventsService.getClient(user.userID);
-    if (client) {
-      this.server.to(channel.channelID).to(client.id).emit('firedChannel', message)
+    if (client && client.rooms.has(channel.channelID)) {
+      client.emit('firedChannel', message);
     };
   }
 

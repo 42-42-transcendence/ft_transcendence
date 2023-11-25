@@ -12,37 +12,36 @@ export class ChannelService {
   constructor(private channelRepository: ChannelRepository) {}
 
   async getAllChannels(): Promise<Channel[]> {
-    return (await this.channelRepository.getAllChannels());
+    return await this.channelRepository.getAllChannels();
   }
 
   async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
-    return (this.channelRepository.createChannel(createChannelDto));
+    return this.channelRepository.createChannel(createChannelDto);
   }
 
   async getChannelById(channelID: string): Promise<Channel> {
-    return (this.channelRepository.getChannelById(channelID));
+    return this.channelRepository.getChannelById(channelID);
   }
 
   async getChannelByIdWithException(channelID: string): Promise<Channel> {
     const channel = this.channelRepository.getChannelById(channelID);
 
-    if (!channel)
-      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+    if (!channel) throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
-    return (channel);
+    return channel;
   }
 
   async getChannelAllInfoById(channelID: string): Promise<Channel> {
     const channel = await this.getChannelByIdWithException(channelID);
     const channelMembers = await channel.channelMembers;
 
-    const relationUsers = channelMembers.map(async channelMember => {
+    const relationUsers = channelMembers.map(async (channelMember) => {
       await channelMember.user;
-    })
+    });
     await Promise.all(relationUsers);
     await channel.chats;
 
-    return (channel);
+    return channel;
   }
 
   async deleteChannelById(channelID: string): Promise<void> {
@@ -54,23 +53,20 @@ export class ChannelService {
   }
 
   async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
-    return (this.channelRepository.getJoinChannelMembers(channelID));
+    return this.channelRepository.getJoinChannelMembers(channelID);
   }
 
-  async joinChannel(user: User, channelID: string) {
-
-  }
+  async joinChannel(user: User, channelID: string) {}
 
   async updateChannelInfo(channel: Channel, updateChannelDto: ChannelDto): Promise<Channel> {
-    return (await this.channelRepository.updateChannelInfo(channel, updateChannelDto));
+    return await this.channelRepository.updateChannelInfo(channel, updateChannelDto);
   }
 
   async enterUserToChannel(channel: Channel): Promise<Channel> {
-		return (this.channelRepository.enterUserToChannel(channel));
-	}
+    return this.channelRepository.enterUserToChannel(channel);
+  }
 
-	async leaveUserToChannel(channel: Channel): Promise<Channel> {
-		return (this.channelRepository.leaveUserToChannel(channel));
-	}
-
+  async leaveUserToChannel(channel: Channel): Promise<Channel> {
+    return this.channelRepository.leaveUserToChannel(channel);
+  }
 }

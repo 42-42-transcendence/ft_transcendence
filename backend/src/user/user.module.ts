@@ -9,17 +9,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '../auth/jwt.strategy';
 import { Game } from 'src/game/entities/game.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { RelationModule } from 'src/relation/relation.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    AuthModule
-  ],
+  imports: [TypeOrmModule.forFeature([User]), AuthModule, RelationModule],
   controllers: [UserController],
-  providers: [
-    UserService,
-    UserRepository
-  ],
-  exports: [UserService, UserRepository]
+  providers: [UserService, UserRepository],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}

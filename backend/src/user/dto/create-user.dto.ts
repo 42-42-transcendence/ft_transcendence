@@ -9,11 +9,4 @@ export class CreateUserDto {
     uniqueItems: true,
   })
   nickname: string;
-
-  @ApiProperty({
-    description: '프로필 이미지',
-    example: './User/byeonkim/images/kobe.jpg',
-    required: true,
-  })
-  avatar: string;
 }

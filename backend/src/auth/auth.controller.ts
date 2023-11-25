@@ -13,24 +13,24 @@ export class AuthController {
 
   // 본래 token과 isSignUp이라는 boolean값을 반환해야함
   @ApiOperation({
-    summary: 'JWT 토큰 발급 및 회원가입 유무 파악'
+    summary: 'JWT 토큰 발급 및 회원가입 유무 파악',
   })
   @ApiOkResponse({
     description: '성공',
-    type: UserAuthResponseDto
+    type: UserAuthResponseDto,
   })
   @Post()
   async userAuth(@Body('code') code: string): Promise<UserAuthResponseDto> {
     const accessToken = await this.authService.createAuthToken(code);
-    const { intraUID, intraName }= await this.authService.requestIntraUID(accessToken);
+    const { intraUID, intraName } = await this.authService.requestIntraUID(accessToken);
     const jwtToken = await this.authService.createJWT(intraUID);
     const userName = await this.authService.isSignup(intraUID, intraName);
 
-    return ({ jwtToken, userName });
+    return { jwtToken, userName };
   }
 
   @ApiOperation({
-    summary: '회원가입'
+    summary: '회원가입',
   })
   @Post('signup')
   @UseGuards(AuthGuard())

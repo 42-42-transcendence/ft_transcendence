@@ -7,7 +7,6 @@ import { Auth } from './entities/auth.entity';
 import { SocketException } from 'src/events/socket.exception';
 import { User } from 'src/user/entities/user.entity';
 
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -35,7 +34,7 @@ export class AuthService {
     }
   }
 
-  async requestIntraUID(accessToken: string): Promise<{ intraUID: string, intraName: string }> {
+  async requestIntraUID(accessToken: string): Promise<{ intraUID: string; intraName: string }> {
     const url = 'https://api.intra.42.fr/v2/me';
 
     try {
@@ -50,7 +49,6 @@ export class AuthService {
         const intraName = res.data.login;
         return { intraUID, intraName };
       }
-
     } catch (e) {
       console.log('bbbbbbbb', e);
     }
@@ -63,13 +61,15 @@ export class AuthService {
 
     if (!auth) {
       const newAuth = await this.authRepository.createAuth(intraUID);
-      const newUser = await this.userRepository.createUser(intraName);
-      const updataAuth = await this.authRepository.relationAuthUser(newAuth, newUser);
+      // const newUser = await this.userRepository.createUser(intraName);
+      // const updataAuth = await this.authRepository.relationAuthUser(newAuth, newUser);
       // return false;
-      return ((await updataAuth.user).nickname);
+      return '';
+    } else {
+      const user = this.userRepository.getUserById(intraUID);
+      if (user) return intraName;
     }
-
-    return ((await auth.user).nickname);
+    return '';
   }
 
   async createJWT(intraUID: string): Promise<string> {
@@ -83,20 +83,20 @@ export class AuthService {
     const auth = await this.authRepository.getAuthByIntraID(intraUID);
 
     if (!auth) {
-			throw new UnauthorizedException(`토큰이 유효하지 않습니다.`);
-		}
+      throw new UnauthorizedException(`토큰이 유효하지 않습니다.`);
+    }
 
-    return (auth);
+    return auth;
   }
 
   async checkAuthByIntraUIDWithWsException(intraUID: string): Promise<Auth> {
     const auth = await this.authRepository.getAuthByIntraID(intraUID);
 
     if (!auth) {
-			throw new SocketException('Unauthorized',`토큰이 유효하지 않습니다.`);
-		}
+      throw new SocketException('Unauthorized', `토큰이 유효하지 않습니다.`);
+    }
 
-    return (auth);
+    return auth;
   }
 
   async checkAuthByJWT(token: string): Promise<Auth> {
@@ -104,7 +104,7 @@ export class AuthService {
       const decode = this.jwtService.verify(token);
       const auth = await this.checkAuthByIntraUIDWithWsException(decode.intraUID);
 
-      return (auth);
+      return auth;
     } catch (e) {
       throw new SocketException('Unauthorized', `토큰이 유효하지 않습니다.`);
     }
@@ -116,6 +116,6 @@ export class AuthService {
     if (!user) {
       throw new SocketException('NotFound', `해당 토큰의 유저를 찾을수 없습니다.`);
     }
-    return (user);
+    return user;
   }
 }

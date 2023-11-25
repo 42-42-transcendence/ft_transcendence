@@ -10,6 +10,9 @@ import { UserStatus } from '../enums/user-status.enum';
 
 @Entity()
 export class User {
+  getRelationByUsers() {
+    throw new Error('Method not implemented.');
+  }
   @ApiProperty({
     description: 'User ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
@@ -37,45 +40,26 @@ export class User {
   status: UserStatus;
 
   @ApiProperty({
-    description: '도전과제',
-    example: '(byeonkim, first_victory), ...',
-  })
-  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
-  userAchievements: UserAchievement[];
-
-  @ApiProperty({
-    description: 'Auth 두 번 이상 연결했는지',
-    example: '0, 1',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: false,
-  })
-  isSecondAuth: boolean;
-  //아직 처리 안함
-
-  @ApiProperty({
     description: '프로필 이미지',
     example: './User/byeonkim/images/kobe.jpg',
     required: true,
   })
   @Column({
     nullable: true,
-    default: '../../../assets/images/default_profile_image.png',
+    default: 'default_image',
   })
   avatar: string;
 
   @ApiProperty({
-    description: '랭크 점수',
-    example: '1000',
+    description: '승리 횟수',
+    example: '0',
     required: true,
   })
   @Column({
     nullable: false,
-    default: 1000,
+    default: 0,
   })
-  point: number;
+  win: number;
 
   @ApiProperty({
     description: '패배 횟수',
@@ -89,15 +73,22 @@ export class User {
   lose: number;
 
   @ApiProperty({
-    description: '승리 횟수',
-    example: '0',
+    description: '랭크 점수',
+    example: '1000',
     required: true,
   })
   @Column({
     nullable: false,
-    default: 0,
+    default: 1000,
   })
-  win: number;
+  point: number;
+
+  @ApiProperty({
+    description: '도전과제',
+    example: '(byeonkim, first_victory), ...',
+  })
+  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
+  userAchievements: UserAchievement[];
 
   // @Column({ nullable: false })
   // isSecondAuth: boolean;

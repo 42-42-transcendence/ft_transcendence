@@ -12,15 +12,15 @@ export class AchievementService {
     return `This action returns all achievement`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} achievement`;
   }
 
-  update(id: number, updateAchievementDto: UpdateAchievementDto) {
+  update(id: string, updateAchievementDto: UpdateAchievementDto) {
     return `This action updates a #${id} achievement`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} achievement`;
   }
 }

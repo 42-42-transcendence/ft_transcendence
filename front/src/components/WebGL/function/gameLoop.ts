@@ -4,12 +4,12 @@ import update from "./update";
 
 export function gameLoop(timeStamp: number) {
 	let delta = (timeStamp - data.lastTime) / 1000.0;
-	// if (timeStamp < data.lastTime + (1000 / 120)) {
+	// if (timeStamp < data.lastTime + (1000 / 50)) {
 	// 	requestAnimationFrame(gameLoop);
 	// 	return;
 	// }
-	render();
 	update(delta);
+	render();
 	data.lastTime = timeStamp;
 	requestAnimationFrame(gameLoop);
 }

@@ -11,10 +11,11 @@ function shader () {
             }
         `;
     const fsGLSL = `
-           precision mediump float;
-
+            precision mediump float;
+            uniform vec4 u_Color;
+            
             void main(void) {
-            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                gl_FragColor = u_Color;
             }
         `;
     const lineFsGLSL = `
@@ -82,6 +83,7 @@ function shader () {
      // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/enableVertexAttribArray
     // GPU에서 관리하는 attribute 변수를 활성화
     gl.enableVertexAttribArray(data.positionLoc);
+    data.uColorLocation = gl.getUniformLocation(data.program[0]!, 'u_Color');
     data.program[1] = gl.createProgram();
     if (!data.program[1]) {
         throw new Error('ERROR creating shader program!');

@@ -19,7 +19,7 @@ import SocialPage from './Social';
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    element: <ProtectedRouter />,
+    // element: <ProtectedRouter />,
     children: [
       {
         path: '/',
@@ -28,10 +28,10 @@ const router = createBrowserRouter([
           {
             path: '/',
             element: <MainPage />,
-            action: async () => {
-              await new Promise((res) => setTimeout(res, 1000));
-              return redirect('/game/1');
-            },
+            // action: async () => {
+            //   await new Promise((res) => setTimeout(res, 1000));
+            //   return redirect('/game/1');
+            // },
           },
           {
             path: '/dashboard/:userID',
@@ -58,11 +58,11 @@ const router = createBrowserRouter([
       {
         path: '/game/:gameID',
         element: <GamePage />,
-        action: async ({ request }) => {
-          const data = await request.formData();
-          console.log(data.get('mode'));
-          return null;
-        },
+        // action: async ({ request }) => {
+        //   const data = await request.formData();
+        //   console.log(data.get('mode'));
+        //   return null;
+        // },
       },
       {
         path: '/two-factor-auth',

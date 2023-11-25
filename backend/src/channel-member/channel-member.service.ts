@@ -66,6 +66,10 @@ export class ChannelMemberService {
     return (this.channelMemberRepository.updateChannMemberIsMuted(member, isMuted));
   }
 
+  async deleteChannelMemberById(channelMemberID: string) {
+    await this.channelMemberRepository.deleteChannelMember(channelMemberID);
+  }
+
   async deleteChannelMember(channel: Channel, user: User) {
     const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
@@ -81,10 +85,24 @@ export class ChannelMemberService {
   }
 
   async getChannelFromChannelMember(member: ChannelMember): Promise<Channel> {
-		return (this.channelMemberRepository.getChannelFromChannelMember(member));
+		return (await this.channelMemberRepository.getChannelFromChannelMember(member));
 	}
 
   async getUserFromChannelMember(member: ChannelMember): Promise<User> {
-    return (this.channelMemberRepository.getUserFromChannelMember(member));
+    return (await this.channelMemberRepository.getUserFromChannelMember(member));
 	}
+
+  async delegateChannelOwner(channel: Channel): Promise<ChannelMember> {
+    const staff = await this.channelMemberRepository.findChannelStaff(channel);
+
+    if (staff) {
+      const newOwner = this.channelMemberRepository.updateChannelMemberRole(staff, ChannelMemberRole.OWNER);
+      return (newOwner);
+    }
+
+    const member = await this.channelMemberRepository.findChannelAnyMember(channel);
+    const newOwner = await this.channelMemberRepository.updateChannelMemberRole(member, ChannelMemberRole.OWNER);
+    return (newOwner);
+  }
+
 }

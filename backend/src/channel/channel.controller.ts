@@ -168,21 +168,21 @@ export class ChannelController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    await this.channelMemberService.deleteChannelMember(channel, user);
-    await this.channelService.leaveUserToChannel(channel);
+    const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    if (member.role === ChannelMemberRole.OWNER && channel.total !== 1) {
+      const newOwner = await this.channelMemberService.delegateChannelOwner(channel);
+      const newOwnerUser = await this.channelMemberService.getUserFromChannelMember(newOwner);
+      const content = `${user.nickname}님이 ${newOwnerUser.nickname}님에게 OWNER를 위임했습니다.`;
+      await this.eventsGateway.updatedSystemMessage(content, channel, newOwnerUser);
+    }
+    await this.channelMemberService.deleteChannelMemberById(member.channelMemberID);
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
-    const chat = await this.chatService.createChatMessage({
-      content,
-      chatType: ChatType.SYSTEM,
-      userNickname: user.nickname,
-      channel,
-      user
-    });
-    this.eventsGateway.updatedMessage(user.userID, channel.channelID, chat);
-    this.eventsGateway.updatedMembersForAllUsers(channel);
+    await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    const newChannel = await this.channelService.leaveUserToChannel(channel);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
 
-    if (channel.total === 0) {
-      this.channelService.deleteChannelById(channel.channelID);
+    if (newChannel.total === 0) {
+      await this.channelService.deleteChannelById(newChannel.channelID);
     }
 
     return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};

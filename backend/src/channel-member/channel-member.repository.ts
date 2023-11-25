@@ -84,10 +84,33 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 	}
 
 	async getUserFromChannelMember(member: ChannelMember): Promise<User> {
-		const memberWithChannel = await this.findOne({
-			where: { channelMemberID: member.channelMemberID },
-			relations: ['user']
-		});
-		return (memberWithChannel.user);
+		const result = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.user', 'user')
+			.where('member.channelMemberID = :channelMemberID', { channelMemberID: member.channelMemberID })
+			.getOne();
+		return (result.user);
+	}
+
+	async findChannelStaff(channel: Channel): Promise<ChannelMember> {
+		const member = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.channel', 'channel')
+			.where('channel.channelID = :channelID', { channelID: channel.channelID })
+			.andWhere('member.role = :role', { role: ChannelMemberRole.STAFF })
+			.getOne();
+
+		return (member);
+	}
+
+	async findChannelAnyMember(channel: Channel): Promise<ChannelMember> {
+		const member = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.channel', 'channel')
+			.where('channel.channelID = :channelID', { channelID: channel.channelID })
+			.andWhere('member.role != :role', { role: ChannelMemberRole.OWNER })
+			.getOne();
+
+		return (member);
 	}
 }

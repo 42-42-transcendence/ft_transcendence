@@ -4,8 +4,9 @@ import useCanvasSize from '../components/WebGL/hook/useCanvasSize';
 import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
 import initialize from '../components/WebGL/function/initialize';
-import usePress from '../components/WebGL/hook/usePress';
-import useCloseModal from '../store/Modal/useCloseModal';
+import usePress from "../components/WebGL/hook/usePress";
+import { io } from "socket.io-client";
+import { useParams, useLocation } from 'react-router-dom';
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,9 +15,12 @@ const GamePage = () => {
     const profileRef2 = useRef<HTMLDivElement>(null);
     const scoreRef2 = useRef<HTMLDivElement>(null);
     const [error, setError] = useState(null);
+    const { gameId } = useParams();
+    const { state } = useLocation();
     useCanvasSize();
     usePress();
 
+    let socket: any = null;
     useEffect(() => {
         try {
             data.canvasRef = canvasRef.current;
@@ -24,16 +28,23 @@ const GamePage = () => {
             data.scoreRef[0] = scoreRef1.current;
             data.profileRef[1] = profileRef2.current;
             data.scoreRef[1] = scoreRef2.current;
+            console.log(gameId);
+            console.log(state);
+
             /* webGL 초기화 */
-            initialize();
+            initialize(state);
             /* shader 세팅 */
             shader();
             /* 렌더링 */
             requestAnimationFrame(gameLoop);
-            // render();
         } catch (e : any) {
             setError(e.message);
         }
+        return () => {
+            if (socket && socket.connected) {
+                socket.disconnect();
+            }
+        };
     }, []);
     if (error) {
         return (

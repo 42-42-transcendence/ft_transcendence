@@ -1,26 +1,9 @@
-import { vec2 } from 'gl-matrix';
+import {Ball} from '../class/Ball';
+import {Paddle} from '../class/Paddle';
 
 let data: gameData = {
-	paddle: [
-		{
-			position: vec2.fromValues(-0.96, 0),
-			paddleSpeed: 2.0,
-			width: 0.1, // 패들의 폭
-			height: 0.5, // 패들의 높이
-		},
-		{
-			position: vec2.fromValues(0.96, 0),
-			paddleSpeed: 2.0,
-			width: 0.1, // 패들의 폭
-			height: 1.5, // 패들의 높이
-		},
-	],
-	ball: {
-		position: vec2.fromValues(0, 0),
-		direction: vec2.fromValues(1.0, 0),
-		velocity: 2.0,
-		radius: 0.02, // 공의 반지름
-	},
+	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
+	ball: new Ball(),
 	keyPress: {
 		up: false,
 		down: false,
@@ -37,8 +20,10 @@ let data: gameData = {
 	profileRef: [null, null],
 	scoreRef: [null, null],
 	canvasRef: null,
-	socket: null,
 	program: [null, null],
+	mode: 'normal',
+	items: [],
+	uColorLocation: null,
 };
 
 export default data;

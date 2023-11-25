@@ -4,9 +4,12 @@ import styles from '../../styles/GameSelect.module.css';
 
 const modeList = ['normal', 'fast', 'object'];
 
-const GameModeSelectionList = () => {
-  const [enteredMode, setEnteredMode] = useState<string>('normal');
+type GameModeSelectionListProps = {
+  setEnteredMode: (mode: string) => void;
+  enteredMode: string;
+};
 
+const GameModeSelectionList: React.FC<GameModeSelectionListProps> = ({ enteredMode, setEnteredMode}) => {
   const changeModeHandler = (mode: string) => {
     setEnteredMode(mode);
   };

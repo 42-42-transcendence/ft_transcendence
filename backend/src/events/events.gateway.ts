@@ -122,15 +122,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.server.to(channel.channelID).emit("updatedMessage", chat);
     }
     else {
-      const createChatMessageDto = {
-        content: `${user.nickname}님은 현재 뮤트상태입니다.`,
-        chatType: ChatType.SYSTEM,
-        userNickname: user.nickname,
-        user,
-        channel,
-      };
-      const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMessage", chat);
+      // 메세지 이거... db저장하면 안됨.
+      const chat = this.chatService.createMuteMessage(user, channel);
+      if (client && client.rooms.has(channel.channelID)) {
+        client.emit("updatedMessage", chat);
+      }
     }
   }
 

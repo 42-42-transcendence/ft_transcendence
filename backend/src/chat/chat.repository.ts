@@ -34,6 +34,17 @@ export class ChatRepository extends Repository<Chat> {
 		return (result);
 	}
 
+	createMuteMessage(user: User, channel: Channel): Chat {
+		const message = this.create({
+			content: `${user.nickname}님은 현재 뮤트상태입니다.`,
+			chatType: ChatType.SYSTEM,
+			userNickname: user.nickname,
+			user,
+			channel
+		})
+		return (message);
+	}
+
 	async createChatDummy(channel: Channel, user: User) {
 
 		const dummy = this.create({

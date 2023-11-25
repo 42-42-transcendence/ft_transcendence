@@ -119,6 +119,7 @@ export class ChannelController {
         await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
         await this.channelService.enterUserToChannel(channel);
         this.eventsGateway.updatedSystemMessage(content, channel, user);
+        this.eventsGateway.updatedMembersForAllUsers(channel);
       }
       return ({ isAuthenticated: true });
     }
@@ -135,6 +136,7 @@ export class ChannelController {
       await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       await this.channelService.enterUserToChannel(channel);
       this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     if (!member) {
@@ -145,6 +147,7 @@ export class ChannelController {
       });
       await this.channelService.enterUserToChannel(channel);
       this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     return ({ isAuthenticated: true });
@@ -176,6 +179,7 @@ export class ChannelController {
       user
     });
     this.eventsGateway.updatedMessage(user.userID, channel.channelID, chat);
+    this.eventsGateway.updatedMembersForAllUsers(channel);
 
     if (channel.total === 0) {
       this.channelService.deleteChannelById(channel.channelID);
@@ -355,10 +359,10 @@ export class ChannelController {
       channel
     )
     await this.channelService.leaveUserToChannel(channel);
-    await this.eventsGateway.updatedMembersForAllUsers(channel);
 
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
     await this.eventsGateway.updateNotification(
       `${kickedUser.nickname}님은 ${channel.title}채널에서 추방되셨습니다.`, NotiType.KICKED, kickedUser
     )
@@ -502,7 +506,7 @@ export class ChannelController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Post(':id/staff')
+  @Post(':id/mute')
   async muteUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
@@ -537,6 +541,7 @@ export class ChannelController {
         this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
         const content = `${mutedUser.nickname}님께서 뮤트가 해제되었습니다.`;
         await this.eventsGateway.updatedSystemMessage(content, channel, user);
+        this.eventsGateway.updatedMembersForAllUsers(channel);
 
         return ({ message: content });
       }
@@ -550,6 +555,7 @@ export class ChannelController {
 
       const content = `${mutedUser.nickname}님께서 뮤트되었습니다.`;
       await this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
 
       return ({ message: content });
     }

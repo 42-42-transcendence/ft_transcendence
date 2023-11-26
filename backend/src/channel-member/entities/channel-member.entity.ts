@@ -21,7 +21,8 @@ export class ChannelMember {
     type: 'string'
   })
   @ManyToOne(() => Channel, (channel) => channel.channelMembers, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
   channel: Channel;
 
@@ -31,7 +32,8 @@ export class ChannelMember {
     type: 'string'
   })
   @ManyToOne(() => User, (user) => user.channelMembers, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
   user: User;
 

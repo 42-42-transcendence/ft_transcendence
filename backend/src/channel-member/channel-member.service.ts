@@ -6,6 +6,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ChannelMember } from './entities/channel-member.entity';
 import { ChannelMemberRole } from './enums/channel-member-role.enum';
 import { channel } from 'diagnostics_channel';
+import { ChannelTypeEnum } from 'src/channel/enums/channelType.enum';
 
 @Injectable()
 export class ChannelMemberService {
@@ -20,7 +21,7 @@ export class ChannelMemberService {
   }
 
   async getChannelMemberByChannelUserWithException(channel: Channel, user: User): Promise<ChannelMember> {
-    const member = this.getChannelMemberByChannelUser(channel, user);
+    const member = await this.channelMemberRepository.getChannelMemberByChannelUser(channel, user);
 
     if (!member)
       throw new NotFoundException('없는 channel-member 관계입니다.');
@@ -66,6 +67,10 @@ export class ChannelMemberService {
     return (this.channelMemberRepository.updateChannMemberIsMuted(member, isMuted));
   }
 
+  async deleteChannelMemberById(channelMemberID: string) {
+    await this.channelMemberRepository.deleteChannelMember(channelMemberID);
+  }
+
   async deleteChannelMember(channel: Channel, user: User) {
     const member = await this.getChannelMemberByChannelUserWithException(channel, user);
 
@@ -81,10 +86,32 @@ export class ChannelMemberService {
   }
 
   async getChannelFromChannelMember(member: ChannelMember): Promise<Channel> {
-		return (this.channelMemberRepository.getChannelFromChannelMember(member));
+		return (await this.channelMemberRepository.getChannelFromChannelMember(member));
 	}
 
   async getUserFromChannelMember(member: ChannelMember): Promise<User> {
-    return (this.channelMemberRepository.getUserFromChannelMember(member));
+    return (await this.channelMemberRepository.getUserFromChannelMember(member));
 	}
+
+  async delegateChannelOwner(channel: Channel): Promise<ChannelMember> {
+    const staff = await this.channelMemberRepository.findChannelStaff(channel);
+
+    if (staff) {
+      const newOwner = await this.channelMemberRepository.updateChannelMemberRole(staff, ChannelMemberRole.OWNER);
+      return (newOwner);
+    }
+
+    const member = await this.channelMemberRepository.findChannelAnyMember(channel);
+    const newOwner = await this.channelMemberRepository.updateChannelMemberRole(member, ChannelMemberRole.OWNER);
+    return (newOwner);
+  }
+
+  async getPrivateChannelsByUser(user: User): Promise<Channel[]> {
+		return (await this.channelMemberRepository.getChannelsByUserAndType(user, ChannelTypeEnum.PRIVATE));
+	}
+
+  async getDmChannelsByUser(user: User): Promise<Channel[]> {
+		return (await this.channelMemberRepository.getChannelsByUserAndType(user, ChannelTypeEnum.DM));
+	}
+
 }

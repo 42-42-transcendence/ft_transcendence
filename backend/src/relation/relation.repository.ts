@@ -49,8 +49,6 @@ export class RelationRepository extends Repository<Relation> {
 			.where('subjectUser.userID = :subjectUserID', { subjectUserID: subjectUser.userID })
 			.andWhere('objectUser.userID = :objectUserID', { objectUserID: objectUser.userID })
 			.getOne();
-		
-		console.log('----------- get relation', relation);
 
 		return (relation);
 	}

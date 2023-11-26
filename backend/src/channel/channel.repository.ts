@@ -16,6 +16,15 @@ export class ChannelRepository extends Repository<Channel> {
 		return (await this.find());
 	}
 
+	async getPublicChannels(): Promise<Channel[]> {
+		const channels = await this
+			.createQueryBuilder('channel')
+			.where('channel.type = :type', { type: ChannelTypeEnum.PUBLIC })
+			.getMany();
+		
+		return (channels);
+	}
+
 	async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
 		const { title, password, type } = createChannelDto;
 

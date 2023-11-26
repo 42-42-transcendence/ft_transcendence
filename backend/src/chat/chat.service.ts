@@ -14,7 +14,11 @@ export class ChatService {
   }
 
   async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
-    return (this.chatRepository.createChatMessage(createChatMessageDto));
+    return (await this.chatRepository.createChatMessage(createChatMessageDto));
+  }
+
+  createMuteMessage(user: User, channel: Channel): Chat {
+    return (this.chatRepository.createMuteMessage(user, channel));
   }
 
   async createChatDummy(channel: Channel, user: User) {

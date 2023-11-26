@@ -19,6 +19,8 @@ import { UserService } from 'src/user/user.service';
 import { EventsService } from './events.service';
 import { Chat } from 'src/chat/entities/chat.entity';
 import { SocketExceptionFilter } from './socket.filter';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotiType } from 'src/notification/enums/noti-type.enum';
 
 
 
@@ -34,6 +36,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private authService: AuthService,
+    private notificationService: NotificationService,
     private eventsService: EventsService,
     @Inject(forwardRef(() => ChannelService))
     private channelService: ChannelService,
@@ -51,6 +54,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await this.authService.getUserByAuthWithWsException(auth);
     this.eventsService.addClient(user.userID, client);
+
     console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
   }
 
@@ -118,21 +122,29 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.server.to(channel.channelID).emit("updatedMessage", chat);
     }
     else {
-      const createChatMessageDto = {
-        content: `${user.nickname}님은 현재 뮤트상태입니다.`,
-        chatType: ChatType.SYSTEM,
-        userNickname: user.nickname,
-        user,
-        channel,
-      };
-      const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMessage", chat);
+      // 메세지 이거... db저장하면 안됨.
+      const chat = this.chatService.createMuteMessage(user, channel);
+      if (client && client.rooms.has(channel.channelID)) {
+        client.emit("updatedMessage", chat);
+      }
     }
   }
 
+  @SubscribeMessage('notification')
+  async getAllNotificationsByUser(client: Socket) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const user = await this.authService.getUserByAuthWithWsException(auth);
+    const notifications = await this.notificationService.getAllNotiByUserID(user.userID);
+
+    return (notifications);
+  }
+
+
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
-    client.to(channelID).emit("updatedMessage", chat);
+    if (client && client.rooms.has(channelID)) {
+      client.to(channelID).emit("updatedMessage", chat);
+    }
   }
 
 
@@ -141,11 +153,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const emitUpdatedMembers = channelMembers.map(async member => {
       const user = await this.channelMemberService.getUserFromChannelMember(member);
       const client = this.eventsService.getClient(user.userID);
-      if (client === undefined || !client.rooms.has(channel.channelID)) {
-        return ;
-      }
       const members = await this.eventsService.createEventsMembers(channelMembers, user);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMembers", members);
+      if (client && client.rooms.has(channel.channelID)) {
+        client.emit("updatedMembers", members);
+      }
     });
     await Promise.all(emitUpdatedMembers);
   }
@@ -154,7 +165,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const channelMembers = await channel.channelMembers;
     const members = await this.eventsService.createEventsMembers(channelMembers, user);
-    this.server.to(channel.channelID).to(client.id).emit("updatedMembers", members);
+    if (client && client.rooms.has(channel.channelID)) {
+      client.emit("updatedMembers", members);
+    }
   }
 
   async updatedSystemMessage(content: string, channel: Channel, user: User) {
@@ -171,7 +184,24 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async kickOutSpecificClient(message: string, user: User, channel: Channel) {
     const client = this.eventsService.getClient(user.userID);
     if (client) {
-      this.server.to(channel.channelID).to(client.id).emit('firedChannel', message)
+      client.emit('firedChannel', message);
     };
   }
+
+  async updatedNotification(message: string, notiType: NotiType, user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const notification = await this.notificationService.createNotification({ message, notiType, user });
+    if (client) {
+      client.emit("updatedNotificaion", notification);
+    }
+  }
+
+  async updatedNotificationWithChannelID(message: string, notiType: NotiType, user: User, channelID: string) {
+    const client = this.eventsService.getClient(user.userID);
+    const notification = await this.notificationService.createNotificationWithChannelID({ message, notiType, user, channelID });
+    if (client) {
+      client.emit("updatedNotificaion", notification);
+    }
+  }
+
 }

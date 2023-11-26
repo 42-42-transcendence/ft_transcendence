@@ -75,8 +75,9 @@ export class ChannelController {
     const channel = await this.channelService.createChannel(createChannelDto);
     const role = ChannelMemberRole.OWNER;
 
-    await this.channelMemberService.relationChannelMember({ channel, user, role });
     await this.channelService.enterUserToChannel(channel);
+    await this.channelMemberService.relationChannelMember({ channel, user, role });
+
 
     return ({ channelID: channel.channelID });
   }
@@ -434,8 +435,10 @@ export class ChannelController {
     const content = `${banedUser.nickname}님께서 영구 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
     await this.eventsGateway.updatedMembersForAllUsers(channel);
-    await this.eventsGateway.updateNotification(
-      `${banedUser.nickname}님은 ${channel.title}채널에서 영구 추방되었습니다.`, NotiType.BAN, banedUser
+    await this.eventsGateway.updatedNotification(
+      `${banedUser.nickname}님은 ${channel.title}채널에서 영구 추방되었습니다.`,
+      NotiType.BAN,
+      banedUser
     )
 
     return ({ message: content });
@@ -490,8 +493,11 @@ export class ChannelController {
 
     const content = `${invitedUser.nickname}님께 초대를 보냈습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
-    await this.eventsGateway.updateNotification(
-      `${user.nickname}님이 ${channel.title}로 초대하셨습니다.`, NotiType.INVITE, invitedUser
+    await this.eventsGateway.updatedNotificationWithChannelID(
+      `${user.nickname}님이 ${channel.title}로 초대하셨습니다.`,
+      NotiType.INVITE,
+      invitedUser,
+      channel.channelID
     );
 
     return ({ message: content });
@@ -523,8 +529,11 @@ export class ChannelController {
     await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user: invitedUser, role });
     await this.channelService.enterUserToChannel(channel);
-    await this.eventsGateway.updateNotification(
-      `${user.nickname}님으로부터 DM이 도착했습니다.`, NotiType.DM, invitedUser
+    await this.eventsGateway.updatedNotificationWithChannelID(
+      `${user.nickname}님으로부터 DM이 도착했습니다.`,
+      NotiType.DM,
+      invitedUser,
+      channel.channelID
     )
 
     return ({ channelID: channel.channelID });

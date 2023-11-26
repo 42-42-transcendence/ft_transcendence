@@ -18,4 +18,7 @@ export class Notification {
         orphanedRowAction: 'delete'
     })
     user: User;
+
+    @Column()
+    channelID?: string;
 }

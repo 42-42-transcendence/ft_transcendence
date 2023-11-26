@@ -130,6 +130,15 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
+  @SubscribeMessage('notification')
+  async getAllNotificationsByUser(client: Socket) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const user = await this.authService.getUserByAuthWithWsException(auth);
+    const notifications = await this.notificationService.getAllNotiByUserID(user.userID);
+
+    return (notifications);
+  }
+
 
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
@@ -179,11 +188,20 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     };
   }
 
-  async updateNotification(message: string, notiType: NotiType, user: User) {
+  async updatedNotification(message: string, notiType: NotiType, user: User) {
     const client = this.eventsService.getClient(user.userID);
-    const noti = this.notificationService.createNotification({ message, notiType, user });
+    const notification = await this.notificationService.createNotification({ message, notiType, user });
     if (client) {
-      client.emit("updatedNotificaion", noti);
+      client.emit("updatedNotificaion", notification);
     }
   }
+
+  async updatedNotificationWithChannelID(message: string, notiType: NotiType, user: User, channelID: string) {
+    const client = this.eventsService.getClient(user.userID);
+    const notification = await this.notificationService.createNotificationWithChannelID({ message, notiType, user, channelID });
+    if (client) {
+      client.emit("updatedNotificaion", notification);
+    }
+  }
+
 }

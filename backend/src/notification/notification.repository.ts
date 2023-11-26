@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Notification } from "./entities/notification.entity";
 import { DataSource, Repository } from "typeorm";
 import { NotificationDto } from "./dto/notification.dto";
+import { NotificationWithChannelIDDto } from "./dto/notification-with-channelID.dto";
 
 @Injectable()
 export class NotificationRepository extends Repository<Notification> {
@@ -9,22 +10,37 @@ export class NotificationRepository extends Repository<Notification> {
         super(Notification, dataSource.createEntityManager());
     }
 
-    async getAllNotiFromNickname(userNickname: string): Promise<Notification[]> {
+    async getAllNotiByUserID(userID: string): Promise<Notification[]> {
         const notifications = await this
             .createQueryBuilder('notification')
             .leftJoinAndSelect('notification.user', 'user')
-            .where('user.nickname = :nickname', { nickname: userNickname })
+            .where('user.userID = :userID', { userID })
             .getMany();
 
         return (notifications);
     }
 
     async createNotification(notificationDto: NotificationDto): Promise<Notification> {
-        const result = this.create({
+        const noti = this.create({
             message: notificationDto.message,
             notiType: notificationDto.notiType,
             user: notificationDto.user
         });
+
+        const result = await this.save(noti);
+        
+        return (result);
+    }
+
+    async createNotificationWithChannelID(notificationWithChannelIDDto: NotificationWithChannelIDDto): Promise<Notification> {
+        const noti = this.create({
+            message: notificationWithChannelIDDto.message,
+            notiType: notificationWithChannelIDDto.notiType,
+            user: notificationWithChannelIDDto.user,
+            channelID: notificationWithChannelIDDto.channelID,
+        });
+
+        const result = await this.save(noti);
         
         return (result);
     }

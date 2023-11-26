@@ -15,6 +15,10 @@ export class ChannelService {
     return (await this.channelRepository.getAllChannels());
   }
 
+  async getPublicChannels(): Promise<Channel[]> {
+		return (await this.channelRepository.getPublicChannels());
+	}
+
   async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
     return (await this.channelRepository.createChannel(createChannelDto));
   }

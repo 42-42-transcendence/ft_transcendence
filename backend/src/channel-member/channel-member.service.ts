@@ -6,6 +6,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ChannelMember } from './entities/channel-member.entity';
 import { ChannelMemberRole } from './enums/channel-member-role.enum';
 import { channel } from 'diagnostics_channel';
+import { ChannelTypeEnum } from 'src/channel/enums/channelType.enum';
 
 @Injectable()
 export class ChannelMemberService {
@@ -104,5 +105,13 @@ export class ChannelMemberService {
     const newOwner = await this.channelMemberRepository.updateChannelMemberRole(member, ChannelMemberRole.OWNER);
     return (newOwner);
   }
+
+  async getPrivateChannelsByUser(user: User): Promise<Channel[]> {
+		return (await this.channelMemberRepository.getChannelsByUserAndType(user, ChannelTypeEnum.PRIVATE));
+	}
+
+  async getDmChannelsByUser(user: User): Promise<Channel[]> {
+		return (await this.channelMemberRepository.getChannelsByUserAndType(user, ChannelTypeEnum.DM));
+	}
 
 }

@@ -33,17 +33,29 @@ export class ChannelController {
     private eventsGateway: EventsGateway,
   ) {}
 
-  // 임시로 채널이 없으면 더미를 생성하게 함
+
   @ApiOperation({
-    summary: '모든 채널 조회'
+    summary: '모든 공개 채널 및 유저가 참여한 private, dm 채널 조회'
   })
   @ApiOkResponse({
     description: '성공',
     type: [Channel]
   })
   @Get()
-  async getAllChannels(): Promise<Channel[]> {
-    return (await this.channelService.getAllChannels());
+  async getAllChannels(
+    @GetAuth() auth: Auth
+  ): Promise<Channel[]> {
+    const user = await auth.user;
+    const channels: Channel[] = [];
+    const publicChannels = await this.channelService.getPublicChannels();
+    const privateChannels = await this.channelMemberService.getPrivateChannelsByUser(user);
+    const dmChannels = await this.channelMemberService.getDmChannelsByUser(user);
+
+    channels.push(...publicChannels);
+    channels.push(...privateChannels);
+    channels.push(...dmChannels);
+  
+    return (channels);
   }
 
 
@@ -116,8 +128,8 @@ export class ChannelController {
         return ({ isAuthenticated: false });
       }
       if (member.role === ChannelMemberRole.INVITE) {
-        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
         await this.channelService.enterUserToChannel(channel);
+        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
         this.eventsGateway.updatedSystemMessage(content, channel, user);
         this.eventsGateway.updatedMembersForAllUsers(channel);
       }

@@ -5,6 +5,7 @@ import { ChannelMemberDto } from "./dto/channel-member.dto";
 import { ChannelMemberRole } from "./enums/channel-member-role.enum";
 import { Channel } from "src/channel/entities/channel.entity";
 import { User } from "src/user/entities/user.entity";
+import { ChannelTypeEnum } from "src/channel/enums/channelType.enum";
 
 @Injectable()
 export class ChannelMemberRepository extends Repository<ChannelMember> {
@@ -18,9 +19,7 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		const channelMember = new ChannelMember();
 
 		channelMember.channel = channel;
-		// channelMember.channel = Promise.resolve(channel);
 		channelMember.user = user;
-		// channelMember.user = Promise.resolve(user);
 		channelMember.role = role;
 
 		const result = await this.save(channelMember);
@@ -112,5 +111,22 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 			.getOne();
 
 		return (member);
+	}
+
+	async getChannelsByUserAndType(user: User, type: ChannelTypeEnum): Promise<Channel[]> {
+		const channelMembers = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.user', 'user')
+			.leftJoinAndSelect('member.channel', 'channel')
+			.where('user.userID = :userID', { userID: user.userID })
+			.andWhere('channel.type = :type', { type })
+			.getMany();
+		
+		const channels: Channel[] = [];
+		channelMembers.forEach(member => {
+			channels.push(member.channel);
+		});
+		
+		return (channels);
 	}
 }

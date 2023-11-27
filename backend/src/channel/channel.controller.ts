@@ -54,7 +54,7 @@ export class ChannelController {
     channels.push(...publicChannels);
     channels.push(...privateChannels);
     channels.push(...dmChannels);
-  
+
     return (channels);
   }
 
@@ -186,7 +186,7 @@ export class ChannelController {
     // orphanedRowAction 없다면, chat의 channel을 null로 만든다
     // 해결할려면, 일단 channel 정보 먼저 업데이트하고, chat을 만드는 방법밖에 없음...
     await this.channelService.leaveUserToChannel(channel);
-    if (member.role === ChannelMemberRole.OWNER && channel.total > 1) {
+    if (member.role === ChannelMemberRole.OWNER && channel.total > 0) {
       const newOwner = await this.channelMemberService.delegateChannelOwner(channel);
       const newOwnerUser = await this.channelMemberService.getUserFromChannelMember(newOwner);
       const content = `${user.nickname}님이 ${newOwnerUser.nickname}님에게 OWNER를 위임했습니다.`;
@@ -373,6 +373,9 @@ export class ChannelController {
     )
     await this.channelService.leaveUserToChannel(channel);
 
+    // 멤버 지워야 함
+    await this.channelMemberService.deleteChannelMemberById(objectUserRole.channelMemberID);
+
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
     await this.eventsGateway.updatedMembersForAllUsers(channel);
@@ -421,6 +424,7 @@ export class ChannelController {
       throw new BadRequestException(`${banedUser.nickname}님은 이미 영구 추방되었습니다.`);
     }
 
+    await this.channelService.leaveUserToChannel(channel);
     await this.channelMemberService.updateChannelMemberRoleByChannelMember(
       objectUserRole,
       ChannelMemberRole.BLOCK
@@ -430,7 +434,6 @@ export class ChannelController {
       banedUser,
       channel
     )
-    await this.channelService.leaveUserToChannel(channel);
 
     const content = `${banedUser.nickname}님께서 영구 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
@@ -462,7 +465,7 @@ export class ChannelController {
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const invitedUser = await this.userService.getUserByNicknameWithException(targetUserID);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
-    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, invitedUser);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUser(channel, invitedUser);
 
     if (!subjectUserRole) {
       throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);

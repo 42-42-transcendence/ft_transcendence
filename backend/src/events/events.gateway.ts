@@ -24,7 +24,7 @@ import { NotiType } from 'src/notification/enums/noti-type.enum';
 
 
 
-// @UseFilters(new SocketExceptionFilter())
+@UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:3000',
@@ -32,7 +32,6 @@ import { NotiType } from 'src/notification/enums/noti-type.enum';
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    private userService: UserService,
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private authService: AuthService,

@@ -11,7 +11,6 @@ import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { ChatService } from 'src/chat/chat.service';
-import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { UserService } from 'src/user/user.service';
 import { RelationService } from 'src/relation/relation.service';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
@@ -674,7 +673,5 @@ export class ChannelController {
 
       return ({ message: content });
     }
-
-
 
 }

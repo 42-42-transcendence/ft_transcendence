@@ -37,4 +37,18 @@ export class AuthController {
   async userSignUp(@Body() body) {
     console.log('--------------------- auth success ----------------------');
   }
+
+
+  @ApiOperation({
+    summary: '토큰이 유효한지 확인한다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Get()
+  @UseGuards(AuthGuard())
+  async checkTokenIsValidated(): Promise<{ message: string }> {
+    return ({ message: '유효한 토큰입니다.'});
+  }
 }

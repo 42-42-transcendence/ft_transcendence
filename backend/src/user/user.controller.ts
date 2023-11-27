@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Patch,
   Param,
@@ -55,38 +56,36 @@ export class UserController {
     description: '성공',
     type: User,
   })
-  @Post('setting-profile')
+  @Put('setting-profile')
   async createUser(@Body() CreateUserDto: CreateUserDto): Promise<CreateUserDto> {
     const createdUser = await this.userService.createUser(CreateUserDto);
     const nickname = {
       nickname: createdUser.nickname,
     };
+    const User = this.userService.getUserByNickname(createdUser.nickname);
+    (await User).userAchievements;
+    console.log('ok2');
     return nickname;
   }
+  //이미지 요청 response 필요
 
   @ApiOperation({
-    summary: '유저 본인 프로필 보기',
+    summary: '유저 프로필 보기',
   })
   @ApiOkResponse({
     description: '성공',
     type: User,
   })
   @Get('profile/:user')
-  async getUserProfile(@Param('user') UserID): Promise<UerprofileUserDto> {
-    const createdUser = await this.userService.getUserByNickname(UserID);
-    const userinfo = {
-      nickname: createdUser.nickname,
-      image: createdUser.avatar,
-      win: createdUser.win,
-      lose: createdUser.lose,
-      point: createdUser.point,
-      userAchievements: createdUser.userAchievements,
-    };
+  async getUserProfile(@Param('user') nickname): Promise<UerprofileUserDto> {
+    const createdUser = await this.userService.getUserByNickname(nickname);
+    await this.userService.getAchievements(nickname);
+    const userinfo = this.userService.getUserProfile(nickname);
     return userinfo;
   }
 
   @ApiOperation({
-    summary: '유저 정보 보기',
+    summary: '채팅창 모달에서 유저 정보 보기',
   })
   @ApiOkResponse({
     description: '성공',

@@ -17,14 +17,6 @@ export class Achievement {
   name: string;
 
   @ApiProperty({
-    description: '도전과제 아이콘 이미지',
-    example: './User/byeonkim/images/victory.jpg',
-    uniqueItems: true,
-  })
-  @Column()
-  icon: string;
-
-  @ApiProperty({
     description: '도전과제 설명',
     example: 'First Blood!',
     uniqueItems: true,

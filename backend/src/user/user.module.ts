@@ -10,9 +10,10 @@ import { JwtStrategy } from '../auth/jwt.strategy';
 import { Game } from 'src/game/entities/game.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { RelationModule } from 'src/relation/relation.module';
+import { UserAchievementModule } from 'src/user-achievement/user-achievement.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), AuthModule, RelationModule],
+  imports: [TypeOrmModule.forFeature([User]), AuthModule, RelationModule, UserAchievementModule],
   controllers: [UserController],
   providers: [UserService, UserRepository],
   exports: [UserService, UserRepository],

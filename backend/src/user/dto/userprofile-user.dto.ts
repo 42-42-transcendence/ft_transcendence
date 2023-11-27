@@ -21,25 +21,25 @@ export class UerprofileUserDto {
     example: '0',
     required: true,
   })
-  win: number;
+  winCount: number;
 
   @ApiProperty({
     description: '패배 횟수',
     example: '0',
     required: true,
   })
-  lose: number;
+  loseCount: number;
 
   @ApiProperty({
     description: '랭크 점수',
     example: '1000',
     required: true,
   })
-  point: number;
+  ladderPoint: number;
 
   @ApiProperty({
     description: '도전과제',
     example: '(byeonkim, first_victory), ...',
   })
-  userAchievements: UserAchievement[];
+  achievements: UserAchievement[];
 }

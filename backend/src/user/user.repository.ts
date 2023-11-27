@@ -5,6 +5,7 @@ import { ChannelMember } from 'src/channel-member/entities/channel-member.entity
 import { UserStatus } from './enums/user-status.enum';
 import { faker } from '@faker-js/faker';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UerprofileUserDto } from './dto/userprofile-user.dto';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -62,5 +63,18 @@ export class UserRepository extends Repository<User> {
 
   async getAllUsers(): Promise<User[]> {
     return await this.find();
+  }
+
+  async getUserProfile(nickname: string): Promise<UerprofileUserDto> {
+    const createdUser = await this.getUserByNickname(nickname);
+    const userinfo = {
+      nickname: createdUser.nickname,
+      image: createdUser.avatar,
+      winCount: createdUser.win,
+      loseCount: createdUser.lose,
+      ladderPoint: createdUser.point,
+      achievements: createdUser.userAchievements,
+    };
+    return userinfo;
   }
 }

@@ -14,6 +14,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -31,6 +32,9 @@ import { EventsModule } from './events/events.module';
     UserAchievementModule,
     AuthModule,
     EventsModule,
+    MulterModule.register({
+      dest: '../assets/images',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

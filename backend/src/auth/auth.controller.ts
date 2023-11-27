@@ -22,9 +22,9 @@ export class AuthController {
   @Post()
   async userAuth(@Body('code') code: string): Promise<UserAuthResponseDto> {
     const accessToken = await this.authService.createAuthToken(code);
-    const { intraUID, intraName } = await this.authService.requestIntraUID(accessToken);
+    const { intraUID } = await this.authService.requestIntraUID(accessToken);
     const jwtToken = await this.authService.createJWT(intraUID);
-    const userName = await this.authService.isSignup(intraUID, intraName);
+    const userName = await this.authService.isSignup(intraUID);
 
     return { jwtToken, userName };
   }

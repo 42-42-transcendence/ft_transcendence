@@ -11,7 +11,6 @@ import { User } from 'src/user/entities/user.entity';
 export class AuthService {
   constructor(
     private authRepository: AuthRepository,
-    private userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -34,7 +33,7 @@ export class AuthService {
     }
   }
 
-  async requestIntraUID(accessToken: string): Promise<{ intraUID: string; intraName: string }> {
+  async requestIntraUID(accessToken: string): Promise<{ intraUID: string }> {
     const url = 'https://api.intra.42.fr/v2/me';
 
     try {
@@ -46,8 +45,7 @@ export class AuthService {
 
       if (res.status === HttpStatus.OK) {
         const intraUID = res.data.id;
-        const intraName = res.data.login;
-        return { intraUID, intraName };
+        return { intraUID };
       }
     } catch (e) {
       console.log('bbbbbbbb', e);
@@ -56,18 +54,18 @@ export class AuthService {
 
   // 본래 회원가입 되어있는지 아닌지(user 객체가 있는지 없는지)를 확인하여 boolean값을 반환하는 메소드
   // 현재는 임시 테스트로 username을 반환하게 했음
-  async isSignup(intraUID: string, intraName: string): Promise<string> {
+  async isSignup(intraUID: string): Promise<string> {
     const auth = await this.authRepository.getAuthByIntraID(intraUID);
 
     if (!auth) {
-      const newAuth = await this.authRepository.createAuth(intraUID);
+      await this.authRepository.createAuth(intraUID);
       // const newUser = await this.userRepository.createUser(intraName);
       // const updataAuth = await this.authRepository.relationAuthUser(newAuth, newUser);
       // return false;
       return '';
     } else {
-      const user = this.userRepository.getUserById(intraUID);
-      if (user) return intraName;
+      const user = await auth.user;
+      if (user) return user.nickname;
     }
     return '';
   }

@@ -85,7 +85,7 @@ export class User {
 
   @ApiProperty({
     description: '도전과제',
-    example: '(byeonkim, first_victory), ...',
+    example: '[{it, title, description}]',
   })
   @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   userAchievements: UserAchievement[];

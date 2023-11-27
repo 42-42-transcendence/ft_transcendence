@@ -56,16 +56,16 @@ export class UserController {
     description: '성공',
     type: User,
   })
-  @Put('setting-profile')
+  @Put('setup')
   async createUser(@Body() CreateUserDto: CreateUserDto): Promise<CreateUserDto> {
     const createdUser = await this.userService.createUser(CreateUserDto);
-    const nickname = {
-      nickname: createdUser.nickname,
+    const userID = {
+      userID: createdUser.userID,
     };
     const User = this.userService.getUserByNickname(createdUser.nickname);
     (await User).userAchievements;
     console.log('ok2');
-    return nickname;
+    return userID;
   }
   //이미지 요청 response 필요
 

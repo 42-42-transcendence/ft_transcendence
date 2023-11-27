@@ -57,15 +57,15 @@ export class UserController {
     type: User,
   })
   @Put('setup')
-  async createUser(@Body('userID') CreateUserDto: CreateUserDto): Promise<CreateUserDto> {
-    const createdUser = await this.userService.createUser(CreateUserDto);
-    const userID = {
+  async createUser(@Body('userID') nickname: string): Promise<{ userID: string }> {
+    const createdUser = await this.userService.createUser(nickname);
+    const ret = {
       userID: createdUser.nickname,
     };
     const User = this.userService.getUserByNickname(createdUser.nickname);
     (await User).userAchievements;
     console.log('ok2');
-    return userID;
+    return ret;
   }
   //이미지 요청 response 필요
 
@@ -79,7 +79,7 @@ export class UserController {
   @Get('profile/:user')
   async getUserProfile(@Param('user') nickname): Promise<UerprofileUserDto> {
     const createdUser = await this.userService.getUserByNickname(nickname);
-    await this.userService.getAchievements(nickname);
+    // await this.userService.getAchievements(nickname);
     const userinfo = this.userService.getUserProfile(nickname);
     return userinfo;
   }

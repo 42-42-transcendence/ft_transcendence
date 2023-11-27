@@ -8,6 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UerprofileUserDto } from './dto/userprofile-user.dto';
 import { UserAchievementRepository } from 'src/user-achievement/user-achievement.repository';
 import { achievements, Achievements } from 'src/achievement/achievement';
+import { UserStatus } from './enums/user-status.enum';
 
 @Injectable()
 export class UserService {
@@ -61,8 +62,8 @@ export class UserService {
     return this.userRepository.createUserDummy();
   }
 
-  async createUser(CreateUserDto: CreateUserDto): Promise<User> {
-    return this.userRepository.createUser_default(CreateUserDto);
+  async createUser(nickname: string): Promise<User> {
+    return this.userRepository.createUser_default(nickname);
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -73,34 +74,14 @@ export class UserService {
     return this.userRepository.getUserProfile(nickname);
   }
 
-  async addAchievement(Usernickname: string, achievementId: number, isAchieved: boolean): Promise<void> {
-    const user = await this.getUserByNickname(Usernickname);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    const existingUserAchievement = await this.userachivementRepository.findOne({
-      where: { usernickname: Usernickname, achievementId: achievementId },
-    });
-    if (existingUserAchievement) {
-      throw new NotFoundException('Achievement already added');
-    }
-    this.userachivementRepository.adduserachievement(Usernickname, achievementId, isAchieved);
+  async getAchievements(nickname: string) {
+    this.userRepository.getAchivements(nickname);
   }
 
-  async getAchievements(nickname: string) {
-    const user = await this.getUserByNickname(nickname);
-    if (user) {
-      if (user.win >= 1 || user.lose >= 1) await this.addAchievement(nickname, Achievements.FIRSTGAME, true);
-      else await this.addAchievement(nickname, Achievements.FIRSTGAME, false);
-      if (user.win >= 1) await this.addAchievement(nickname, Achievements.FIRSTWIN, true);
-      else await this.addAchievement(nickname, Achievements.FIRSTWIN, false);
-      await this.addAchievement(nickname, Achievements.FOUR, false);
-      await this.addAchievement(nickname, Achievements.FIVE, false);
-      await this.addAchievement(nickname, Achievements.SIX, false);
-      await this.addAchievement(nickname, Achievements.SEVEN, false);
-      await this.addAchievement(nickname, Achievements.EIGHT, false);
-      await this.addAchievement(nickname, Achievements.NINE, false);
-      await this.addAchievement(nickname, Achievements.TEN, false);
-    }
+  async changeStatus(nickname: string, status: UserStatus) {
+    this.userRepository.changeStatus(nickname, status);
+    // const createduser = await this.getUserByNickname(nickname);
+    // createduser.status = status;
+    // await this.save(createduser);
   }
 }

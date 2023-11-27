@@ -23,7 +23,7 @@ import { UserRepository } from 'src/user/user.repository';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtStrategy, UserRepository],
+  providers: [AuthService, AuthRepository, JwtStrategy],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

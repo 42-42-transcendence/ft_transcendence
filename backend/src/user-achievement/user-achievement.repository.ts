@@ -16,7 +16,7 @@ export class UserAchievementRepository extends Repository<UserAchievement> {
   async adduserachievement(nickname: string, id: number, isAchieved: boolean): Promise<UserAchievement> {
     if (!this.achivementRepository.findachievement(id)) this.achivementRepository.createachievement(id);
     const createduserachievement = this.create({
-      usernickname: nickname,
+      nickname: nickname,
       achievementId: id,
       isAchieved: isAchieved,
     });

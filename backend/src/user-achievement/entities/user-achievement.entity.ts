@@ -5,8 +5,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class UserAchievement {
-  @PrimaryColumn()
-  usernickname: string;
+  @PrimaryColumn('varchar')
+  nickname: string;
   @PrimaryColumn()
   achievementId: number;
 
@@ -25,11 +25,10 @@ export class UserAchievement {
   // date: any;
 
   @ManyToOne(() => User, (user) => user.userAchievements)
-  @JoinColumn({ name: 'usernickname' })
+  @JoinColumn({ name: 'nickname' })
   user: User;
 
   @ManyToOne(() => Achievement, (achievement) => achievement.userAchievements, { cascade: true })
   @JoinColumn({ name: 'achievementId' })
   achievement: Achievement;
-  newUserAchievement: Achievement[];
 }

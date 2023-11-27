@@ -13,64 +13,56 @@ function initializeBuffer(buffer: WebGLBuffer | null, vertices: Float32Array) {
 // 인스턴스 생성
 const line = new Line();
 
+function drawObject(program: WebGLProgram, buffer: WebGLBuffer, vertices: Float32Array, color: [number, number, number, number] | undefined, viewportSize?: { width: number, height: number }) {
+	const gl = data.gl as WebGLRenderingContext;
+	gl.useProgram(program);
+	if (color !== undefined)
+		gl.uniform4f(data.uColorLocation, ...color);
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices);
+	gl.vertexAttribPointer(data.positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+	if (viewportSize) {
+		gl.uniform2f(data.viewPortLoc, viewportSize.width, viewportSize.height);
+	}
+
+	gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
+
 function drawPaddle(paddle: Paddle) {
 	paddle.calculateVertices();
-	if (!data.gl) throw new Error('data.gl is null');
-	data.gl.useProgram(data.program[0]);
-	data.gl.uniform4f(data.uColorLocation, 1.0, 0.0, 0.0, 1.0);
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.paddleBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, paddle.paddleVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+	drawObject(data.program[0]!, data.paddleBuffer!, paddle.paddleVertices, [1.0, 0.0, 0.0, 1.0]);
 }
 
 function drawItem(item: Item) {
 	item.calculateVertices();
-	if (!data.gl) throw new Error('data.gl is null');
-	data.gl.useProgram(data.program[0]);
-	data.gl.uniform4f(data.uColorLocation, 1.0, 0.0, 1.0, 1.0);
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, item.itemVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+	drawObject(data.program[0]!, data.ballBuffer!, item.itemVertices, [1.0, 0.0, 1.0, 1.0]);
 }
 
 function drawBall(ball: Ball) {
 	ball.calculateVertices();
-	if (!data.gl) throw new Error('data.gl is null');
-	data.gl.useProgram(data.program[0]);
-	data.gl.uniform4f(data.uColorLocation, 1.0, 0.0, 0.0, 1.0);
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.ballBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, ball.ballVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+	drawObject(data.program[0]!, data.ballBuffer!, ball.ballVertices, [1.0, 0.0, 0.0, 1.0]);
 }
 
 function drawLine(line: Line) {
-	if (!data.gl) throw new Error('data.gl is null');
-	data.gl.useProgram(data.program[1]);
-	data.gl.bindBuffer(data.gl.ARRAY_BUFFER, data.lineBuffer);
-	data.gl.bufferSubData(data.gl.ARRAY_BUFFER, 0, line.lineVertices);
-	data.gl.vertexAttribPointer(data.positionLoc, 2, data.gl.FLOAT, false, 0, 0);
-	if (data.canvasRef) {
-		data.gl.uniform2f(data.viewPortLoc, data.canvasRef.clientWidth, data.canvasRef.clientHeight);
-	}
-	data.gl.drawArrays(data.gl.TRIANGLES, 0, 6);
+	const viewportSize = data.canvasRef ? { width: data.canvasRef.clientWidth, height: data.canvasRef.clientHeight } : undefined;
+	drawObject(data.program[1]!, data.lineBuffer!, line.lineVertices, undefined, viewportSize);
 }
 
 export function render() {
-	if (!data.gl) return;
-
-	data.gl.clear(data.gl.COLOR_BUFFER_BIT | data.gl.DEPTH_BUFFER_BIT);
+	data.gl!.clear(data.gl!.COLOR_BUFFER_BIT | data.gl!.DEPTH_BUFFER_BIT);
 
 	if (data.isFirstRender) {
 		initializeBuffer(data.paddleBuffer, data.paddle[0].paddleVertices);
 		initializeBuffer(data.ballBuffer, data.ball.ballVertices);
 		initializeBuffer(data.lineBuffer, line.lineVertices);
-
 		data.isFirstRender = false;
 		return;
 	}
+
+	if (!data.program[0] || !data.ballBuffer)
+		throw new Error('data.program[0] or data.ballBuffer is null');
 
 	drawLine(line);
 	drawBall(data.ball);

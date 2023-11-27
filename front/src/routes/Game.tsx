@@ -28,8 +28,6 @@ const GamePage = () => {
             data.scoreRef[0] = scoreRef1.current;
             data.profileRef[1] = profileRef2.current;
             data.scoreRef[1] = scoreRef2.current;
-            console.log(gameId);
-            console.log(state);
 
             /* webGL 초기화 */
             initialize(state);

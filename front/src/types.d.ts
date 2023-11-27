@@ -3,20 +3,6 @@ declare module '*.glsl' {
 	export default content;
 }
 
-// type Paddle = {
-// 	position: vec2;
-// 	paddleSpeed: number;
-// 	width: number;
-// 	height: number;
-// };
-
-// type Ball = {
-// 	position: vec2;
-// 	direction: vec2;
-// 	velocity: number;
-// 	radius: number;
-// };
-
 type KeyPress = {
 	up: boolean;
 	down: boolean;

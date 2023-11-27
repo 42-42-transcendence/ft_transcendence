@@ -15,7 +15,7 @@ export class Paddle {
     width: number;
     height: number;
     ballVelocityFactor: number;
-    paddleVertices = new Float32Array();
+    paddleVertices = new Float32Array(12);
 
     constructor(x: number, y: number, width: number = 0.05, height: number = 0.5) {
         this.position = vec2.fromValues(x, y);
@@ -28,7 +28,7 @@ export class Paddle {
 
     public calculateVertices() {
         // 버텍스 계산 로직
-        this.paddleVertices = new Float32Array([
+        this.paddleVertices.set([
             this.position[0] - this.width / 2.0, this.position[1] - this.height / 2.0, // 1
             this.position[0] + this.width / 2.0, this.position[1] - this.height / 2.0, // 2
             this.position[0] - this.width / 2.0, this.position[1] + this.height / 2.0, // 3

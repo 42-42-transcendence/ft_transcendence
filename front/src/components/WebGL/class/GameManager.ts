@@ -28,7 +28,8 @@ export class GameManager {
         }
     }
 
-    static checkOverLine(ballPos: vec2) : string {
+    static checkOverLine() : string {
+        const ballPos = data.ball.position;
         const radius = data.ball.radius;
 
         if (ballPos[0] + radius > 1.0 || ballPos[0] - radius < -1.0) {

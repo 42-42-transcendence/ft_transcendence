@@ -7,12 +7,12 @@ function update(delta: number) {
 		/* 아이템 생성 */
 		GameManager.createItem();
 		/* 아이템 업데이트 */
-		PhysicsEngine.checkItemCollision(data.items, data.paddle, delta);
+		PhysicsEngine.checkItemCollision(delta);
 	}
 	/* 공 위치 업데이트 */
-	PhysicsEngine.GuaranteeConflict(data.ball, delta);
+	PhysicsEngine.GuaranteeConflict(delta);
 	/* 공이 라인을 넘어가는지 확인 */
-	const player = GameManager.checkOverLine(data.ball.position);
+	const player = GameManager.checkOverLine();
 	/* 공이 라인을 넘어갔다면 점수 업데이트 */
 	if (player !== '')
 		GameManager.scoreUpdate(player);

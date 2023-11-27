@@ -7,7 +7,8 @@ import {CanvasPosition} from "./GameManager";
 
 class PhysicsEngine {
     static _paddlePos : PaddlePos | null = null;
-    static checkBallPaddleCollision(ballPos: vec2, paddle: Paddle) {
+    static checkBallPaddleCollision(paddle: Paddle) {
+        const ballPos = data.ball.position;
         const radius = data.ball.radius;
 
         const paddleHeightHalf = paddle.height / 2.0;
@@ -29,7 +30,7 @@ class PhysicsEngine {
         const paddle = data.paddle;
 
         for (let i = 0; i < 2; i++) {
-            if (this.checkBallPaddleCollision(ball.position, paddle[i])) {
+            if (this.checkBallPaddleCollision(paddle[i])) {
                 let normalReflect = vec2.fromValues(i === 0 ? 1 : -1, 0); // 왼쪽 패들이면 1, 오른쪽 패들이면 -1
                 normalReflect[1] = (ball.position[1] - paddle[i].position[1]) / paddle[i].height * 4.0;
                 vec2.normalize(ball.direction, normalReflect);
@@ -62,7 +63,8 @@ class PhysicsEngine {
         return (q < 0 || q > l) || p > delta || p < 0;
     }
 
-    private static makeBallPosition(ball: Ball, ballCorner: BallCorner) : vec2 {
+    private static makeBallPosition(ballCorner: BallCorner) : vec2 {
+        const ball = data.ball;
         switch (ballCorner) {
             case BallCorner.TopRight:
                 return vec2.fromValues(ball.position[0] + ball.radius, ball.position[1] + ball.radius);
@@ -75,7 +77,8 @@ class PhysicsEngine {
         }
     }
 
-    private static makePaddlePosition(paddle: Paddle[], paddlePos: PaddlePos) : {c: vec2, d: vec2, r: number} {
+    private static makePaddlePosition(paddlePos: PaddlePos) : {c: vec2, d: vec2, r: number} {
+        const paddle = data.paddle;
         let c = vec2.create();
         let d = vec2.create();
         let r : number;
@@ -140,10 +143,11 @@ class PhysicsEngine {
         return {c, d, r};
     }
 
-    private static checkAndHandleWallCollision(item: Item, delta: number) {
+    private static checkAndHandleWallCollision(item: Item, delta: number) : {p : number, q : number, side: boolean} | undefined {
         const a = vec2.fromValues(item.position[0], item.position[1]);
         const b = vec2.fromValues(item.direction[0], item.direction[1]);
 
+        console.log(item.position[0], item.position[1]);
         // 캔버스 경계(벽) 설정
         const walls = [
             CanvasPosition.TopLeft,
@@ -152,22 +156,21 @@ class PhysicsEngine {
             CanvasPosition.BottomLeft,
         ];
 
-        // 각 벽과의 충돌 검사
-        walls.forEach(wall => {
-            const {r, c, d} = this.makeCanvasPosition(wall);
+        for (const wall of walls) {
+            const {c, d, r} = this.makeCanvasPosition(wall);
             const {p, q} = this.calculateConflict(a, b, c, d);
 
             if (!this.checkConflict(p, q, r, delta)) {
-                if (wall === walls[0] || wall === walls[1]) {
-                    item.direction[0] *= -1;
-                } else {
-                    item.direction[1] *= -1;
-                }
+                let side = wall === walls[2] || wall === walls[3];
+                return {p, q, side};
             }
-        });
+        }
+        return undefined;
     }
 
-    static calCheckConflict(ball: Ball, delta: number, paddle: Paddle[]) {
+    static calCheckConflict(delta: number) {
+        const paddles = data.paddle;
+        const ball = data.ball;
         const cornerPaddleArray = [
             { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
             { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
@@ -176,12 +179,12 @@ class PhysicsEngine {
         ];
 
             for (const { corner, paddlePos } of cornerPaddleArray) {
-                const ballPos = this.makeBallPosition(ball, corner);
+                const ballPos = this.makeBallPosition(corner);
 
                 for (const pos of paddlePos) {
                     const factor = this.calculateFactor(this._paddlePos);
                     const ballDirection = vec2.scale(vec2.create(), ball.direction, ball.velocity * factor);
-                    const { c, d, r } = this.makePaddlePosition(paddle, pos);
+                    const { c, d, r } = this.makePaddlePosition(pos);
                     const { p, q } = this.calculateConflict(ballPos, ballDirection, c, d);
 
                     if (!this.checkConflict(p, q, r, delta) && p > 0) {
@@ -189,34 +192,80 @@ class PhysicsEngine {
                     }
                 }
         }
-        return -1; // 충돌이 없는 경우
+        return undefined; // 충돌이 없는 경우
     }
 
-    static checkItemCollision(items: Item[], paddles: Paddle[], delta: number) {
-        for (let i = items.length - 1; i >= 0; i--) {
-            const item = items[i];
-            let collisionDetected = false;
+    private static checkItemAndPaddleCollision(item: Item, idx: number, delta: number) {
+        const items = data.items;
+        const paddles = data.paddle;
+        let collisionDetected = false;
 
-            for (let j = 0; j < paddles.length; j++) {
-                const paddle = paddles[j];
-                const paddlePositions = this.getPaddlePositions(j); // 패들의 모든 위치를 가져옴
+        for (let j = 0; j < paddles.length; j++) {
+            const paddle = paddles[j];
+            const paddlePositions = this.getPaddlePositions(j); // 패들의 모든 위치를 가져옴
 
-                for (const pos of paddlePositions) {
-                    if (this.isColliding(item, delta, pos)) {
-                        this.applyEffectToPaddle(paddle);
-                        items.splice(i, 1);
-                        collisionDetected = true;
-                        break; // 충돌 감지되면 내부 루프 종료
-                    }
+            for (const pos of paddlePositions) {
+                const collisionResult = this.isItemColliding(item, delta, pos);
+                if (collisionResult !== undefined) {
+                    this.applyItemEffectToPaddle(paddle);
+                    items.splice(idx, 1);
+                    return true;
                 }
-                if (collisionDetected) break; // 충돌 감지되면 외부 루프 종료
+            }
+        }
+        return false;
+    }
+
+    private static checkItemMove(item: Item, delta: number) {
+        const collisionResultInWall = this.checkAndHandleWallCollision(item, delta);
+        if (collisionResultInWall === undefined) {
+            item.move(delta);
+            return;
+        }
+
+        item.move(collisionResultInWall.p);
+        if (!collisionResultInWall.side) {
+            item.direction[0] *= -1;
+        } else {
+            item.direction[1] *= -1;
+        }
+        const restAfterCollision = delta - collisionResultInWall.p;
+        item.move(0.001);
+        this.checkItemMove(item, restAfterCollision);
+    }
+
+    static checkItemCollision(delta: number) {
+        let items = data.items;
+        let collisionResult : {p : number, q : number} | undefined = undefined;
+
+        const paddles = data.paddle;
+        for (let i = items.length - 1; i >= 0; i--) {
+            let collisionDetected = false;
+            const item = items[i];
+
+            if (this.checkItemAndPaddleCollision(item, i, delta)) {
+                collisionDetected = true;
+                break;
             }
 
             if (!collisionDetected) {
-                this.checkAndHandleWallCollision(item, delta);
-                item.move(delta);
+                this.checkItemMove(item, delta);
+                // const collisionResultInWall = this.checkAndHandleWallCollision(item, delta);
+                // if (collisionResultInWall !== undefined) {
+                //     item.move(collisionResultInWall.p);
+                //     if (collisionResultInWall.side) {
+                //         item.direction[0] *= -1;
+                //     } else {
+                //         item.direction[1] *= -1;
+                //     }
+                //     const restAfterCollision = delta - collisionResultInWall.p;
+                //     this.checkItemCollision(restAfterCollision);
+                // } else {
+                //     item.move(delta);
+                // }
             }
         }
+        return collisionResult;
     }
 
     private static getPaddlePositions(index: number): PaddlePos[] {
@@ -227,16 +276,18 @@ class PhysicsEngine {
         }
     }
 
-    private static isColliding(item: Item, delta: number, paddlePos: PaddlePos) : boolean {
+    private static isItemColliding(item: Item, delta: number, paddlePos: PaddlePos) : {p : number, q : number} | undefined {
         const a = vec2.fromValues(item.position[0], item.position[1]);
         const b = vec2.fromValues(item.direction[0], item.direction[1]);
-        const {c, d, r} = this.makePaddlePosition(data.paddle, paddlePos);
+        const {c, d, r} = this.makePaddlePosition(paddlePos);
 
         const {p, q} = this.calculateConflict(a, b, c, d);
-        return !this.checkConflict(p, q, r, delta);
+        if (!this.checkConflict(p, q, r, delta))
+            return {p, q};
+        return undefined;
     }
 
-    private static applyEffectToPaddle(paddle: Paddle) {
+    private static applyItemEffectToPaddle(paddle: Paddle) {
         let rand = Math.random() * 3;
         if (rand < 1) {
             if (paddle.height < 0.8)
@@ -253,10 +304,10 @@ class PhysicsEngine {
         }
     }
 
-    static GuaranteeConflict(ball: Ball, delta: number) {
-        const p = this.calCheckConflict(ball, delta, data.paddle);
+    static GuaranteeConflict(delta: number) {
+        const p = this.calCheckConflict(delta);
 
-        if (p === -1) {
+        if (p === undefined) {
             this.updateBallPosition(delta);
             return ;
         }
@@ -264,13 +315,12 @@ class PhysicsEngine {
         this.handleBallPaddleCollision();
         const restAfterCollision = delta - p.p;
         this._paddlePos = p.pos;
-        this.GuaranteeConflict(ball, restAfterCollision);
-        // 상하 라인 충돌도 구현.
+        this.GuaranteeConflict(restAfterCollision);
     }
 
     static calculateFactor(paddlePos: PaddlePos | null) {
         let factor;
-        if (null === paddlePos) {
+        if (paddlePos === null) {
             factor = 1.0;
         } else if (paddlePos < 3) {
             factor = data.paddle[0].ballVelocityFactor;
@@ -280,7 +330,8 @@ class PhysicsEngine {
         return factor;
     }
 
-    static calculateBallPosition(ball: Ball, delta: number, factor: number) : vec2 {
+    static calculateBallPosition(delta: number, factor: number) : vec2 {
+        const ball = data.ball;
         let tempVec2 = vec2.create();
         vec2.add(tempVec2, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta * factor));
         return tempVec2;
@@ -288,7 +339,7 @@ class PhysicsEngine {
 
     static updateBallPosition(delta: number) {
         const factor = this.calculateFactor(this._paddlePos);
-        data.ball.position = this.calculateBallPosition(data.ball, delta, factor);
+        data.ball.position = this.calculateBallPosition(delta, factor);
     }
 
     static updatePaddlePosition(delta: number) {

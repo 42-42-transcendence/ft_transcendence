@@ -219,9 +219,10 @@ export class ChannelController {
       await this.eventsGateway.updatedSystemMessage(content, channel, newOwnerUser);
     }
     await this.channelMemberService.deleteChannelMemberById(member.channelMemberID);
+    const newChannel = await this.channelService.getChannelByIdWithException(channelID);
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
-    await this.eventsGateway.updatedSystemMessage(content, channel, user);
-    await this.eventsGateway.updatedMembersForAllUsers(channel);
+    await this.eventsGateway.updatedSystemMessage(content, newChannel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(newChannel);
 
     if (channel.total === 0) {
       await this.channelService.deleteChannelById(channel.channelID);

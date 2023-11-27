@@ -548,8 +548,13 @@ export class ChannelController {
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
     const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
+    var title: string = `${user.nickname}-${invitedUser.nickname} DM`;
+
+    if (user.nickname > invitedUser.nickname) {
+      title = `${invitedUser.nickname}-${user.nickname} DM`;
+    }
     const channel = await this.channelService.createChannel({
-      title: `${user.nickname}-${invitedUser.nickname} DM`,
+      title,
       password: '',
       type: ChannelTypeEnum.DM
     });

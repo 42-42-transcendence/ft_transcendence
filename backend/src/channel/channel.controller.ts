@@ -60,6 +60,21 @@ export class ChannelController {
 
 
   @ApiOperation({
+    summary: 'channelID로 채널 정보를 가져온다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<Channel>
+  })
+  @Get(':id')
+  async getChannelInfoById(
+    @Param('id') channelID: string
+  ): Promise<Channel> {
+    return (await this.channelService.getChannelById(channelID));
+  }
+
+
+  @ApiOperation({
     summary: '채널 생성'
   })
   @ApiOkResponse({
@@ -642,5 +657,7 @@ export class ChannelController {
 
       return ({ message: content });
     }
+
+
 
 }

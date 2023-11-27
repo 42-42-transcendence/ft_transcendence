@@ -1,5 +1,7 @@
 import { vec2 } from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
+import {PaddlePos} from "./Paddle";
+import data from "../interface/gameData";
 export class GameObject {
     position: vec2;
     direction: vec2;
@@ -58,5 +60,45 @@ export class GameObject {
 
     public checkConflict(p: number, q: number, l: number, delta: number) : boolean {
         return (q < 0 || q > l) || p > delta || p < 0;
+    }
+
+    protected makePaddlePosition(paddlePos: PaddlePos) : {c: vec2, d: vec2, r: number} {
+        const paddle = data.paddle;
+        let c = vec2.create();
+        let d = vec2.create();
+        let r : number;
+        switch (paddlePos) {
+            case PaddlePos.LeftFront:
+                c = vec2.fromValues(paddle[0].position[0] + paddle[0].width / 2.0, paddle[0].position[1] - paddle[0].height / 2.0);
+                d = vec2.fromValues(0, 1);
+                r = paddle[0].height;
+                break;
+            case PaddlePos.LeftUp:
+                c = vec2.fromValues(paddle[0].position[0] - paddle[0].width / 2.0, paddle[0].position[1] + paddle[0].height / 2.0);
+                d = vec2.fromValues(1, 0);
+                r = paddle[0].width;
+                break;
+            case PaddlePos.LeftDown:
+                c = vec2.fromValues(paddle[0].position[0] - paddle[0].width / 2.0, paddle[0].position[1] - paddle[0].height / 2.0);
+                d = vec2.fromValues(1, 0);
+                r = paddle[0].width;
+                break;
+            case PaddlePos.RightFront:
+                c = vec2.fromValues(paddle[1].position[0] - paddle[1].width / 2.0, paddle[1].position[1] - paddle[1].height / 2.0);
+                d = vec2.fromValues(0, 1);
+                r = paddle[1].height;
+                break;
+            case PaddlePos.RightUp:
+                c = vec2.fromValues(paddle[1].position[0] + paddle[1].width / 2.0, paddle[1].position[1] + paddle[1].height / 2.0);
+                d = vec2.fromValues(-1, 0);
+                r = paddle[1].width;
+                break;
+            case PaddlePos.RightDown:
+                c = vec2.fromValues(paddle[1].position[0] + paddle[1].width / 2.0, paddle[1].position[1] - paddle[1].height / 2.0);
+                d = vec2.fromValues(-1, 0);
+                r = paddle[1].width;
+                break;
+        }
+        return {c, d, r};
     }
 }

@@ -1,20 +1,11 @@
 import {vec2} from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
 import {GameObject} from "./GameObject";
+import data from "../interface/gameData";
+import {Paddle, PaddlePos} from "./Paddle";
 
 export class Item extends GameObject {
-    // position: vec2;
-    // direction: vec2;
-    // velocity: number;
-    // radius: number;
     itemVertices = new Float32Array();
-    // constructor(direction: vec2) {
-    //     this.position = vec2.fromValues(0, 0);
-    //     this.direction = direction;
-    //     this.velocity = 1.0;
-    //     this.radius = 0.01; // 공의 반지름
-    //     this.calculateVertices();
-    // }
 
     public calculateVertices() {
         this.itemVertices = new Float32Array([
@@ -26,6 +17,62 @@ export class Item extends GameObject {
             this.position[0] - this.radius, this.position[1] - this.radius,   // 3
             this.position[0] + this.radius, this.position[1] - this.radius,    // 4
         ]);
+    }
+
+    private getPaddlePositions(index: number): PaddlePos[] {
+        if (index === 0) { // 왼쪽 패들
+            return [PaddlePos.LeftFront, PaddlePos.LeftUp, PaddlePos.LeftDown];
+        } else { // 오른쪽 패들
+            return [PaddlePos.RightFront, PaddlePos.RightUp, PaddlePos.RightDown];
+        }
+    }
+
+    private isColliding(delta: number, paddlePos: PaddlePos) : {p : number, q : number} | undefined {
+        const a = vec2.fromValues(this.position[0], this.position[1]);
+        const b = vec2.fromValues(this.direction[0], this.direction[1]);
+        const {c, d, r} = this.makePaddlePosition(paddlePos);
+
+        const {p, q} = this.calculateConflict(a, b, c, d);
+        if (!this.checkConflict(p, q, r, delta))
+            return {p, q};
+        return undefined;
+    }
+
+    private applyItemEffectToPaddle(paddle: Paddle) {
+        let rand = Math.random() * 3;
+        if (rand < 1) {
+            if (paddle.height < 0.8)
+                paddle.height += 0.05;
+            console.log("패들 길이 증가!");
+        } else if (rand < 2) {
+            if (paddle.paddleSpeed < 2.0)
+                paddle.paddleSpeed += 0.12;
+            console.log("패들 속도 증가!");
+        } else {
+            if (paddle.ballVelocityFactor < 3.0)
+                paddle.ballVelocityFactor += 0.1;
+            console.log("공 속도 증가!");
+        }
+    }
+
+    public checkWithPaddleCollision(idx: number, delta: number) {
+        const items = data.items;
+        const paddles = data.paddle;
+
+        for (let j = 0; j < paddles.length; j++) {
+            const paddle = paddles[j];
+            const paddlePositions = this.getPaddlePositions(j); // 패들의 모든 위치를 가져옴
+
+            for (const pos of paddlePositions) {
+                const collisionResult = this.isColliding(delta, pos);
+                if (collisionResult !== undefined) {
+                    this.applyItemEffectToPaddle(paddle);
+                    items.splice(idx, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private checkAndHandleWallCollision(delta: number) : {p : number, q : number, side: boolean} | undefined {

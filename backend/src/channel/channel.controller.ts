@@ -131,12 +131,23 @@ export class ChannelController {
   async checkJoinChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('password') password: string
+    @Body('password') password: string,
+    @Body('isRedirected') isRedirected: boolean
   ): Promise<{ isAuthenticated: boolean }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const member = await this.channelMemberService.getChannelMemberByChannelUser(channel, user);
     const content = `${user.nickname}님께서 입장하셨습니다.`;
+
+    if (isRedirected === true) {
+      if (member.role === ChannelMemberRole.INVITE) {
+        await this.channelService.enterUserToChannel(channel);
+        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
+      }
+      this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
+      return ({ isAuthenticated: true });
+    }
 
     // DM도 일단 이렇게 느슨하게 설정
     if ((channel.type === ChannelTypeEnum.PRIVATE) || (channel.type === ChannelTypeEnum.DM)) {

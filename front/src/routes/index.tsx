@@ -68,10 +68,6 @@ const router = createBrowserRouter([
         path: '/two-factor-auth',
         element: <TwoFactorAuthPage />,
       },
-      {
-        path: '/setting-profile',
-        element: <SettingProfilePage />,
-      },
     ],
   },
   {
@@ -82,6 +78,10 @@ const router = createBrowserRouter([
     path: '/oauth',
     element: <OAuth />,
     loader: oAuthLoader,
+  },
+  {
+    path: '/setting-profile',
+    element: <SettingProfilePage />,
   },
 ]);
 

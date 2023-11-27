@@ -31,11 +31,9 @@ const OAuth = () => {
           } else {
             dispatch(authActions.setAuthToken(ret.jwtToken));
             dispatch(authActions.setMyID(ret.userName));
+
             return (
-              <Navigate
-                to={ret.userName === '' ? '/setting-profile' : '/'}
-                replace={true}
-              />
+              <Navigate to={ret.userName === '' ? '/setting-profile' : '/'} />
             );
           }
         }}

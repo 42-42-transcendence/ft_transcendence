@@ -62,7 +62,6 @@ export class UserService {
   }
 
   async createUser(CreateUserDto: CreateUserDto): Promise<User> {
-    await this.addAchievement(CreateUserDto.userID, Achievements.WELCOME, true);
     return this.userRepository.createUser_default(CreateUserDto);
   }
 

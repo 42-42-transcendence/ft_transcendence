@@ -2,7 +2,16 @@ import { vec2 } from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
 import {PaddlePos} from "./Paddle";
 import data from "../interface/gameData";
-export class GameObject {
+// import {BallCorner} from "./Ball";
+
+export enum BallCorner {
+    TopRight,
+    BottomRight,
+    TopLeft,
+    BottomLeft
+}
+
+export abstract class GameObject {
     position: vec2;
     direction: vec2;
     velocity: number;
@@ -13,6 +22,7 @@ export class GameObject {
         this.direction = direction;
         this.velocity = velocity;
         this.radius = radius;
+        // calculateVertices();
     }
 
     // public move(delta: number): void {
@@ -20,7 +30,7 @@ export class GameObject {
     //     this.position[1] += this.direction[1] * this.velocity * delta;
     // }
 
-    public makeCanvasPosition(canvasPosition: CanvasPosition) {
+    protected makeCanvasPosition(canvasPosition: CanvasPosition) {
         let c = vec2.create();
         let d = vec2.create();
         let r = 2.0;
@@ -46,9 +56,9 @@ export class GameObject {
         return {c, d, r};
     }
 
-    public crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
+    protected crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
 
-    public calculateConflict(a: vec2, b: vec2, c : vec2, d :vec2) {
+    protected calculateConflict(a: vec2, b: vec2, c : vec2, d :vec2) {
         const crossB_D = this.crossProduct(b, d);
         if (crossB_D === 0) {
             return { p: -1, q: -1 };
@@ -58,7 +68,7 @@ export class GameObject {
         return {p, q};
     }
 
-    public checkConflict(p: number, q: number, l: number, delta: number) : boolean {
+    protected checkConflict(p: number, q: number, l: number, delta: number) : boolean {
         return (q < 0 || q > l) || p > delta || p < 0;
     }
 
@@ -100,5 +110,18 @@ export class GameObject {
                 break;
         }
         return {c, d, r};
+    }
+
+    protected makeBallPosition(ballCorner: BallCorner) : vec2 {
+        switch (ballCorner) {
+            case BallCorner.TopRight:
+                return vec2.fromValues(this.position[0] + this.radius, this.position[1] + this.radius);
+            case BallCorner.BottomRight:
+                return vec2.fromValues(this.position[0] + this.radius, this.position[1] - this.radius);
+            case BallCorner.TopLeft:
+                return vec2.fromValues(this.position[0] - this.radius, this.position[1] + this.radius);
+            case BallCorner.BottomLeft:
+                return vec2.fromValues(this.position[0] - this.radius, this.position[1] - this.radius);
+        }
     }
 }

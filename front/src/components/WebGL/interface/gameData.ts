@@ -1,9 +1,10 @@
 import {Ball} from '../class/Ball';
 import {Paddle} from '../class/Paddle';
+import {vec2} from 'gl-matrix';
 
 let data: gameData = {
 	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-	ball: new Ball(),
+	ball : null,
 	keyPress: {
 		up: false,
 		down: false,

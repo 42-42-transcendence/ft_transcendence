@@ -1,4 +1,6 @@
 import data from '../interface/gameData';
+import {vec2} from 'gl-matrix';
+import {Ball} from '../class/Ball';
 
 function initialize(state: any) {
 	if (data.canvasRef === null) return;
@@ -19,6 +21,7 @@ function initialize(state: any) {
 		data.mode = state.gameMode;
 	}
 
+	data.ball = new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02);
 	if (state.gameMode === 'fast') {
 		data.ball.velocity = 3.0;
 		data.paddle[0].speed = 1.5;

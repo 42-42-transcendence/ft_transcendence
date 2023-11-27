@@ -40,7 +40,7 @@ export class Item extends GameObject {
         }
     }
 
-    public checkWithPaddleCollision(idx: number, delta: number) {
+    public handleWithPaddleCollision(idx: number, delta: number) {
         const items = data.items;
         const paddles = data.paddle;
 
@@ -86,23 +86,18 @@ export class Item extends GameObject {
     public checkMoved(delta: number) {
         const collisionResultInWall = this.checkAndHandleWallCollision(delta);
         if (collisionResultInWall === undefined) {
-            this.move(delta);
+            this.move(delta, null);
             return;
         }
 
-        this.move(collisionResultInWall.p);
+        this.move(collisionResultInWall.p, null);
         if (!collisionResultInWall.side) {
             this.direction[0] *= -1;
         } else {
             this.direction[1] *= -1;
         }
         const restAfterCollision = delta - collisionResultInWall.p;
-        this.move(0.001);
+        this.move(0.001, null);
         this.checkMoved(restAfterCollision);
-    }
-
-    public move(delta: number) {
-        this.position[0] += this.direction[0] * this.velocity * delta;
-        this.position[1] += this.direction[1] * this.velocity * delta;
     }
 }

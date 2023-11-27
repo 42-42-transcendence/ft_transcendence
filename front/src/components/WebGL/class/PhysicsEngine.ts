@@ -13,7 +13,7 @@ class PhysicsEngine {
             let collisionDetected = false;
             const item = items[i];
 
-            if (item.checkWithPaddleCollision(i, delta)) {
+            if (item.handleWithPaddleCollision(i, delta)) {
                 collisionDetected = true;
                 break;
             }
@@ -26,14 +26,14 @@ class PhysicsEngine {
     }
 
     static GuaranteeConflict(delta: number) {
-        const p = data.ball.calCheckConflict(delta);
+        const p = data.ball.predictCollision(delta);
 
         if (p === undefined) {
-            data.ball.updateBallPosition(delta, this._paddlePos);
+            data.ball.move(delta, this._paddlePos);
             return ;
         }
-        data.ball.updateBallPosition(p.p, this._paddlePos);
-        data.ball.handleBallPaddleCollision();
+        data.ball.move(p.p, this._paddlePos);
+        data.ball.handleWithPaddleCollision();
         const restAfterCollision = delta - p.p;
         this._paddlePos = p.pos;
         this.GuaranteeConflict(restAfterCollision);

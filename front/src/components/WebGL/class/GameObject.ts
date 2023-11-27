@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
-import {PaddlePos} from "./Paddle";
+import {Paddle, PaddlePos} from "./Paddle";
 import data from "../interface/gameData";
 // import {BallCorner} from "./Ball";
 
@@ -26,6 +26,26 @@ export abstract class GameObject {
         this.calculateVertices();
     }
 
+    protected checkWithWallCollision() {
+        return this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0;
+    }
+
+    protected checkWithPaddleCollision(paddle: Paddle) {
+        const paddleHeightHalf = paddle.height / 2.0;
+        const paddleWidthHalf = paddle.width / 2.0;
+        let paddleTop = paddle.position[1] + paddleHeightHalf;
+        let paddleBottom = paddle.position[1] - paddleHeightHalf;
+        let paddleLeft = paddle.position[0] - paddleWidthHalf;
+        let paddleRight = paddle.position[0] + paddleWidthHalf;
+
+        const objectTop = this.position[1] + this.radius;
+        const objectBottom = this.position[1] - this.radius;
+        const objectLeft = this.position[0] - this.radius;
+        const objectRight = this.position[0] + this.radius;
+
+        return (objectTop > paddleBottom && objectBottom < paddleTop && objectLeft < paddleRight && objectRight > paddleLeft);
+    }
+
     public calculateVertices() {
         this.vertices.set([
             this.position[0] - this.radius, this.position[1] + this.radius,  // 1
@@ -38,10 +58,23 @@ export abstract class GameObject {
         ]);
     }
 
-    // public move(delta: number): void {
-    //     this.position[0] += this.direction[0] * this.velocity * delta;
-    //     this.position[1] += this.direction[1] * this.velocity * delta;
-    // }
+    public calculateFactor(paddlePos: PaddlePos | null) {
+        let factor;
+        if (paddlePos === null) {
+            factor = 1.0;
+        } else if (paddlePos < 3) {
+            factor = data.paddle[0].ballVelocityFactor;
+        } else {
+            factor = data.paddle[1].ballVelocityFactor;
+        }
+        return factor;
+    }
+
+    public move(delta: number, paddlePos: PaddlePos | null): void {
+        const factor = this.calculateFactor(paddlePos);
+        this.position[0] += this.direction[0] * this.velocity * delta * factor;
+        this.position[1] += this.direction[1] * this.velocity * delta * factor;
+    }
 
     protected crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
 

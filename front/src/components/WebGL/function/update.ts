@@ -22,7 +22,7 @@ function update(delta: number) {
 		GameManager.resetGame();
 	}
 	/* 공이 위, 아래 벽을 넘어가는지 확인 */
-	data.ball.handleBallWallCollision();
+	data.ball.handleWithWallCollision();
 	/* player 패들 이동 */
 	data.paddle[0].updatePosition(delta);
 }

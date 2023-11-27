@@ -117,56 +117,55 @@ class PhysicsEngine {
         return {c, d, r};
     }
 
-    private static makeCanvasPosition(canvasPosition: CanvasPosition) {
-        let c = vec2.create();
-        let d = vec2.create();
-        let r = 2.0;
+    // private static makeCanvasPosition(canvasPosition: CanvasPosition) {
+    //     let c = vec2.create();
+    //     let d = vec2.create();
+    //     let r = 2.0;
+    //
+    //     switch (canvasPosition) {
+    //         case CanvasPosition.TopRight:
+    //             c = vec2.fromValues(1.0, 1.0);
+    //             d = vec2.fromValues(-1.0, 0.0);
+    //             break;
+    //         case CanvasPosition.BottomRight:
+    //             c = vec2.fromValues(1.0, -1.0);
+    //             d = vec2.fromValues(0.0, 1.0);
+    //             break;
+    //         case CanvasPosition.TopLeft:
+    //             c = vec2.fromValues(-1.0, 1.0);
+    //             d = vec2.fromValues(0.0, -1.0);
+    //             break;
+    //         case CanvasPosition.BottomLeft:
+    //             c = vec2.fromValues(-1.0, -1.0);
+    //             d = vec2.fromValues(1.0, 0.0);
+    //             break;
+    //     }
+    //     return {c, d, r};
+    // }
 
-        switch (canvasPosition) {
-            case CanvasPosition.TopRight:
-                c = vec2.fromValues(1.0, 1.0);
-                d = vec2.fromValues(-1.0, 0.0);
-                break;
-            case CanvasPosition.BottomRight:
-                c = vec2.fromValues(1.0, -1.0);
-                d = vec2.fromValues(0.0, 1.0);
-                break;
-            case CanvasPosition.TopLeft:
-                c = vec2.fromValues(-1.0, 1.0);
-                d = vec2.fromValues(0.0, -1.0);
-                break;
-            case CanvasPosition.BottomLeft:
-                c = vec2.fromValues(-1.0, -1.0);
-                d = vec2.fromValues(1.0, 0.0);
-                break;
-        }
-        return {c, d, r};
-    }
-
-    private static checkAndHandleWallCollision(item: Item, delta: number) : {p : number, q : number, side: boolean} | undefined {
-        const a = vec2.fromValues(item.position[0], item.position[1]);
-        const b = vec2.fromValues(item.direction[0], item.direction[1]);
-
-        console.log(item.position[0], item.position[1]);
-        // 캔버스 경계(벽) 설정
-        const walls = [
-            CanvasPosition.TopLeft,
-            CanvasPosition.BottomRight,
-            CanvasPosition.TopRight,
-            CanvasPosition.BottomLeft,
-        ];
-
-        for (const wall of walls) {
-            const {c, d, r} = this.makeCanvasPosition(wall);
-            const {p, q} = this.calculateConflict(a, b, c, d);
-
-            if (!this.checkConflict(p, q, r, delta)) {
-                let side = wall === walls[2] || wall === walls[3];
-                return {p, q, side};
-            }
-        }
-        return undefined;
-    }
+    // private static checkAndHandleWallCollision(item: Item, delta: number) : {p : number, q : number, side: boolean} | undefined {
+    //     const a = vec2.fromValues(item.position[0], item.position[1]);
+    //     const b = vec2.fromValues(item.direction[0], item.direction[1]);
+    //
+    //     // 캔버스 경계(벽) 설정
+    //     const walls = [
+    //         CanvasPosition.TopLeft,
+    //         CanvasPosition.BottomRight,
+    //         CanvasPosition.TopRight,
+    //         CanvasPosition.BottomLeft,
+    //     ];
+    //
+    //     for (const wall of walls) {
+    //         const {c, d, r} = this.makeCanvasPosition(wall);
+    //         const {p, q} = this.calculateConflict(a, b, c, d);
+    //
+    //         if (!this.checkConflict(p, q, r, delta)) {
+    //             let side = wall === walls[2] || wall === walls[3];
+    //             return {p, q, side};
+    //         }
+    //     }
+    //     return undefined;
+    // }
 
     static calCheckConflict(delta: number) {
         const paddles = data.paddle;
@@ -216,23 +215,23 @@ class PhysicsEngine {
         return false;
     }
 
-    private static checkItemMove(item: Item, delta: number) {
-        const collisionResultInWall = this.checkAndHandleWallCollision(item, delta);
-        if (collisionResultInWall === undefined) {
-            item.move(delta);
-            return;
-        }
-
-        item.move(collisionResultInWall.p);
-        if (!collisionResultInWall.side) {
-            item.direction[0] *= -1;
-        } else {
-            item.direction[1] *= -1;
-        }
-        const restAfterCollision = delta - collisionResultInWall.p;
-        item.move(0.001);
-        this.checkItemMove(item, restAfterCollision);
-    }
+    // private static checkItemMove(item: Item, delta: number) {
+    //     const collisionResultInWall = this.checkAndHandleWallCollision(item, delta);
+    //     if (collisionResultInWall === undefined) {
+    //         item.move(delta);
+    //         return;
+    //     }
+    //
+    //     item.move(collisionResultInWall.p);
+    //     if (!collisionResultInWall.side) {
+    //         item.direction[0] *= -1;
+    //     } else {
+    //         item.direction[1] *= -1;
+    //     }
+    //     const restAfterCollision = delta - collisionResultInWall.p;
+    //     item.move(0.001);
+    //     this.checkItemMove(item, restAfterCollision);
+    // }
 
     static checkItemCollision(delta: number) {
         let items = data.items;
@@ -249,7 +248,8 @@ class PhysicsEngine {
             }
 
             if (!collisionDetected) {
-                this.checkItemMove(item, delta);
+                data.items[i].checkMoved(delta);
+                // this.checkItemMove(item, delta);
                 // const collisionResultInWall = this.checkAndHandleWallCollision(item, delta);
                 // if (collisionResultInWall !== undefined) {
                 //     item.move(collisionResultInWall.p);

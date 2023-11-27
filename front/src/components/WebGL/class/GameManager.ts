@@ -47,10 +47,13 @@ export class GameManager {
         } else {
             randomX = randomX * 0.6 + 0.2;
         }
+        const position = vec2.fromValues(0.0, 0.0);
         let randomY = Math.random() - 0.5;
         const direction = vec2.normalize(vec2.create(), vec2.fromValues(randomX, randomY));
+        const velocity = 1.0;
+        const radius = 0.01;
 
-        return new Item(direction);
+        return new Item(position, direction, velocity, radius);
     }
 
     static resetBallPosition() {

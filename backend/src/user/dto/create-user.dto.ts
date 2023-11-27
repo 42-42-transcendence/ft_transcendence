@@ -8,5 +8,5 @@ export class CreateUserDto {
     type: 'string',
     uniqueItems: true,
   })
-  userID: string;
+  nickname: string;
 }

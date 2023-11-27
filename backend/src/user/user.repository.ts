@@ -24,10 +24,10 @@ export class UserRepository extends Repository<User> {
   }
 
   async createUser_default(CreateUserDto: CreateUserDto): Promise<User> {
-    const { userID } = CreateUserDto;
+    const { nickname } = CreateUserDto;
 
     const UserTable = this.create({
-      userID,
+      nickname,
     });
 
     await this.save(UserTable);

@@ -57,10 +57,10 @@ export class UserController {
     type: User,
   })
   @Put('setup')
-  async createUser(@Body() CreateUserDto: CreateUserDto): Promise<CreateUserDto> {
+  async createUser(@Body('userID') CreateUserDto: CreateUserDto): Promise<CreateUserDto> {
     const createdUser = await this.userService.createUser(CreateUserDto);
     const userID = {
-      userID: createdUser.userID,
+      userID: createdUser.nickname,
     };
     const User = this.userService.getUserByNickname(createdUser.nickname);
     (await User).userAchievements;

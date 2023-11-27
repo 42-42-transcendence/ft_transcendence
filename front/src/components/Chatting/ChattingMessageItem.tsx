@@ -11,11 +11,12 @@ type Props = {
 
 const formatTimeToHHMM = (dateStr: string): string => {
   const date = new Date(dateStr);
+
   let hoursString = date.getHours().toString();
   let minutesString = date.getMinutes().toString();
 
-  if (hoursString.length === 1) hoursString = hoursString + '0';
-  if (minutesString.length === 1) minutesString = minutesString + '0';
+  if (hoursString.length === 1) hoursString = '0' + hoursString;
+  if (minutesString.length === 1) minutesString = '0' + minutesString;
 
   return `${hoursString}:${minutesString}`;
 };

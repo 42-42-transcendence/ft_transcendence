@@ -12,7 +12,7 @@ import { SERVER_URL } from '../../App';
 type ChannelType = {
   channelID: string;
   title: string;
-  type: 'public' | 'private' | 'direct';
+  type: 'public' | 'private' | 'dm';
   total?: number;
   password?: string;
 };

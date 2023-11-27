@@ -19,7 +19,7 @@ import SocialPage from './Social';
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    // element: <ProtectedRouter />,
+    element: <ProtectedRouter />,
     children: [
       {
         path: '/',

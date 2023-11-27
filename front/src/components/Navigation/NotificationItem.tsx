@@ -8,21 +8,21 @@ import { actions as notificationActions } from '../../store/Notification/notific
 
 type Props = {
   id: string;
-  type: NotificationType;
+  notiType: NotificationType;
   message: string;
   channelID?: string;
 };
 
-const NotificationItem = ({ id, type, message, channelID }: Props) => {
+const NotificationItem = ({ id, notiType, message, channelID }: Props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { request } = useRequest();
 
   let title = '';
-  if (type === 'friend') title = '친구 요청';
-  else if (type === 'ban') title = '추방 알림';
-  else if (type === 'dm') title = '메시지 도착';
-  else if (type === 'invite') title = '채팅 초대';
+  if (notiType === 'friend') title = '친구 요청';
+  else if (notiType === 'ban') title = '추방 알림';
+  else if (notiType === 'dm') title = '메시지 도착';
+  else if (notiType === 'invite') title = '채팅 초대';
 
   const clickHandler = async () => {
     const ret = await request<{ message: string }>(
@@ -34,8 +34,10 @@ const NotificationItem = ({ id, type, message, channelID }: Props) => {
 
     if (ret !== null) {
       dispatch(notificationActions.deleteNotification(id));
-      if (type === 'dm' || type === 'invite')
-        navigate(`/chatting/${channelID}`);
+      if (notiType === 'dm' || notiType === 'invite')
+        navigate(`/chatting/${channelID}`, {
+          state: { redirect: true },
+        });
     }
   };
 

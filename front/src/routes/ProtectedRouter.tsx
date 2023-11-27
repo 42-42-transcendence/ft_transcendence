@@ -27,10 +27,9 @@ const ProtectedRouter = () => {
     };
     fetchTokenisValidated();
   }, [request]);
-  console.log('ga');
 
   if (tokenIsValidated === null) {
-    return <></>;
+    return <>...Loading...</>;
   } else if (tokenIsValidated === true) {
     if (!authState.myID) {
       return <Navigate to="/setting-profile" />;

@@ -36,7 +36,12 @@ export class UserRepository extends Repository<User> {
 	}
 
 	async getUserByNickname(nickname: string): Promise<User> {
-		return (await this.findOneBy({ nickname }));
+		const user = await this
+			.createQueryBuilder('user')
+			.where('user.nickname = :nickname', { nickname })
+			.getOne();
+
+		return (user);
 	}
 
 	async createUserDummy(): Promise<User> {

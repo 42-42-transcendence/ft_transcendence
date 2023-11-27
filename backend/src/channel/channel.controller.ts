@@ -459,11 +459,11 @@ export class ChannelController {
   async inviteToChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const invitedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUser(channel, invitedUser);
 

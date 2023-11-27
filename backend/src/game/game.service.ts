@@ -4,7 +4,7 @@ import { Repository } from "typeorm";
 import { vec2 } from "gl-matrix";
 import { Game } from "./entities/game.entity";;
 import { UserService } from "../user/user.service";
-import { GameData, Paddle, Ball } from "./dto/in-game.dto";
+import { GameData, Paddle, Ball, JoinGameDto } from "./dto/in-game.dto";
 import { GameInfoDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 import { GameObjectsDto } from "./dto/game-data.dto";
@@ -19,32 +19,7 @@ interface Queue {
     isFirst : boolean;
 }
 
-let data: GameData = {
-	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-	ball: new Ball(),
-	keyPress: {
-		up: false,
-		down: false,
-	},
-	scores: [0, 0],
-	// gl: null,
-	// paddleBuffer: null,
-	// ballBuffer: null,
-	// lineBuffer: null,
-	// positionLoc: 0,
-	// viewPortLoc: null,
-	lastTime: 0,
-	// isFirstRender: true,
-	// profileRef: [null, null],
-	// scoreRef: [null, null],
-	// canvasRef: null,
-	// program: [null, null],
-	mode: 'normal',
-	// items: [],
-};
-
-
-// queue: Array<Socket> = [];
+const data = new GameData();
 
 @Injectable()
 export class GameService {
@@ -62,6 +37,7 @@ export class GameService {
         if (gameId)
             return null;
         const user = new User;
+        // const user = await this.userService.findByName(dto.firstPlayer);
         if (!user)
             return null;
         const game = await this.gameRepository.save({player1 : user.userID, player2 : null});
@@ -70,21 +46,68 @@ export class GameService {
         return game.id;
     }
 
+    async startGame(clientId1: string, clientId2: string, gameOptions: GameOptionDto): Promise<string> {
+        const gameId = await this.newGame(clientId1, gameOptions);
+      
+        if (!gameId) {
+          return null;
+        }
+      
+        // Join player2 (수정 필요)
+        const joinDto: JoinGameDto = {
+            gameId: gameId,
+            displayName: "PLAYER 2", // ??
+            player1: clientId1,      
+            player2: clientId2,      
+          };
+      
+        const gameOption = await this.joinGame(clientId2, joinDto);
+      
+        if (!gameOption) {
+          return null;
+        }
+      
+        this.startGameLoop(gameId);
 
-    // async joinGame (clientId : string, dto : JoinGameDto) : Promise<GameOptionDto> {
-    //     const gameOption : GameOptionDto = this.getGameOptions(dto.gameId);
-    //     if (!gameOption || gameOption.isInGame) {
-    //         return null;
-    //     }
-    //     await this.setplayer2(dto.gameId, dto.displayName);
-    //     gameOption.player2 = dto.displayName;
-    //     gameOption.isInGame = true;
-    //     this.gameIdToGameOption.set(dto.gameId, gameOption);
-    //     this.userService.changeStatus(gameOption.player1, dto.gameId);
-    //     this.userService.changeStatus(dto.displayName, dto.gameId);
-    //     this.playerToGameId.set(clientId, {gameId : dto.gameId, isFirst : false});
-    //     return gameOption;
-    // }
+        return (gameId);
+    }
+      
+    private async startGameLoop(gameId: string): Promise<void> {
+        setInterval(async () => {
+          await this.updateGame(gameId);
+          const gameData = this.getGameData(gameId);
+          this.gameGateway.server.to(gameId).emit("updateGame", gameData);
+        }, 20);
+    }
+      
+    async joinGame (clientId : string, dto : JoinGameDto) : Promise<GameOptionDto> {
+        const gameOption : GameOptionDto = this.getGameOptions(dto.gameId);
+        if (!gameOption || gameOption.isInGame) {
+            return null;
+        }
+        await this.setplayer2(dto.gameId, dto.displayName);
+        gameOption.player2 = dto.displayName;
+        gameOption.isInGame = true;
+        this.gameIdToGameOption.set(dto.gameId, gameOption);
+        // this.userService.changeStatus(gameOption.player1, dto.gameId);
+        // this.userService.changeStatus(dto.displayName, dto.gameId);
+        this.playerToGameId.set(clientId, {gameId : dto.gameId, isFirst : false});
+
+        const queue = this.getQueue(clientId);
+        const player1 = this.playerToGameId.get(queue.gameId);
+      
+        if (player1 && player1.isFirst) {
+            // Both players are in the queue, start the game
+            const gameOptions = this.getGameOptions(queue.gameId);
+            const gameId = await this.startGame(clientId, player1.gameId, gameOptions);
+        
+            if (gameId) {
+              // Emit a message or perform any other actions to notify the clients that the game has started
+              this.gameGateway.server.to(gameId).emit('gameStarted');
+            }
+        return gameOption;
+        }
+    }
 
     private async updateGame(gameId: string): Promise<void> {
         const gamedata = this.gameIdToGameData.get(gameId);
@@ -105,6 +128,7 @@ export class GameService {
     
             return (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft);
         };
+        
         const handleBallPaddleCollision = () =>{
             const ball = data.ball;
             const paddle = data.paddle;
@@ -169,7 +193,7 @@ export class GameService {
             const paddle = data.paddle;
             /* 현재 player1의 패들 위치만 고려 */
             if (data.keyPress.up) {
-                paddle[0].position[1] += paddle[0].paddleSpeed * delta
+                paddle[0].position[1] += paddle[0].paddleSpeed * delta;
             } else if (data.keyPress.down) {
                 paddle[0].position[1] -= paddle[0].paddleSpeed * delta;
             } else {
@@ -186,12 +210,6 @@ export class GameService {
         
         this.gameGateway.emitGameUpdate(gameId, gamedata);
     }
-
-
-    startGameLoop(gameId: string): void {
-        setInterval(() => this.updateGame(gameId), 20); // Adjust milliseconds
-    }
-
 
     reconnectToGame (clientId : string, playerName : string) : string {
         for (const [gameId, GameData] of this.gameIdToGameData) {
@@ -218,14 +236,14 @@ export class GameService {
     deleteGameData (gameId : string) {
         this.gameIdToGameData.delete(gameId);
     }
-
-    // async setplayer2(gameId : string, player2 : string) : Promise<void> {
-    //     const game : Game = await this.findGameById(gameId);
-    //     const user = await this.userService.findByID(player2);
-    //     if (user)
-    //         game.player2 = user.id;
-    //     await this.gameRepository.save(game);
-    // }
+    
+    async setplayer2(gameId : string, player2 : string) : Promise<void> {
+        const game : Game = await this.findGameById(gameId);
+        // const user = await this.userService.findByID(player2);
+        // if (user)
+        //     game.player2 = user.id;
+        await this.gameRepository.save(game);
+    }
 
     isInGame(gameId : string) : boolean {
         if (this.gameIdToGameOption.has(gameId))

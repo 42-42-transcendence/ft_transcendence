@@ -92,23 +92,13 @@ export interface JoinGameDto { // will combine with GameInfoDto
 }
 
 export class GameData {
-	// paddle: Paddle[];
-	paddle: Paddle[];
-	ball: Ball;
-	keyPress: KeyPress;
-	scores: [number, number];
-	// gl: WebGLRenderingContext | null;
-	// paddleBuffer: WebGLBuffer | null;
-	// ballBuffer: WebGLBuffer | null;
-	// lineBuffer: WebGLBuffer | null;
-	// positionLoc: number;
-	// viewPortLoc: WebGLUniformLocation | null;
-	lastTime: number;
-	// isFirstRender: boolean;
-	// canvasRef: HTMLCanvasElement | null;
-	// profileRef: (HTMLDivElement | null)[];
-	// scoreRef: (HTMLDivElement | null)[];
-	// program: (WebGLProgram | null)[];
-	mode: string;
-	// items: Item[];
+	paddle: Paddle[] = [new Paddle(-0.96, 0), new Paddle(0.96, 0)];
+	ball: Ball = new Ball();
+	keyPress: KeyPress = {
+		up: false,
+		down: false,
+	};
+	scores: [number, number] = [0, 0];
+	lastTime: number = 0;
+	mode: GameModeEnum.NORMAL;
 }

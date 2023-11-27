@@ -1,30 +1,10 @@
 import { vec2 } from 'gl-matrix';
+import { normalize } from 'path';
 import { GameData, Paddle, Ball } from "./dto/in-game.dto";
 import { GameModeEnum } from './enums/gameMode.enum';
 
-let data: GameData = {
-	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-	ball: new Ball(),
-	keyPress: {
-		up: false,
-		down: false,
-	},
-	scores: [0, 0],
-	// gl: null,
-	// paddleBuffer: null,
-	// ballBuffer: null,
-	// lineBuffer: null,
-	// positionLoc: 0,
-	// viewPortLoc: null,
-	lastTime: 0,
-	// isFirstRender: true,
-	// profileRef: [null, null],
-	// scoreRef: [null, null],
-	// canvasRef: null,
-	// program: [null, null],
-	mode: 'normal',
-	// items: [],
-};
+const data = new GameData();
+
 export class GameEngine {
 	// startGame(gameId: number, GameData: GameData, mode: GameModeEnum) {
 	// 	GameData.subscription = subject.subscribe(() => {

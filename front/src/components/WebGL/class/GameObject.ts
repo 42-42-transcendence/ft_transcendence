@@ -16,13 +16,26 @@ export abstract class GameObject {
     direction: vec2;
     velocity: number;
     radius: number;
+    vertices = new Float32Array(12);
 
     constructor(position: vec2, direction: vec2, velocity: number, radius: number) {
         this.position = position;
         this.direction = direction;
         this.velocity = velocity;
         this.radius = radius;
-        // calculateVertices();
+        this.calculateVertices();
+    }
+
+    public calculateVertices() {
+        this.vertices.set([
+            this.position[0] - this.radius, this.position[1] + this.radius,  // 1
+            this.position[0] + this.radius, this.position[1] + this.radius,  // 2
+            this.position[0] - this.radius, this.position[1] - this.radius,   // 3
+
+            this.position[0] + this.radius, this.position[1] + this.radius,  // 2
+            this.position[0] - this.radius, this.position[1] - this.radius,   // 3
+            this.position[0] + this.radius, this.position[1] - this.radius,    // 4
+        ]);
     }
 
     // public move(delta: number): void {
@@ -30,35 +43,9 @@ export abstract class GameObject {
     //     this.position[1] += this.direction[1] * this.velocity * delta;
     // }
 
-    protected makeCanvasPosition(canvasPosition: CanvasPosition) {
-        let c = vec2.create();
-        let d = vec2.create();
-        let r = 2.0;
-
-        switch (canvasPosition) {
-            case CanvasPosition.TopRight:
-                c = vec2.fromValues(1.0, 1.0);
-                d = vec2.fromValues(-1.0, 0.0);
-                break;
-            case CanvasPosition.BottomRight:
-                c = vec2.fromValues(1.0, -1.0);
-                d = vec2.fromValues(0.0, 1.0);
-                break;
-            case CanvasPosition.TopLeft:
-                c = vec2.fromValues(-1.0, 1.0);
-                d = vec2.fromValues(0.0, -1.0);
-                break;
-            case CanvasPosition.BottomLeft:
-                c = vec2.fromValues(-1.0, -1.0);
-                d = vec2.fromValues(1.0, 0.0);
-                break;
-        }
-        return {c, d, r};
-    }
-
     protected crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
 
-    protected calculateConflict(a: vec2, b: vec2, c : vec2, d :vec2) {
+    protected calculateCollision(a: vec2, b: vec2, c : vec2, d :vec2) {
         const crossB_D = this.crossProduct(b, d);
         if (crossB_D === 0) {
             return { p: -1, q: -1 };
@@ -68,7 +55,7 @@ export abstract class GameObject {
         return {p, q};
     }
 
-    protected checkConflict(p: number, q: number, l: number, delta: number) : boolean {
+    protected checkCollision(p: number, q: number, l: number, delta: number) : boolean {
         return (q < 0 || q > l) || p > delta || p < 0;
     }
 
@@ -107,6 +94,32 @@ export abstract class GameObject {
                 c = vec2.fromValues(paddle[1].position[0] + paddle[1].width / 2.0, paddle[1].position[1] - paddle[1].height / 2.0);
                 d = vec2.fromValues(-1, 0);
                 r = paddle[1].width;
+                break;
+        }
+        return {c, d, r};
+    }
+
+    protected makeCanvasPosition(canvasPosition: CanvasPosition) {
+        let c = vec2.create();
+        let d = vec2.create();
+        let r = 2.0;
+
+        switch (canvasPosition) {
+            case CanvasPosition.TopRight:
+                c = vec2.fromValues(1.0, 1.0);
+                d = vec2.fromValues(-1.0, 0.0);
+                break;
+            case CanvasPosition.BottomRight:
+                c = vec2.fromValues(1.0, -1.0);
+                d = vec2.fromValues(0.0, 1.0);
+                break;
+            case CanvasPosition.TopLeft:
+                c = vec2.fromValues(-1.0, 1.0);
+                d = vec2.fromValues(0.0, -1.0);
+                break;
+            case CanvasPosition.BottomLeft:
+                c = vec2.fromValues(-1.0, -1.0);
+                d = vec2.fromValues(1.0, 0.0);
                 break;
         }
         return {c, d, r};

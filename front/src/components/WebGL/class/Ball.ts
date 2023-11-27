@@ -1,34 +1,9 @@
 import {vec2} from "gl-matrix";
-import {PaddlePos} from "./Paddle";
+import {Paddle, PaddlePos} from "./Paddle";
 import data from "../interface/gameData";
 import {GameObject, BallCorner} from "./GameObject";
 
 export class Ball extends GameObject{
-    // position: vec2;
-    // direction: vec2;
-    // velocity: number;
-    // radius: number;
-    ballVertices = new Float32Array(12);
-    // constructor(direction: vec2 = vec2.fromValues(1.0, 0), velocity: number = 2.0, radius: number = 0.02) {
-    //     this.position = vec2.fromValues(0, 0);
-    //     this.direction = direction;
-    //     this.velocity = velocity;
-    //     this.radius = radius; // 공의 반지름
-    //     this.calculateVertices();
-    // }
-
-    public calculateVertices() {
-        this.ballVertices.set([
-            this.position[0] - this.radius, this.position[1] + this.radius,  // 1
-            this.position[0] + this.radius, this.position[1] + this.radius,  // 2
-            this.position[0] - this.radius, this.position[1] - this.radius,   // 3
-
-            this.position[0] + this.radius, this.position[1] + this.radius,  // 2
-            this.position[0] - this.radius, this.position[1] - this.radius,   // 3
-            this.position[0] + this.radius, this.position[1] - this.radius,    // 4
-        ]);
-    }
-
     public calculateFactor(paddlePos: PaddlePos | null) {
         let factor;
         if (paddlePos === null) {
@@ -49,10 +24,10 @@ export class Ball extends GameObject{
 
     public updateBallPosition(delta: number, paddlePos: PaddlePos | null) {
         const factor = this.calculateFactor(paddlePos);
-        data.ball.position = this.calculateBallPosition(delta, factor);
+        this.position = this.calculateBallPosition(delta, factor);
     }
 
-    public calCheckConflict(delta: number, paddlePos: PaddlePos | null) {
+    public calCheckCollision(delta: number, paddlePos: PaddlePos | null) {
         const cornerPaddleArray = [
             { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
             { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
@@ -67,13 +42,48 @@ export class Ball extends GameObject{
                 const factor = data.ball.calculateFactor(paddlePos);
                 const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * factor);
                 const { c, d, r } = this.makePaddlePosition(pos);
-                const { p, q } = this.calculateConflict(ballPos, ballDirection, c, d);
+                const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
 
-                if (!this.checkConflict(p, q, r, delta) && p > 0) {
+                if (!this.checkCollision(p, q, r, delta) && p > 0) {
                     return {p, pos}; // 충돌 감지 시 바로 p 반환
                 }
             }
         }
         return undefined; // 충돌이 없는 경우
+    }
+
+    public handleBallWallCollision() {
+        if (this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0) {
+            this.direction[1] *= -1; // 위, 아래 벽에 닿을 경우 공의 반사를 구현 (정반사)
+        }
+    }
+
+    public checkBallPaddleCollision(paddle: Paddle) {
+        const paddleHeightHalf = paddle.height / 2.0;
+        const paddleWidthHalf = paddle.width / 2.0;
+        let paddleTop = paddle.position[1] + paddleHeightHalf;
+        let paddleBottom = paddle.position[1] - paddleHeightHalf;
+        let paddleLeft = paddle.position[0] - paddleWidthHalf;
+        let paddleRight = paddle.position[0] + paddleWidthHalf;
+
+        const BallTop = this.position[1] + this.radius;
+        const BallBottom = this.position[1] - this.radius;
+        const BallLeft = this.position[0] - this.radius;
+        const BallRight = this.position[0] + this.radius;
+
+        return (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft);
+    }
+    public handleBallPaddleCollision() : boolean {
+        const paddle = data.paddle;
+
+        for (let i = 0; i < 2; i++) {
+            if (this.checkBallPaddleCollision(paddle[i])) {
+                let normalReflect = vec2.fromValues(i === 0 ? 1 : -1, 0); // 왼쪽 패들이면 1, 오른쪽 패들이면 -1
+                normalReflect[1] = (this.position[1] - paddle[i].position[1]) / paddle[i].height * 4.0;
+                vec2.normalize(this.direction, normalReflect);
+                return true;
+            }
+        }
+        return false;
     }
 }

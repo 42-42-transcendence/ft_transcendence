@@ -5,20 +5,6 @@ import data from "../interface/gameData";
 import {Paddle, PaddlePos} from "./Paddle";
 
 export class Item extends GameObject {
-    itemVertices = new Float32Array();
-
-    public calculateVertices() {
-        this.itemVertices = new Float32Array([
-            this.position[0] - this.radius, this.position[1] + this.radius,  // 1
-            this.position[0] + this.radius, this.position[1] + this.radius,  // 2
-            this.position[0] - this.radius, this.position[1] - this.radius,   // 3
-
-            this.position[0] + this.radius, this.position[1] + this.radius,  // 2
-            this.position[0] - this.radius, this.position[1] - this.radius,   // 3
-            this.position[0] + this.radius, this.position[1] - this.radius,    // 4
-        ]);
-    }
-
     private getPaddlePositions(index: number): PaddlePos[] {
         if (index === 0) { // 왼쪽 패들
             return [PaddlePos.LeftFront, PaddlePos.LeftUp, PaddlePos.LeftDown];
@@ -26,14 +12,13 @@ export class Item extends GameObject {
             return [PaddlePos.RightFront, PaddlePos.RightUp, PaddlePos.RightDown];
         }
     }
-
     private isColliding(delta: number, paddlePos: PaddlePos) : {p : number, q : number} | undefined {
         const a = vec2.fromValues(this.position[0], this.position[1]);
         const b = vec2.fromValues(this.direction[0], this.direction[1]);
         const {c, d, r} = this.makePaddlePosition(paddlePos);
 
-        const {p, q} = this.calculateConflict(a, b, c, d);
-        if (!this.checkConflict(p, q, r, delta))
+        const {p, q} = this.calculateCollision(a, b, c, d);
+        if (!this.checkCollision(p, q, r, delta))
             return {p, q};
         return undefined;
     }
@@ -88,9 +73,9 @@ export class Item extends GameObject {
 
         for (const wall of walls) {
             const {c, d, r} = this.makeCanvasPosition(wall);
-            const {p, q} = this.calculateConflict(a, b, c, d);
+            const {p, q} = this.calculateCollision(a, b, c, d);
 
-            if (!this.checkConflict(p, q, r, delta)) {
+            if (!this.checkCollision(p, q, r, delta)) {
                 let side = wall === walls[2] || wall === walls[3];
                 return {p, q, side};
             }
@@ -119,6 +104,5 @@ export class Item extends GameObject {
     public move(delta: number) {
         this.position[0] += this.direction[0] * this.velocity * delta;
         this.position[1] += this.direction[1] * this.velocity * delta;
-        this.calculateVertices();
     }
 }

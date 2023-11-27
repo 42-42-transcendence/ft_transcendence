@@ -37,12 +37,12 @@ function drawPaddle(paddle: Paddle) {
 
 function drawItem(item: Item) {
 	item.calculateVertices();
-	drawObject(data.program[0]!, data.ballBuffer!, item.itemVertices, [1.0, 0.0, 1.0, 1.0]);
+	drawObject(data.program[0]!, data.ballBuffer!, item.vertices, [1.0, 0.0, 1.0, 1.0]);
 }
 
 function drawBall(ball: Ball) {
 	ball.calculateVertices();
-	drawObject(data.program[0]!, data.ballBuffer!, ball.ballVertices, [1.0, 0.0, 0.0, 1.0]);
+	drawObject(data.program[0]!, data.ballBuffer!, ball.vertices, [1.0, 0.0, 0.0, 1.0]);
 }
 
 function drawLine(line: Line) {
@@ -55,7 +55,7 @@ export function render() {
 
 	if (data.isFirstRender) {
 		initializeBuffer(data.paddleBuffer, data.paddle[0].paddleVertices);
-		initializeBuffer(data.ballBuffer, data.ball.ballVertices);
+		initializeBuffer(data.ballBuffer, data.ball.vertices);
 		initializeBuffer(data.lineBuffer, line.lineVertices);
 		data.isFirstRender = false;
 		return;

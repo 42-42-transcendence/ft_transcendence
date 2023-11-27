@@ -1,4 +1,5 @@
 import { vec2 } from "gl-matrix";
+import data from "../interface/gameData";
 
 export enum PaddlePos{
     LeftFront,
@@ -37,5 +38,23 @@ export class Paddle {
             this.position[0] - this.width / 2.0, this.position[1] + this.height / 2.0, // 3
             this.position[0] + this.width / 2.0, this.position[1] + this.height / 2.0, // 4
         ]);
+    }
+
+    public updatePosition(delta: number) {
+        /* 현재 player1의 패들 위치만 고려 */
+        if (data.keyPress.up) {
+            this.position[1] += this.paddleSpeed * delta
+        } else if (data.keyPress.down) {
+            this.position[1] -= this.paddleSpeed * delta;
+        } else {
+            this.position[1] += 0;
+        }
+
+        /* 패들 위치 제한 */
+        if (this.position[1] - this.height / 2.0 < -1.0) {
+            this.position[1] = -1.0 + this.height / 2.0;
+        }
+        if (this.position[1] + this.height / 2.0 > 1.0)
+            this.position[1] = 1.0 - this.height / 2.0;
     }
 }

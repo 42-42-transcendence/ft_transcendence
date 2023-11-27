@@ -192,7 +192,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const notification = await this.notificationService.createNotification({ message, notiType, user });
     if (client) {
-      client.emit("updatedNotificaion", notification);
+      client.emit("updatedNotification", notification);
     }
   }
 
@@ -200,7 +200,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const notification = await this.notificationService.createNotificationWithChannelID({ message, notiType, user, channelID });
     if (client) {
-      client.emit("updatedNotificaion", notification);
+      client.emit("updatedNotification", notification);
     }
   }
 

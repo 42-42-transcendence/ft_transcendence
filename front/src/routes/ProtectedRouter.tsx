@@ -12,7 +12,6 @@ const ProtectedRouter = () => {
   );
   const { request } = useRequest();
 
-  // token이 있는데 만료된 경우 로그인 시키기
   useEffect(() => {
     const fetchTokenisValidated = async () => {
       const ret = await request<{ message: string }>(`${SERVER_URL}/api/auth`, {
@@ -32,7 +31,14 @@ const ProtectedRouter = () => {
     return <>...Loading...</>;
   } else if (tokenIsValidated === true) {
     if (!authState.myID) {
-      return <Navigate to="/setting-profile" />;
+      return (
+        <Navigate
+          to="/setting-profile"
+          state={{
+            message: '토큰 정보가 유효하지 않습니다.',
+          }}
+        />
+      );
     } else {
       return (
         <SocketContextProvider>

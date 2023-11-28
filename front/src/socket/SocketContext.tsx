@@ -5,6 +5,7 @@ import { SERVER_URL } from '../App';
 import { useDispatch } from 'react-redux';
 import { actions as notificationActions } from '../store/Notification/notification';
 import type { Notification } from '../store/Notification/notification';
+import { useNavigate } from 'react-router-dom';
 
 type SocketContextType = {
   socket: Socket | null;
@@ -19,6 +20,7 @@ type ChildProps = {
 const SocketContextProvider = ({ children }: ChildProps) => {
   const authState = useAuthState();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
@@ -36,7 +38,6 @@ const SocketContextProvider = ({ children }: ChildProps) => {
       newSocket.on('connect', () => {
         console.log('connected socket');
         newSocket.emit('notification', (notifications: Notification[]) => {
-          console.log(notifications);
           dispatch(notificationActions.setNotification(notifications));
         });
       });
@@ -53,6 +54,11 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         dispatch(notificationActions.appendNotification(notification));
       });
 
+      newSocket.on('tokenExpired', (message) => {
+        console.log('tokenExpired:', message);
+        navigate('/login', { state: { message: message } });
+      });
+
       setSocket(newSocket);
     }
 
@@ -62,7 +68,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         setSocket(null);
       }
     };
-  }, [socket, authState, dispatch]);
+  }, [socket, authState, dispatch, navigate]);
 
   return (
     <SocketContext.Provider value={{ socket }}>

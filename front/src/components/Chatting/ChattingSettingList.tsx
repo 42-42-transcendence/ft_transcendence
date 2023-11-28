@@ -9,26 +9,28 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { SERVER_URL } from '../../App';
 import useRequest from '../../http/useRequest';
+import { ChannelType } from '../Channel';
 
 type Props = {
   myRole: Role | null;
 };
 
-type ChannelType = 'public' | 'private' | 'dm';
-
 const ChattingSettingList = ({ myRole }: Props) => {
   const params = useParams();
   const { request } = useRequest();
-  const [channelType, setChannelType] = useState<ChannelType | null>(null);
+  const [channelType, setChannelType] = useState<
+    'public' | 'private' | 'dm' | null
+  >(null);
 
   useEffect(() => {
     const fetchChannelType = async () => {
-      const ret = await request<any>(
+      const ret = await request<ChannelType>(
         `${SERVER_URL}/api/channel/${params.channelID}`,
         {
           method: 'GET',
         }
       );
+
       if (ret !== null) setChannelType(ret.type);
     };
 

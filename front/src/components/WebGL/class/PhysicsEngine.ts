@@ -1,42 +1,63 @@
-import data from "../interface/gameData";
-import {PaddlePos} from "./Paddle";
+import {GameObject} from "./GameObject";
 
 class PhysicsEngine {
-    static _paddlePos : PaddlePos | null = null;
-
-    static checkItemCollision(delta: number) {
-        let items = data.items;
-        let collisionResult : {p : number, q : number} | undefined = undefined;
-
-        const paddles = data.paddle;
-        for (let i = items.length - 1; i >= 0; i--) {
-            let collisionDetected = false;
-            const item = items[i];
-
-            if (item.handleWithPaddleCollision(i, delta)) {
-                collisionDetected = true;
-                break;
+    static GuaranteeConflict(object: GameObject, delta: number) {
+        const collisionProcesses = [
+            {
+                checkCollision: () => object.checkWithPaddleCollision(delta),
+                handleCollision: (collisionResult: CollisionResult) => object.handleWithPaddleCollision(collisionResult.pos)
+            },
+            {
+                checkCollision: () => object.checkWithWallCollision(delta),
+                handleCollision: (collisionResult: CollisionResult) => object.handleWithWallCollision(collisionResult.pos)
             }
+        ];
 
-            if (!collisionDetected) {
-                data.items[i].checkMoved(delta);
+        for (const process of collisionProcesses) {
+            const collisionResult = process.checkCollision();
+            if (collisionResult !== undefined) {
+                object.move(collisionResult.p);
+                if (process.handleCollision(collisionResult))
+                    return;
+                const restAfterCollision = delta - collisionResult.p;
+                object.move(0.001);
+                this.GuaranteeConflict(object, restAfterCollision);
+                return;
             }
         }
-        return collisionResult;
-    }
-
-    static GuaranteeConflict(delta: number) {
-        const p = data.ball.predictCollision(delta);
-
-        if (p === undefined) {
-            data.ball.move(delta, this._paddlePos);
-            return ;
-        }
-        data.ball.move(p.p, this._paddlePos);
-        data.ball.handleWithPaddleCollision();
-        const restAfterCollision = delta - p.p;
-        this._paddlePos = p.pos;
-        this.GuaranteeConflict(restAfterCollision);
+        object.move(delta);
     }
 }
+
+interface CollisionResult {
+    p: number;
+    pos: any;
+}
+    /* 함수 포인터로 재사용 고려 */
+//     static GuaranteeConflict(object: GameObject, delta: number) {
+//         const collisionResultInPaddle = object.checkWithPaddleCollision(delta);
+//         if (collisionResultInPaddle !== undefined) {
+//             object.move(collisionResultInPaddle.p);
+//             if (object.handleWithPaddleCollision(collisionResultInPaddle.pos))
+//                 return ;
+//             const restAfterCollision = delta - collisionResultInPaddle.p;
+//             object.move(0.001);
+//             this.GuaranteeConflict(object, restAfterCollision);
+//             return ;
+//         }
+//
+//         const collisionResultInWall = object.checkWithWallCollision(delta);
+//         if (collisionResultInWall !== undefined) {
+//             object.move(collisionResultInWall.p);
+//             if (object.handleWithWallCollision(collisionResultInWall.pos))
+//                 return ;
+//             const restAfterCollision = delta - collisionResultInWall.p;
+//             object.move(0.001);
+//             this.GuaranteeConflict(object, restAfterCollision);
+//             return ;
+//         }
+//
+//         object.move(delta);
+//     }
+// }
 export default PhysicsEngine;

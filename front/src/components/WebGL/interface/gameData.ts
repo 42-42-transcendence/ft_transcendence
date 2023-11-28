@@ -1,4 +1,3 @@
-import {Ball} from '../class/Ball';
 import {Paddle} from '../class/Paddle';
 import {vec2} from 'gl-matrix';
 
@@ -23,8 +22,8 @@ let data: gameData = {
 	canvasRef: null,
 	program: [null, null],
 	mode: 'normal',
-	items: [],
 	uColorLocation: null,
+	requestId: 0,
 };
 
 export default data;

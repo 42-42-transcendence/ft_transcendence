@@ -8,7 +8,6 @@ type KeyPress = {
 	down: boolean;
 };
 interface gameData {
-	// paddle: Paddle[];
 	paddle: Paddle[];
 	ball: Ball;
 	keyPress: KeyPress;
@@ -26,6 +25,6 @@ interface gameData {
 	scoreRef: (HTMLDivElement | null)[];
 	program: (WebGLProgram | null)[];
 	mode: string;
-	items: Item[];
 	uColorLocation: WebGLUniformLocation | null;
+	requestId: number;
 }

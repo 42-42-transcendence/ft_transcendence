@@ -2,7 +2,6 @@ import { vec2 } from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
 import {Paddle, PaddlePos} from "./Paddle";
 import data from "../interface/gameData";
-// import {BallCorner} from "./Ball";
 
 export enum BallCorner {
     TopRight,
@@ -16,6 +15,7 @@ export abstract class GameObject {
     direction: vec2;
     velocity: number;
     radius: number;
+    factor: number;
     vertices = new Float32Array(12);
 
     constructor(position: vec2, direction: vec2, velocity: number, radius: number) {
@@ -23,27 +23,8 @@ export abstract class GameObject {
         this.direction = direction;
         this.velocity = velocity;
         this.radius = radius;
+        this.factor = 1.0;
         this.calculateVertices();
-    }
-
-    protected checkWithWallCollision() {
-        return this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0;
-    }
-
-    protected checkWithPaddleCollision(paddle: Paddle) {
-        const paddleHeightHalf = paddle.height / 2.0;
-        const paddleWidthHalf = paddle.width / 2.0;
-        let paddleTop = paddle.position[1] + paddleHeightHalf;
-        let paddleBottom = paddle.position[1] - paddleHeightHalf;
-        let paddleLeft = paddle.position[0] - paddleWidthHalf;
-        let paddleRight = paddle.position[0] + paddleWidthHalf;
-
-        const objectTop = this.position[1] + this.radius;
-        const objectBottom = this.position[1] - this.radius;
-        const objectLeft = this.position[0] - this.radius;
-        const objectRight = this.position[0] + this.radius;
-
-        return (objectTop > paddleBottom && objectBottom < paddleTop && objectLeft < paddleRight && objectRight > paddleLeft);
     }
 
     public calculateVertices() {
@@ -58,22 +39,9 @@ export abstract class GameObject {
         ]);
     }
 
-    public calculateFactor(paddlePos: PaddlePos | null) {
-        let factor;
-        if (paddlePos === null) {
-            factor = 1.0;
-        } else if (paddlePos < 3) {
-            factor = data.paddle[0].ballVelocityFactor;
-        } else {
-            factor = data.paddle[1].ballVelocityFactor;
-        }
-        return factor;
-    }
-
-    public move(delta: number, paddlePos: PaddlePos | null): void {
-        const factor = this.calculateFactor(paddlePos);
-        this.position[0] += this.direction[0] * this.velocity * delta * factor;
-        this.position[1] += this.direction[1] * this.velocity * delta * factor;
+    public move(delta: number): void {
+        this.position[0] += this.direction[0] * this.velocity * delta * this.factor;
+        this.position[1] += this.direction[1] * this.velocity * delta * this.factor;
     }
 
     protected crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
@@ -90,6 +58,64 @@ export abstract class GameObject {
 
     protected checkCollision(p: number, q: number, l: number, delta: number) : boolean {
         return (q < 0 || q > l) || p > delta || p < 0;
+    }
+
+    public checkWithPaddleCollision(delta: number) {
+        const cornerPaddleArray = [
+            { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
+            { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
+            { corner: BallCorner.BottomLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftUp] },
+            { corner: BallCorner.TopLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftDown] }
+        ];
+
+        for (const { corner, paddlePos } of cornerPaddleArray) {
+            const ballPos = this.makeBallPosition(corner);
+
+            for (const pos of paddlePos) {
+                // const factor = data.ball.calculateFactor(paddlePos);
+                const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
+                const { c, d, r } = this.makePaddlePosition(pos);
+                const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
+
+                if (!this.checkCollision(p, q, r, delta)) {
+                    return {p, pos}; // 충돌 감지 시 바로 p 반환
+                }
+            }
+        }
+        return undefined; // 충돌이 없는 경우
+    }
+
+    public checkWithWallCollision(delta: number) : {p : number, pos : CanvasPosition} | undefined {
+        const a = this.position;
+        // const direction = this.direction;
+        const direction = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
+
+        const walls = [
+            CanvasPosition.TopLeft,
+            CanvasPosition.BottomRight,
+            CanvasPosition.TopRight,
+            CanvasPosition.BottomLeft,
+        ];
+
+        for (const pos of walls) {
+            const {c, d, r} = this.makeCanvasPosition(pos);
+            const {p, q} = this.calculateCollision(a, direction, c, d);
+
+            if (!this.checkCollision(p, q, r, delta)) {
+                return {p, pos};
+            }
+        }
+        return undefined;
+    }
+
+    public handleWithWallCollision(side: CanvasPosition) {
+        console.error("handleWithWallCollision is not implemented");
+        return false;
+    }
+
+    public handleWithPaddleCollision(paddlePos: PaddlePos) {
+        console.error("handleWithPaddleCollision is not implemented");
+        return false;
     }
 
     protected makePaddlePosition(paddlePos: PaddlePos) : {c: vec2, d: vec2, r: number} {
@@ -133,8 +159,8 @@ export abstract class GameObject {
     }
 
     protected makeCanvasPosition(canvasPosition: CanvasPosition) {
-        let c = vec2.create();
-        let d = vec2.create();
+        let c ;
+        let d;
         let r = 2.0;
 
         switch (canvasPosition) {

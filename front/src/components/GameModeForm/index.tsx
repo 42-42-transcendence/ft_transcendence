@@ -17,6 +17,9 @@ const GameModeForm = () => {
   const { socket } = useSocket();
 
   const navigate = useNavigate();
+  const handlePlayerButton = async (playerType: 'player1' | 'player2') => {
+
+  }
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const socket = io('http://localhost:3001/');
     if (socket) {
@@ -39,6 +42,19 @@ const GameModeForm = () => {
 
   return (
     <>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px'}}>
+        <div>
+          <CardButton clickHandler={() => handlePlayerButton('player1')}>
+            Player 1
+          </CardButton>
+        </div>
+        <div>
+          <CardButton clickHandler={() => handlePlayerButton('player2')}>
+            Player 2
+          </CardButton>
+        </div>
+      </div>
+      
       <Form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.container}>
           <h2>GAME MODE</h2>

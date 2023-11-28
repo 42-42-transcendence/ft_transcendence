@@ -3,6 +3,7 @@ import {Ball} from '../class/Ball';
 import {Paddle} from '../class/Paddle';
 import Line from '../class/Line';
 import {Item} from '../class/Item';
+import {ItemManager} from "../class/ItemManager";
 
 function initializeBuffer(buffer: WebGLBuffer | null, vertices: Float32Array) {
 	if (!data.gl) throw new Error('data.gl is null');
@@ -10,7 +11,6 @@ function initializeBuffer(buffer: WebGLBuffer | null, vertices: Float32Array) {
 	data.gl.bufferData(data.gl.ARRAY_BUFFER, vertices, data.gl.DYNAMIC_DRAW);
 }
 
-// 인스턴스 생성
 const line = new Line();
 
 function drawObject(program: WebGLProgram, buffer: WebGLBuffer, vertices: Float32Array, color: [number, number, number, number] | undefined, viewportSize?: { width: number, height: number }) {
@@ -68,7 +68,7 @@ export function render() {
 	drawBall(data.ball);
 	drawPaddle(data.paddle[0]);
 	drawPaddle(data.paddle[1]);
-	for (let i = 0; i < data.items.length; i++) {
-		drawItem(data.items[i]);
+	for (let i = 0; i < ItemManager.getInstance().items.length; i++) {
+		drawItem(ItemManager.getInstance().items[i]);
 	}
 }

@@ -1,27 +1,10 @@
-import {vec2} from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
 import {GameObject} from "./GameObject";
-import data from "../interface/gameData";
 import {Paddle, PaddlePos} from "./Paddle";
+import data from "../interface/gameData";
 
 export class Item extends GameObject {
-    private getPaddlePositions(index: number): PaddlePos[] {
-        if (index === 0) { // 왼쪽 패들
-            return [PaddlePos.LeftFront, PaddlePos.LeftUp, PaddlePos.LeftDown];
-        } else { // 오른쪽 패들
-            return [PaddlePos.RightFront, PaddlePos.RightUp, PaddlePos.RightDown];
-        }
-    }
-    private isColliding(delta: number, paddlePos: PaddlePos) : {p : number, q : number} | undefined {
-        const a = vec2.fromValues(this.position[0], this.position[1]);
-        const b = vec2.fromValues(this.direction[0], this.direction[1]);
-        const {c, d, r} = this.makePaddlePosition(paddlePos);
-
-        const {p, q} = this.calculateCollision(a, b, c, d);
-        if (!this.checkCollision(p, q, r, delta))
-            return {p, q};
-        return undefined;
-    }
+    toBeDestroyed: boolean = false;
 
     private applyItemEffectToPaddle(paddle: Paddle) {
         let rand = Math.random() * 3;
@@ -40,64 +23,22 @@ export class Item extends GameObject {
         }
     }
 
-    public handleWithPaddleCollision(idx: number, delta: number) {
-        const items = data.items;
-        const paddles = data.paddle;
+    public handleWithPaddleCollision(paddlePos: PaddlePos) {
+        if (paddlePos < 3) {
+            this.applyItemEffectToPaddle(data.paddle[0]);
+        } else {
+            this.applyItemEffectToPaddle(data.paddle[1]);
+        }
+        this.toBeDestroyed = true;
+        return true;
+    }
 
-        for (let j = 0; j < paddles.length; j++) {
-            const paddle = paddles[j];
-            const paddlePositions = this.getPaddlePositions(j); // 패들의 모든 위치를 가져옴
-
-            for (const pos of paddlePositions) {
-                const collisionResult = this.isColliding(delta, pos);
-                if (collisionResult !== undefined) {
-                    this.applyItemEffectToPaddle(paddle);
-                    items.splice(idx, 1);
-                    return true;
-                }
-            }
+    public handleWithWallCollision(side: CanvasPosition) {
+        if (side < 2) {
+            this.direction[1] *= -1;
+        } else {
+            this.direction[0] *= -1;
         }
         return false;
-    }
-
-    private checkAndHandleWallCollision(delta: number) : {p : number, q : number, side: boolean} | undefined {
-        const a = vec2.fromValues(this.position[0], this.position[1]);
-        const b = vec2.fromValues(this.direction[0], this.direction[1]);
-
-        const walls = [
-            CanvasPosition.TopLeft,
-            CanvasPosition.BottomRight,
-            CanvasPosition.TopRight,
-            CanvasPosition.BottomLeft,
-        ];
-
-        for (const wall of walls) {
-            const {c, d, r} = this.makeCanvasPosition(wall);
-            const {p, q} = this.calculateCollision(a, b, c, d);
-
-            if (!this.checkCollision(p, q, r, delta)) {
-                let side = wall === walls[2] || wall === walls[3];
-                return {p, q, side};
-            }
-        }
-        return undefined;
-    }
-
-    public checkMoved(delta: number) {
-        const collisionResultInWall = this.checkAndHandleWallCollision(delta);
-        if (collisionResultInWall === undefined) {
-            this.move(delta, null);
-            return;
-        }
-
-        this.move(collisionResultInWall.p, null);
-        if (!collisionResultInWall.side) {
-            this.direction[0] *= -1;
-        } else {
-            this.direction[1] *= -1;
-        }
-        const restAfterCollision = delta - collisionResultInWall.p;
-        this.move(0.001, null);
-        this.checkMoved(restAfterCollision);
     }
 }

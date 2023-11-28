@@ -5,6 +5,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { faker } from "@faker-js/faker";
 import { ChannelTypeEnum } from "./enums/channelType.enum";
 import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {
@@ -26,7 +27,11 @@ export class ChannelRepository extends Repository<Channel> {
 	}
 
 	async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
-		const { title, password, type } = createChannelDto;
+		const title = createChannelDto.title;
+		var password: string = '';
+		if (createChannelDto.password !== '') {
+			password = await bcrypt.hash(createChannelDto.password, 10);
+		}
 
 		const existedChannel = await this.findOneBy({ title });
 		if (existedChannel) {
@@ -36,7 +41,7 @@ export class ChannelRepository extends Repository<Channel> {
 		const channel = this.create({
 			title,
 			password,
-			type
+			type: createChannelDto.type
 		});
 
 		await this.save(channel);
@@ -92,4 +97,5 @@ export class ChannelRepository extends Repository<Channel> {
 		const updateChannel = await this.save(channel);
 		return (updateChannel);
 	}
+
 }

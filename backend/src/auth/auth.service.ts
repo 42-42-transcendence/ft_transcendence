@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, UnauthorizedException, UseFilters } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
@@ -108,6 +108,15 @@ export class AuthService {
     } catch (e) {
       throw new SocketException('Unauthorized', `토큰이 유효하지 않습니다.`);
     }
+  }
+
+  async getUserByAuthWithHttpException(auth: Auth): Promise<User> {
+    const user = await auth.user;
+
+    if (!user) {
+      throw new NotFoundException(`해당 토큰의 유저를 찾을수 없습니다.`);
+    }
+    return (user);
   }
 
   async getUserByAuthWithWsException(auth: Auth): Promise<User> {

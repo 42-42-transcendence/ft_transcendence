@@ -5,6 +5,8 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserAuthResponseDto } from './dto/user-auth-response.dto';
+import { GetAuth } from './get-auth.decorator';
+import { Auth } from './entities/auth.entity';
 
 @ApiTags('AUTH')
 @Controller('api/auth')
@@ -50,5 +52,14 @@ export class AuthController {
   @UseGuards(AuthGuard())
   async checkTokenIsValidated(): Promise<{ message: string }> {
     return ({ message: '유효한 토큰입니다.'});
+  }
+
+  @Get('nickname')
+  @UseGuards(AuthGuard())
+  async getUserNicknameByToken(
+    @GetAuth() auth: Auth
+  ): Promise<{ nickname: string }> {
+    const user = await this.authService.getUserByAuthWithHttpException(auth);
+    return ({ nickname: user.nickname });
   }
 }

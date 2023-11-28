@@ -5,6 +5,7 @@ import { User } from 'src/user/entities/user.entity';
 import { RelationService } from 'src/relation/relation.service';
 import { Socket } from 'socket.io';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
+import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 
 @Injectable()
 export class EventsService {
@@ -33,7 +34,11 @@ export class EventsService {
         // forEach는 async에 대해서 기다려주지 않는다
         // 따라서 비동기함수에 대한 map을 만들고 Promise.all로 전체를 실행한다.
         const insertEventsMembers = members.map(async member => {
-            const memberUser = await this.channelMemberService.getUserFromChannelMember(member)
+            if ((member.role === ChannelMemberRole.BLOCK)
+                || (member.role === ChannelMemberRole.INVITE)) {
+                return ;
+            }
+            const memberUser = await this.channelMemberService.getUserFromChannelMember(member);
             const relationType = await this.relationService.isBlockRelation(user, memberUser);
             const eventsMember = {
                 userID: memberUser.userID,

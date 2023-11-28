@@ -20,7 +20,10 @@ export class Channel {
     example: 'Channel Title',
     type: 'string'
   })
-  @Column({ nullable: false })
+  @Column({
+    nullable: false,
+    unique: true
+  })
   title: string;
 
   @ApiProperty({

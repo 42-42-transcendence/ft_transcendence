@@ -21,10 +21,11 @@ import { Chat } from 'src/chat/entities/chat.entity';
 import { SocketExceptionFilter } from './socket.filter';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
+import { SocketException } from './socket.exception';
 
 
 
-// @UseFilters(new SocketExceptionFilter())
+@UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:3000',
@@ -32,12 +33,12 @@ import { NotiType } from 'src/notification/enums/noti-type.enum';
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    private userService: UserService,
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private authService: AuthService,
     private notificationService: NotificationService,
     private eventsService: EventsService,
+    private userService: UserService,
     @Inject(forwardRef(() => ChannelService))
     private channelService: ChannelService,
   ) {}
@@ -51,28 +52,43 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   async handleConnection(client: Socket) {
-    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await this.authService.getUserByAuthWithWsException(auth);
-    this.eventsService.addClient(user.userID, client);
+    try {
+      const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+      const user = await this.authService.getUserByAuthWithWsException(auth);
+      this.eventsService.addClient(user.userID, client);
 
-    console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
+      console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
+    } catch (e) {
+      console.log(e);
+    }
+
   }
 
   async handleDisconnect(client: Socket) {
-    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await this.authService.getUserByAuthWithWsException(auth);
-    const channelMembers = await user.channelMembers;
+    try {
+      const nickname = client.handshake.query.userID;
+      if (typeof nickname !== 'string') {
+        throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+      }
+      const user = await this.userService.getUserByNicknameWithWsException(nickname);
+      const channelMembers = await user.channelMembers;
 
-    const leaveChannels = channelMembers.map(async channelMember => {
-      const channel = await this.channelMemberService.getChannelFromChannelMember(channelMember);
+      const leaveChannels = channelMembers.map(async channelMember => {
+        const channel = await this.channelMemberService.getChannelFromChannelMember(channelMember);
 
-      await this.leaveChannelSession(client, { channelID: channel.channelID });
-    });
-    await Promise.all(leaveChannels);
+        await this.leaveChannelSession(client, { channelID: channel.channelID });
+      });
+      await Promise.all(leaveChannels);
 
-    this.eventsService.removeClient(user.userID);
+      this.eventsService.removeClient(user.userID);
 
-    console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
+      console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
+
+    } catch (e) {
+      console.log(e);
+    }
+
+
   }
 
 
@@ -192,7 +208,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const notification = await this.notificationService.createNotification({ message, notiType, user });
     if (client) {
-      client.emit("updatedNotificaion", notification);
+      client.emit("updatedNotification", notification);
     }
   }
 
@@ -200,7 +216,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const notification = await this.notificationService.createNotificationWithChannelID({ message, notiType, user, channelID });
     if (client) {
-      client.emit("updatedNotificaion", notification);
+      client.emit("updatedNotification", notification);
     }
   }
 

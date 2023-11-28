@@ -11,7 +11,6 @@ import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { ChatService } from 'src/chat/chat.service';
-import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { UserService } from 'src/user/user.service';
 import { RelationService } from 'src/relation/relation.service';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
@@ -54,8 +53,23 @@ export class ChannelController {
     channels.push(...publicChannels);
     channels.push(...privateChannels);
     channels.push(...dmChannels);
-  
+
     return (channels);
+  }
+
+
+  @ApiOperation({
+    summary: 'channelID로 채널 정보를 가져온다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<Channel>
+  })
+  @Get(':id')
+  async getChannelInfoById(
+    @Param('id') channelID: string
+  ): Promise<Channel> {
+    return (await this.channelService.getChannelById(channelID));
   }
 
 
@@ -116,12 +130,23 @@ export class ChannelController {
   async checkJoinChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('password') password: string
+    @Body('password') password: string,
+    @Body('isRedirected') isRedirected: boolean
   ): Promise<{ isAuthenticated: boolean }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const member = await this.channelMemberService.getChannelMemberByChannelUser(channel, user);
     const content = `${user.nickname}님께서 입장하셨습니다.`;
+
+    if (isRedirected === true) {
+      if (member.role === ChannelMemberRole.INVITE) {
+        await this.channelService.enterUserToChannel(channel);
+        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
+      }
+      this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
+      return ({ isAuthenticated: true });
+    }
 
     // DM도 일단 이렇게 느슨하게 설정
     if ((channel.type === ChannelTypeEnum.PRIVATE) || (channel.type === ChannelTypeEnum.DM)) {
@@ -186,16 +211,17 @@ export class ChannelController {
     // orphanedRowAction 없다면, chat의 channel을 null로 만든다
     // 해결할려면, 일단 channel 정보 먼저 업데이트하고, chat을 만드는 방법밖에 없음...
     await this.channelService.leaveUserToChannel(channel);
-    if (member.role === ChannelMemberRole.OWNER && channel.total > 1) {
+    if (member.role === ChannelMemberRole.OWNER && channel.total > 0) {
       const newOwner = await this.channelMemberService.delegateChannelOwner(channel);
       const newOwnerUser = await this.channelMemberService.getUserFromChannelMember(newOwner);
       const content = `${user.nickname}님이 ${newOwnerUser.nickname}님에게 OWNER를 위임했습니다.`;
       await this.eventsGateway.updatedSystemMessage(content, channel, newOwnerUser);
     }
     await this.channelMemberService.deleteChannelMemberById(member.channelMemberID);
+    const newChannel = await this.channelService.getChannelByIdWithException(channelID);
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
-    await this.eventsGateway.updatedSystemMessage(content, channel, user);
-    await this.eventsGateway.updatedMembersForAllUsers(channel);
+    await this.eventsGateway.updatedSystemMessage(content, newChannel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(newChannel);
 
     if (channel.total === 0) {
       await this.channelService.deleteChannelById(channel.channelID);
@@ -272,11 +298,11 @@ export class ChannelController {
   async assignToChannelStaff(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const newStaffUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const newStaffUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, newStaffUser);
 
@@ -337,11 +363,11 @@ export class ChannelController {
   async kickUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const kickedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const kickedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, kickedUser);
 
@@ -373,6 +399,9 @@ export class ChannelController {
     )
     await this.channelService.leaveUserToChannel(channel);
 
+    // 멤버 지워야 함
+    await this.channelMemberService.deleteChannelMemberById(objectUserRole.channelMemberID);
+
     const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
     await this.eventsGateway.updatedMembersForAllUsers(channel);
@@ -392,11 +421,11 @@ export class ChannelController {
   async banUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const banedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const banedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, banedUser);
 
@@ -421,6 +450,7 @@ export class ChannelController {
       throw new BadRequestException(`${banedUser.nickname}님은 이미 영구 추방되었습니다.`);
     }
 
+    await this.channelService.leaveUserToChannel(channel);
     await this.channelMemberService.updateChannelMemberRoleByChannelMember(
       objectUserRole,
       ChannelMemberRole.BLOCK
@@ -430,7 +460,6 @@ export class ChannelController {
       banedUser,
       channel
     )
-    await this.channelService.leaveUserToChannel(channel);
 
     const content = `${banedUser.nickname}님께서 영구 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
@@ -456,13 +485,13 @@ export class ChannelController {
   async inviteToChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const invitedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
-    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, invitedUser);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUser(channel, invitedUser);
 
     if (!subjectUserRole) {
       throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
@@ -514,21 +543,26 @@ export class ChannelController {
   @Post('DM')
   async createDirectMessage(
     @GetAuth() auth: Auth,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
-    const invitedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
+    var title: string = `${user.nickname}-${invitedUser.nickname} DM`;
+
+    if (user.nickname > invitedUser.nickname) {
+      title = `${invitedUser.nickname}-${user.nickname} DM`;
+    }
     const channel = await this.channelService.createChannel({
-      title: `${user.nickname}-${invitedUser.nickname} DM`,
+      title,
       password: '',
       type: ChannelTypeEnum.DM
     });
-    const role = ChannelMemberRole.OWNER;
+    const role = ChannelMemberRole.GUEST;
 
+    await this.channelService.enterUserToChannel(channel);
+    await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user, role });
-    await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user: invitedUser, role });
-    await this.channelService.enterUserToChannel(channel);
     await this.eventsGateway.updatedNotificationWithChannelID(
       `${user.nickname}님으로부터 DM이 도착했습니다.`,
       NotiType.DM,
@@ -552,15 +586,15 @@ export class ChannelController {
   async blockUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const blockedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+    const blockedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const relation = await this.relationService.getRelationByUsers(user, blockedUser);
 
     if (!relation) {
-      const newRelation = await this.relationService.createRelation({
+      await this.relationService.createRelation({
         subjectUser: user,
         objectUser: blockedUser,
         relationType: RelationTypeEnum.BLOCK
@@ -590,11 +624,11 @@ export class ChannelController {
   async muteUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUserID: string,
+    @Body('targetUserID') targetUser: string,
     ): Promise<{ message: string }> {
       const user = await auth.user;
       const channel = await this.channelService.getChannelByIdWithException(channelID);
-      const mutedUser = await this.userService.getUserByNicknameWithException(targetUserID);
+      const mutedUser = await this.userService.getUserByNicknameWithException(targetUser);
       const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
       const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, mutedUser);
 

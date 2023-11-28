@@ -19,6 +19,6 @@ export class Notification {
     })
     user: User;
 
-    @Column()
-    channelID?: string;
+    @Column({ nullable: true })
+    channelID: string;
 }

@@ -4,6 +4,7 @@ import { ChannelMember } from 'src/channel-member/entities/channel-member.entity
 import { User } from './entities/user.entity';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 import { UserAchievementModule } from 'src/user-achievement/user-achievement.module';
+import { SocketException } from 'src/events/socket.exception';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,16 @@ export class UserService {
 
 		if (!user) {
 			throw new NotFoundException(`${nickname}을 가진 유저를 찾을 수 없습니다.`);
+		}
+
+		return (user);
+	}
+
+	async getUserByNicknameWithWsException(nickname: string): Promise<User> {
+		const user = this.userRepository.getUserByNickname(nickname);
+
+		if (!user) {
+			throw new SocketException('NotFound', `${nickname}을 가진 유저를 찾을 수 없습니다.`);
 		}
 
 		return (user);

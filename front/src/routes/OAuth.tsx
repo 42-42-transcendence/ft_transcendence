@@ -32,7 +32,10 @@ const OAuth = () => {
             dispatch(authActions.setAuthToken(ret.jwtToken));
 
             return (
-              <Navigate to={ret.userName === '' ? '/setting-profile' : '/'} />
+              <Navigate
+                to={ret.userName === '' ? '/setting-profile' : '/'}
+                replace={true}
+              />
             );
           }
         }}

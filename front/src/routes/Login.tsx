@@ -13,7 +13,7 @@ const LoginPage = () => {
       {location.state?.message && <small>{location.state?.message}</small>}
       <img src={ftLogo} alt="42 icon" />
       <h1>FT_Transcendence</h1>
-      <Link to={redirectURL as string}>
+      <Link to={redirectURL as string} replace={true}>
         <img src={ftLogo} alt="42 icon" />
         <span>Intra Login</span>
       </Link>

@@ -16,6 +16,7 @@ import { RelationService } from 'src/relation/relation.service';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
+import * as bcrypt from 'bcrypt';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -143,6 +144,7 @@ export class ChannelController {
         await this.channelService.enterUserToChannel(channel);
         await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       }
+      // 멀티 페이지 생각해볼 것 (알림으로 들어갈시 아마 또 떠버리게 될거임)
       this.eventsGateway.updatedSystemMessage(content, channel, user);
       this.eventsGateway.updatedMembersForAllUsers(channel);
       return ({ isAuthenticated: true });
@@ -162,7 +164,7 @@ export class ChannelController {
       return ({ isAuthenticated: true });
     }
 
-    if (channel.password !== password) {
+    if (password !== '' && !(await bcrypt.compare(password, channel.password))) {
       return ({ isAuthenticated: false });
     }
 

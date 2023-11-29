@@ -8,7 +8,7 @@ import type { User } from '../Social';
 import type { Role } from '../Chatting';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
-import useAuthState from '../../store/Auth/useAuthState';
+import useUserState from '../../store/User/useUserState';
 
 type Props = {
   targetUserID: string;
@@ -22,9 +22,9 @@ type Props = {
 const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const navigate = useNavigate();
   const closeModalHandler = useCloseModal();
-  const { myID } = useAuthState();
   const { isLoading, error, request } = useRequest();
   const params = useParams();
+  const userState = useUserState();
 
   const [userInfo, setUserInfo] = useState<User | null>({
     nickname: 'heryu',
@@ -188,7 +188,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
     contents = <div className={styles.header}>Something Wrong</div>;
   } else if (userInfo === null) {
     contents = <div className={styles.header}>유저를 찾을 수 없습니다.</div>;
-  } else if (myID === targetUserID) {
+  } else if (userState.id === targetUserID) {
     contents = (
       <>
         <div className={styles.header}>

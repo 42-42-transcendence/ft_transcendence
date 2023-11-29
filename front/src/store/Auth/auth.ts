@@ -2,12 +2,10 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 type AuthState = {
   token: string;
-  myID: string;
 };
 
 const initialState: AuthState = {
   token: '',
-  myID: '',
 };
 
 const authSlice = createSlice({
@@ -18,13 +16,8 @@ const authSlice = createSlice({
       state.token = action.payload;
     },
 
-    setMyID: (state, action: PayloadAction<string>) => {
-      state.myID = action.payload;
-    },
-
     clearAuth: (state) => {
-      state.token = '';
-      state.myID = '';
+      state = initialState;
     },
   },
 });

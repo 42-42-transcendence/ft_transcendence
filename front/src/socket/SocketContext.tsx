@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { actions as notificationActions } from '../store/Notification/notification';
 import type { Notification } from '../store/Notification/notification';
 import { useNavigate } from 'react-router-dom';
+import useUserState from '../store/User/useUserState';
 
 type SocketContextType = {
   socket: Socket | null;
@@ -19,6 +20,7 @@ type ChildProps = {
 
 const SocketContextProvider = ({ children }: ChildProps) => {
   const authState = useAuthState();
+  const userState = useUserState();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -30,7 +32,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
           token: authState.token,
         },
         query: {
-          userID: authState.myID,
+          userID: userState.id,
         },
       });
 
@@ -68,7 +70,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         setSocket(null);
       }
     };
-  }, [socket, authState, dispatch, navigate]);
+  }, [socket, authState, userState, dispatch, navigate]);
 
   return (
     <SocketContext.Provider value={{ socket }}>

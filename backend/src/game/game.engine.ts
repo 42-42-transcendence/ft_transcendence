@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { vec2 } from 'gl-matrix';
 import { normalize } from 'path';
 import { GameData, Paddle, Ball } from "./dto/in-game.dto";
@@ -10,7 +10,10 @@ const data = new GameData();
 
 @Injectable()
 export class GameEngine {
-	constructor(private gameGateway: GameGateway, private gameservice: GameService) {}
+	constructor(
+		@Inject(forwardRef(() => GameGateway)) private gameGateway: GameGateway,
+		@Inject(forwardRef(() => GameService)) private gameservice: GameService
+	) {}
 
     async startGameLoop(gameId: string): Promise<void> {
         setInterval(async () => {
@@ -39,7 +42,7 @@ export class GameEngine {
 
 			return (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft);
 		};
-		
+
 		const handleBallPaddleCollision = () =>{
 			const ball = data.ball;
 			const paddle = data.paddle;
@@ -118,7 +121,7 @@ export class GameEngine {
 			if (paddle[0].position[1] + paddle[0].height / 2.0 > 1.0)
 				paddle[0].position[1] = 1.0 - paddle[0].height / 2.0;
 		}
-		
+
 		this.gameGateway.emitGameUpdate(gameId, gamedata);
 	}
 }

@@ -23,6 +23,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { SocketException } from './socket.exception';
 import { UserStatus } from 'src/user/enums/user-status.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
 
 
 
@@ -84,8 +85,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       });
       await Promise.all(leaveChannels);
 
+      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
       this.eventsService.removeClient(user.userID);
-      if (user.status === UserStatus.ONLINE) {
+      if (user.status !== UserStatus.ONLINE) {
         await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
       }
 
@@ -225,6 +227,24 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (client) {
       client.emit("updatedNotification", notification);
     }
+  }
+
+  async sendInviteGameNotification(message: string, notiType: NotiType, user: User, sendUser: string) {
+    const client = this.eventsService.getClient(user.userID);
+    if (client && user.status === UserStatus.ONLINE) {
+      const notification = this.notificationService.createNotificationWithData({
+        message,
+        notiType,
+        user,
+        data: sendUser
+      });
+      client.emit("updatedNotification", notification);
+    }
+  }
+
+  async sendStartGameEvent(user: User, gameID: string) {
+    const client = this.eventsService.getClient(user.userID);
+    client.emit("startGame", gameID);
   }
 
 }

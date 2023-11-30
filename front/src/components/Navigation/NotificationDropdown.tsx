@@ -7,10 +7,7 @@ type Props = {
 };
 
 const NotificationDropdown = ({ notifications }: Props) => {
-  const filteredNotifications = notifications.filter(
-    (notification) => notification.notiType !== 'game'
-  );
-  const notificationItemList = filteredNotifications.map((notification) => (
+  const notificationItemList = notifications.map((notification) => (
     <NotificationItem
       key={notification.notiID}
       id={notification.notiID}

@@ -53,6 +53,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
       });
 
       newSocket.on('updatedNotification', (notification: Notification) => {
+        console.log(notification);
         dispatch(notificationActions.appendNotification(notification));
       });
 

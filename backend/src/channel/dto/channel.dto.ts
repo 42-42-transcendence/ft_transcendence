@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ChannelTypeEnum } from "../enums/channelType.enum";
 
-export class CreateChannelDto {
+export class ChannelDto {
 
 	@ApiProperty({
 		description: '채널 이름',

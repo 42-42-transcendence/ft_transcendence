@@ -28,7 +28,10 @@ export class Auth {
 		type: 'Promise<User>',
 		nullable: true
 	})
-	@OneToOne(() => User, (user) => user.auth, { nullable: true })
+	@OneToOne(() => User, (user) => user.auth, {
+		nullable: true,
+		cascade: true
+	})
 	@JoinColumn({ referencedColumnName: 'nickname' })
 	user: Promise<User>;
 

@@ -2,11 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SocketIoAdapter } from './adapters/socket-io.adapter';
+import { SocketExceptionFilter } from './events/socket.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.useWebSocketAdapter(new SocketIoAdapter(app));
+  // app.useGlobalFilters(new SocketExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('ft_transcendence API')

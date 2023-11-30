@@ -10,10 +10,10 @@ import { forwardRef, Inject } from '@nestjs/common';
 import { GameTypeEnum } from './enums/gameType.enum';
 
 
-@WebSocketGateway({
-cors: {
-    origin: process.env.FRONT_URL
-  }
+@WebSocketGateway(8080, {
+    cors: {
+        origin: process.env.FRONT_URL
+    }
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server : Server;

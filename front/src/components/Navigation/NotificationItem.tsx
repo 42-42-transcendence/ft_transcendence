@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { NotificationType } from '../../store/Notification/notification';
-import styles from '../../styles/Dropdown.module.css';
+import styles from '../../styles/Navigation.module.css';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
 import { useDispatch } from 'react-redux';
@@ -42,7 +42,7 @@ const NotificationItem = ({ id, notiType, message, channelID }: Props) => {
   };
 
   return (
-    <li className={styles.list}>
+    <li className={styles['dropdown-list']}>
       <small>! {title}</small>
       <button onClick={clickHandler}>
         <div>{message}</div>

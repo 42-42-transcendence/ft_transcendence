@@ -85,11 +85,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       });
       await Promise.all(leaveChannels);
 
-      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
       this.eventsService.removeClient(user.userID);
       if (user.status !== UserStatus.OFFLINE) {
         await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
       }
+      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
 
       console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
 

@@ -61,7 +61,7 @@ export class NotificationRepository extends Repository<Notification> {
             .delete()
             .from(Notification)
             .where('user.userID = :userID', { userID })
-            .andWhere('notification.notiType = :notiType', { notiType: NotiType.GAME})
+            .andWhere('notiType = :notiGame', { notiGame: NotiType.GAME})
             .execute();
     }
 

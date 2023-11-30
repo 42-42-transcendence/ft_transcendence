@@ -60,7 +60,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         navigate('/login', { state: { message: message } });
       });
 
-      /**
+      /** sangmiha
        * 여기서 필요한 데이터 서버에서 받아서 사용하시면 될 겁니다.
        */
       newSocket.on('startGame', (gameID: string) => {

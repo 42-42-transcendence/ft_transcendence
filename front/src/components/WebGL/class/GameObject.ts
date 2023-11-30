@@ -87,7 +87,6 @@ export abstract class GameObject {
 
     public checkWithWallCollision(delta: number) : {p : number, pos : CanvasPosition} | undefined {
         const a = this.position;
-        // const direction = this.direction;
         const direction = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
 
         const walls = [

@@ -31,4 +31,13 @@ export class Ball extends GameObject{
         vec2.normalize(this.direction, normalReflect);
         return false;
     }
+
+    clone() {
+        let copy = new Ball(this.position, this.direction, this.velocity, this.radius);
+        copy.position = vec2.clone(this.position);
+        copy.direction = vec2.clone(this.direction);
+        copy.factor = this.factor;
+        copy.radius = this.radius;
+        return copy;
+    }
 }

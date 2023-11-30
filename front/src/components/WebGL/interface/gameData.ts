@@ -4,10 +4,6 @@ import {vec2} from 'gl-matrix';
 let data: gameData = {
 	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
 	ball : null,
-	keyPress: {
-		up: false,
-		down: false,
-	},
 	scores: [0, 0],
 	gl: null,
 	paddleBuffer: null,
@@ -24,6 +20,7 @@ let data: gameData = {
 	mode: 'normal',
 	uColorLocation: null,
 	requestId: 0,
+	AIMode: false,
 };
 
 export default data;

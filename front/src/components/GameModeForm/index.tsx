@@ -54,7 +54,7 @@ const GameModeForm = () => {
           </CardButton>
         </div>
       </div>
-      
+
       <Form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.container}>
           <h2>GAME MODE</h2>

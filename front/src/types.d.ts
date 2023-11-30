@@ -3,14 +3,9 @@ declare module '*.glsl' {
 	export default content;
 }
 
-type KeyPress = {
-	up: boolean;
-	down: boolean;
-};
 interface gameData {
 	paddle: Paddle[];
 	ball: Ball;
-	keyPress: KeyPress;
 	scores: number[];
 	gl: WebGLRenderingContext | null;
 	paddleBuffer: WebGLBuffer | null;
@@ -27,4 +22,5 @@ interface gameData {
 	mode: string;
 	uColorLocation: WebGLUniformLocation | null;
 	requestId: number;
+	AIMode: boolean;
 }

@@ -2,6 +2,7 @@ import data from '../interface/gameData';
 import PhysicsEngine from "../class/PhysicsEngine";
 import { GameManager } from "../class/GameManager";
 import { ItemManager} from "../class/ItemManager";
+import { AIManager } from "../class/AIManager";
 
 function update(delta: number) {
 	if (data.mode === 'object') {
@@ -18,8 +19,11 @@ function update(delta: number) {
 		GameManager.resetGame();
 		// window.cancelAnimationFrame(data.requestId);
 	}
+	if (data.AIMode)
+		AIManager.getInstance().GuaranteeConflict(data.ball.clone(),10000);
 	/* player 패들 이동 */
 	data.paddle[0].updatePosition(delta);
+	data.paddle[1].updatePosition(delta);
 }
 
 export default update;

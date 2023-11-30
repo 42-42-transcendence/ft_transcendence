@@ -16,6 +16,7 @@ export class Paddle {
     width: number;
     height: number;
     ballVelocityFactor: number;
+    keyPress: {up: boolean, down: boolean};
     paddleVertices = new Float32Array(12);
 
     constructor(x: number, y: number, width: number = 0.05, height: number = 0.5) {
@@ -24,6 +25,7 @@ export class Paddle {
         this.ballVelocityFactor = 1.0;
         this.width = width;
         this.height = height;
+        this.keyPress = {up: false, down: false};
         this.calculateVertices();
     }
 
@@ -41,10 +43,9 @@ export class Paddle {
     }
 
     public updatePosition(delta: number) {
-        /* 현재 player1의 패들 위치만 고려 */
-        if (data.keyPress.up) {
+        if (this.keyPress.up) {
             this.position[1] += this.paddleSpeed * delta
-        } else if (data.keyPress.down) {
+        } else if (this.keyPress.down) {
             this.position[1] -= this.paddleSpeed * delta;
         } else {
             this.position[1] += 0;

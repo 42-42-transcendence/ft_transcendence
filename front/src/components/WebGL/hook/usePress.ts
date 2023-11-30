@@ -4,19 +4,19 @@ import { useEffect } from 'react';
 function usePress() {
 
 	function keyDownHandler(event : KeyboardEvent) {
-    if (event.key === 'ArrowUp') {
-      data.keyPress.up = true;
-    } else if (event.key === 'ArrowDown') {
-      data.keyPress.down = true;
-    }
+		if (event.key === 'ArrowUp') {
+		  data.paddle[0].keyPress.up = true;
+		} else if (event.key === 'ArrowDown') {
+			data.paddle[0].keyPress.down = true;
+		}
 	}
 
 	function keyUpHandler(event : KeyboardEvent) {
-    if (event.key === 'ArrowUp') {
-      data.keyPress.up = false;
-    } else if (event.key === 'ArrowDown') {
-      data.keyPress.down = false;
-    }
+		if (event.key === 'ArrowUp') {
+			data.paddle[0].keyPress.up = false;
+		} else if (event.key === 'ArrowDown') {
+			data.paddle[0].keyPress.down = false;
+		}
 	}
 
 	useEffect(() => {

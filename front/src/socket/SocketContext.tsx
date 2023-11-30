@@ -53,11 +53,10 @@ const SocketContextProvider = ({ children }: ChildProps) => {
       });
 
       newSocket.on('updatedNotification', (notification: Notification) => {
-        console.log(notification);
         dispatch(notificationActions.appendNotification(notification));
       });
 
-      newSocket.on('tokenExpired', (message) => {
+      newSocket.on('sessionExpired', (message) => {
         navigate('/login', { state: { message: message } });
       });
 

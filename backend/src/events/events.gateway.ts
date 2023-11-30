@@ -87,7 +87,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       await this.notificationService.deleteAllGameNotiByUserID(user.userID);
       this.eventsService.removeClient(user.userID);
-      if (user.status !== UserStatus.ONLINE) {
+      if (user.status !== UserStatus.OFFLINE) {
         await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
       }
 

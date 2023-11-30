@@ -22,6 +22,7 @@ import { SocketExceptionFilter } from './socket.filter';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { SocketException } from './socket.exception';
+import { UserStatus } from 'src/user/enums/user-status.enum';
 
 
 
@@ -56,6 +57,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
       const user = await this.authService.getUserByAuthWithWsException(auth);
       this.eventsService.addClient(user.userID, client);
+      if (user.status === UserStatus.OFFLINE) {
+        await this.userService.updateUserStatus(user, UserStatus.ONLINE);
+      }
 
       console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
     } catch (e) {
@@ -81,6 +85,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       await Promise.all(leaveChannels);
 
       this.eventsService.removeClient(user.userID);
+      if (user.status === UserStatus.ONLINE) {
+        await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
+      }
 
       console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
 

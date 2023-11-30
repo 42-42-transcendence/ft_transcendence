@@ -56,4 +56,11 @@ export class UserRepository extends Repository<User> {
 	async getAllUsers(): Promise<User[]> {
 		return (await this.find());
 	}
+
+	async updateUserStatus(user: User, status: UserStatus): Promise<User> {
+		user.status = status;
+
+		const result = await this.save(user);
+		return (result);
+	}
 }

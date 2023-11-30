@@ -232,7 +232,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async sendInviteGameNotification(message: string, notiType: NotiType, user: User, sendUser: string) {
     const client = this.eventsService.getClient(user.userID);
     if (client && user.status === UserStatus.ONLINE) {
-      const notification = this.notificationService.createNotificationWithData({
+      const notification = await this.notificationService.createNotificationWithData({
         message,
         notiType,
         user,

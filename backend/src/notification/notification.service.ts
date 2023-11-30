@@ -52,4 +52,15 @@ export class NotificationService {
         return (true);
     }
 
+    async getGameNotiByInvitedUserAndSendUserNicknameWithException(
+        invitedUser: User, sendUserNickname: string
+    ): Promise<Notification>{
+        const noti = await this.notificationRepository
+                            .getGameNotiByInvitedUserAndSendUserNickname(invitedUser, sendUserNickname);
+        if (!noti) {
+            throw new BadRequestException(`해당하는 게임 초대를 받지 않았습니다.`);
+        }
+        return (noti);
+    }
+
 }

@@ -90,12 +90,12 @@ export class GameController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const sendUser = await this.userService.getUserByNicknameWithException(targetUser);
-
     // user가 초대를 받은 유저가 맞는지 확인이 필요함
     // 확인이 안되면, postman등으로 초대를 받지 않는 C가 A에게 일방적으로 수락 req를 보낼 수도 있음.
-    if (!(await this.notificationService.isSendGameNotiToInvitedUser(user, sendUser.nickname))) {
-      throw new BadRequestException(`해당하는 게임 초대를 받지 않았습니다.`);
-    }
+    const noti = await this.notificationService
+        .getGameNotiByInvitedUserAndSendUserNicknameWithException(user, sendUser.nickname);
+
+    await this.notificationService.deleteNotification(noti.notiID);
 
     if (user.status !== UserStatus.ONLINE) {
       throw new BadRequestException(`${user.nickname}님은 현재 게임을 할 수 있는 상태가 아닙니다.`);
@@ -104,6 +104,9 @@ export class GameController {
     if (sendUser.status !== UserStatus.ONLINE) {
       throw new BadRequestException(`${sendUser.nickname}님은 현재 게임을 할 수 있는 상태가 아닙니다.`);
     }
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
 
     // 여기에서 game방 객체를 만들던, gameID를 generate하던 gameID를 생성해줘야함
     await this.eventsGateway.sendStartGameEvent(user, '1234');

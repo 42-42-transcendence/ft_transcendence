@@ -6,7 +6,6 @@ import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 import { UserAchievementModule } from 'src/user-achievement/user-achievement.module';
 import { SocketException } from 'src/events/socket.exception';
 import { UserStatus } from './enums/user-status.enum';
-import { stat } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -67,5 +66,5 @@ export class UserService {
 	async updateUserStatus(user: User, status: UserStatus): Promise<User> {
 		return (this.userRepository.updateUserStatus(user, status));
 	}
-
+ 
 }

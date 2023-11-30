@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
+import { v4 as uuidv4 } from 'uuid';
 import { UserStatus } from "./enums/user-status.enum";
 import { faker } from "@faker-js/faker";
 

@@ -4,7 +4,7 @@ type NotificationType = 'friend' | 'invite' | 'dm' | 'ban';
 
 type Notification = {
   notiID: string;
-  type: NotificationType;
+  notiType: NotificationType;
   message: string;
   channelID?: string;
 };

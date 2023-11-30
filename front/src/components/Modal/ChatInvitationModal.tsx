@@ -38,10 +38,10 @@ const ChatInvitationModal = ({ channelID }: Props) => {
     setFeedbackMessage('');
 
     const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/channel/${channelID}`,
+      `${SERVER_URL}/api/channel/${channelID}/invite`,
       {
         method: 'POST',
-        body: JSON.stringify({ invitedUser: enteredName }),
+        body: JSON.stringify({ targetUserID: enteredName }),
         headers: { 'Content-Type': 'application/json' },
       }
     );
@@ -73,6 +73,7 @@ const ChatInvitationModal = ({ channelID }: Props) => {
             placeholder="닉네임 입력"
             value={enteredName}
             onChange={changeNameHandler}
+            autoComplete="off"
           />
         </div>
         <div className={styles.feedback}>{feedbackMessage}</div>

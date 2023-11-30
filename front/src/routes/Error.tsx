@@ -1,4 +1,5 @@
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
+import BackLink from '../UI/BackLink';
 
 const ErrorPage = () => {
   const error = useRouteError();
@@ -19,6 +20,7 @@ const ErrorPage = () => {
       <main>
         <h1>Error Page</h1>
         <p>{errorMessage}</p>
+        <BackLink title="메인 페이지로 이동" redirect="/" />
       </main>
     </>
   );

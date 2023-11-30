@@ -7,11 +7,12 @@ type Props = {
 };
 
 const NotificationDropdown = ({ notifications }: Props) => {
+  console.log(notifications);
   const notificationItemList = notifications.map((notification) => (
     <NotificationItem
       key={notification.notiID}
       id={notification.notiID}
-      type={notification.type}
+      notiType={notification.notiType}
       message={notification.message}
       channelID={notification.channelID}
     />

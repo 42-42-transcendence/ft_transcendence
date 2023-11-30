@@ -9,10 +9,10 @@ import ChannelIconList from './ChannelIconList';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
 
-type ChannelType = {
+export type ChannelType = {
   channelID: string;
   title: string;
-  type: 'public' | 'private' | 'direct';
+  type: 'public' | 'private' | 'dm';
   total?: number;
   password?: string;
 };
@@ -68,5 +68,4 @@ const Channel = () => {
   );
 };
 
-export type { ChannelType };
 export default Channel;

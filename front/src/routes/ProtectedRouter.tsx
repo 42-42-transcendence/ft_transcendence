@@ -1,20 +1,66 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import useAuthState from '../store/Auth/useAuthState';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { SocketContextProvider } from '../socket/SocketContext';
+import { useEffect, useState } from 'react';
+import useRequest from '../http/useRequest';
+import { SERVER_URL } from '../App';
+import { useDispatch } from 'react-redux';
+import { actions as userActions } from '../store/User/user';
+import useUserState from '../store/User/useUserState';
 
 const ProtectedRouter = () => {
-  const authState = useAuthState();
-  // token이 있는데 만료된 경우 로그인 시키기
-  if (!authState.token) {
-    return <Navigate to="/login" />;
-  } else if (!authState.myID) {
-    return <Navigate to="/setting-profile" />;
-  } else {
-    return (
-      <SocketContextProvider>
-        <Outlet />
-      </SocketContextProvider>
-    );
+  const dispatch = useDispatch();
+  const { isLoading, request } = useRequest();
+  const [tokenIsValidated, setTokenIsValidated] = useState<boolean | null>(
+    null
+  );
+  const userState = useUserState();
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const tokenResponse = await request<{ message: string }>(
+        `${SERVER_URL}/api/auth`,
+        {
+          method: 'GET',
+        }
+      );
+
+      if (tokenResponse !== null) {
+        setTokenIsValidated(true);
+      } else {
+        setTokenIsValidated(false);
+      }
+
+      const userResponse = await request<{ nickname: string }>(
+        `${SERVER_URL}/api/auth/nickname`,
+        {
+          method: 'GET',
+        }
+      );
+
+      if (userResponse !== null) {
+        dispatch(userActions.setUserID(userResponse.nickname));
+      }
+    };
+
+    fetchData();
+  }, [request, dispatch]);
+
+  if (tokenIsValidated === null || isLoading) {
+    return <h1 style={{ textAlign: 'center' }}>...Loading...</h1>;
   }
+  if (tokenIsValidated === true) {
+    if (location.pathname === '/setting-profile') {
+      return <Outlet />;
+    }
+    if (userState.id !== '') {
+      return (
+        <SocketContextProvider>
+          <Outlet />
+        </SocketContextProvider>
+      );
+    }
+  }
+  return <Navigate to="/login" />;
 };
 export default ProtectedRouter;

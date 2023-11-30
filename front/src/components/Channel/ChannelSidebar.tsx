@@ -6,7 +6,7 @@ type Props = {
   onChangeFilter: (option: string) => void;
 };
 
-const filterOptionList = ['public', 'private', 'direct'];
+const filterOptionList = ['public', 'private', 'dm'];
 
 const ChannelSidebar = ({ selectedFilter, onChangeFilter }: Props) => {
   const optionRadioList = filterOptionList.map((option, index) => (

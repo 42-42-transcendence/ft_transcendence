@@ -10,7 +10,7 @@ type Props = {
 const BackLink = ({ title, redirect, className }: Props) => {
   const classes = `${styles.link} ${className || ''}`;
   return (
-    <Link className={classes} to={redirect}>
+    <Link className={classes} to={redirect} replace={true}>
       {title}
     </Link>
   );

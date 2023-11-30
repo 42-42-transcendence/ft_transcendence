@@ -28,20 +28,20 @@ export class NotificationRepository extends Repository<Notification> {
         });
 
         const result = await this.save(noti);
-        
+
         return (result);
     }
 
-    async createNotificationWithChannelID(notificationWithChannelIDDto: NotificationWithChannelIDDto): Promise<Notification> {
+    async createNotificationWithData(notificationWithChannelIDDto: NotificationWithChannelIDDto): Promise<Notification> {
         const noti = this.create({
             message: notificationWithChannelIDDto.message,
             notiType: notificationWithChannelIDDto.notiType,
             user: notificationWithChannelIDDto.user,
-            channelID: notificationWithChannelIDDto.channelID,
+            data: notificationWithChannelIDDto.data,
         });
 
         const result = await this.save(noti);
-        
+
         return (result);
     }
 

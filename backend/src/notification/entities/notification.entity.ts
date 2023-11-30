@@ -20,5 +20,5 @@ export class Notification {
     user: User;
 
     @Column({ nullable: true })
-    channelID: string;
+    data: string;
 }

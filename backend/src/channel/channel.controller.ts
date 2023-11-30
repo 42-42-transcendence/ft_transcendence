@@ -524,7 +524,7 @@ export class ChannelController {
 
     const content = `${invitedUser.nickname}님께 초대를 보냈습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
-    await this.eventsGateway.updatedNotificationWithChannelID(
+    await this.eventsGateway.updatedNotificationWithData(
       `${user.nickname}님이 ${channel.title}로 초대하셨습니다.`,
       NotiType.INVITE,
       invitedUser,
@@ -565,7 +565,7 @@ export class ChannelController {
     await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user, role });
     await this.channelMemberService.relationChannelMember({ channel, user: invitedUser, role });
-    await this.eventsGateway.updatedNotificationWithChannelID(
+    await this.eventsGateway.updatedNotificationWithData(
       `${user.nickname}님으로부터 DM이 도착했습니다.`,
       NotiType.DM,
       invitedUser,

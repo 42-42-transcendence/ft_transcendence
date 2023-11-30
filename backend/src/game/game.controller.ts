@@ -58,6 +58,11 @@ export class GameController {
       return this.gameService.getGamesToJoin();
   }
 
+  @ApiOperation({ summary: '특정 상대를 게임에 초대한다' })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Post('invite')
   @UseGuards(AuthGuard())
   async inviteGameToUser(
@@ -82,6 +87,11 @@ export class GameController {
     return ({ message: `${invitedUser.nickname}님에게 성공적으로 게임초대를 보냈습니다.` });
   }
 
+  @ApiOperation({ summary: '게임 초대를 수락한다' })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Post('accept')
   @UseGuards(AuthGuard())
   async acceptInviteGame(
@@ -113,5 +123,27 @@ export class GameController {
     await this.eventsGateway.sendStartGameEvent(sendUser, '1234');
 
     return ({ message: `${user.nickname}님이 성공적으로 게임을 수락하셨습니다.` });
+  }
+
+  @Get('match/:mode')
+  @UseGuards(AuthGuard())
+  async startGameMatching(
+    @GetAuth() auth: Auth
+  ):Promise<{ message: string }> {
+    const user = await auth.user;
+
+
+    return ({ message: `성공적으로 매칭에 들어갔습니다` });
+  }
+
+  @Delete('match/:mode')
+  @UseGuards(AuthGuard())
+  async cancelGameMatching(
+    @GetAuth() auth: Auth
+  ):Promise<{ message: string }> {
+    const user = await auth.user;
+
+
+    return ({ message: `성공적으로 매칭에 들어갔습니다` });
   }
 }

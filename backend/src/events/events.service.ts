@@ -16,6 +16,10 @@ export class EventsService {
 
     private clients: Map<string, Socket> = new Map();
 
+    private normalGameQueue: Map<string, Socket> = new Map();
+    private fastGameQueue: Map<string, Socket> = new Map();
+    private objectGameQueue: Map<string, Socket> = new Map();
+
     addClient(userID: string, socket: Socket) {
         this.clients.set(userID, socket);
     }
@@ -27,6 +31,44 @@ export class EventsService {
     getClient(userID: string): Socket | undefined  {
         return (this.clients.get(userID));
     }
+
+    addNormalGameQueueUser(userID: string, socket: Socket) {
+        this.normalGameQueue.set(userID, socket);
+    }
+
+    deleteNormalGameQueueUser(userID: string) {
+        this.normalGameQueue.delete(userID);
+    }
+
+    getNormalGameQueueUser(userID: string): Socket | undefined  {
+        return (this.normalGameQueue.get(userID));
+    }
+
+    addFastGameQueueUser(userID: string, socket: Socket) {
+        this.fastGameQueue.set(userID, socket);
+    }
+
+    deleteFastGameQueueUser(userID: string) {
+        this.fastGameQueue.delete(userID);
+    }
+
+    getFastGameQueueUser(userID: string): Socket | undefined  {
+        return (this.fastGameQueue.get(userID));
+    }
+
+    addObjectGameQueueUser(userID: string, socket: Socket) {
+        this.objectGameQueue.set(userID, socket);
+    }
+
+    deleteObjectGameQueueUser(userID: string) {
+        this.objectGameQueue.delete(userID);
+    }
+
+    getObjectGameQueueUser(userID: string): Socket | undefined  {
+        return (this.objectGameQueue.get(userID));
+    }
+
+
 
     async createEventsMembers(members: ChannelMember[], user: User): Promise<EventsMemberDto[]> {
         let eventsMembers: EventsMemberDto[] = [];

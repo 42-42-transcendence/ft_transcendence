@@ -20,7 +20,7 @@ class PhysicsEngine {
                 if (process.handleCollision(collisionResult))
                     return;
                 const restAfterCollision = delta - collisionResult.p;
-                object.move(0.001);
+                object.move(0.0000001);
                 this.GuaranteeConflict(object, restAfterCollision);
                 return;
             }

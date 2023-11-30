@@ -72,13 +72,12 @@ export abstract class GameObject {
             const ballPos = this.makeBallPosition(corner);
 
             for (const pos of paddlePos) {
-                // const factor = data.ball.calculateFactor(paddlePos);
                 const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
                 const { c, d, r } = this.makePaddlePosition(pos);
                 const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
 
                 if (!this.checkCollision(p, q, r, delta)) {
-                    return {p, pos}; // 충돌 감지 시 바로 p 반환
+                    return {p, pos};
                 }
             }
         }

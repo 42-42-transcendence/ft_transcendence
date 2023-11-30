@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
+import { faker } from "@faker-js/faker";
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -30,5 +32,15 @@ export class UserRepository extends Repository<User> {
 		const user = await this.getUserById(userID);
 
 		return (await user.channelMembers);
+	}
+
+	async createUserDummy(): Promise<User> {
+		const dummy = this.create({
+			nickname: faker.person.firstName(),
+			userID: uuidv4(),
+		});
+
+		const result = this.save(dummy);
+		return (result);
 	}
 }

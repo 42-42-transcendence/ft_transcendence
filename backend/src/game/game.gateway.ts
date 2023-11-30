@@ -1,14 +1,14 @@
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from "./game.service";
-import { GameObjectsDto } from "./dto/game-data.dto";
-import { JoinGameDto } from "./dto/in-game.dto";
+// import { GameObjectsDto } from "./dto/game-data.dto";
+import { InGameDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
-import { GameData, Paddle, Ball } from "./dto/in-game.dto";
+import { GameData } from "./dto/in-game.dto";
 import { GameModeEnum } from './enums/gameMode.enum';
 import { forwardRef, Inject } from '@nestjs/common';
+import { GameTypeEnum } from './enums/gameType.enum';
 
-const data = new GameData();
 
 @WebSocketGateway({
 cors: {
@@ -32,7 +32,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           const gameId : string = this.gameService.getPlayerGameId(client.id);
           if (gameId && this.gameService.isInGame(gameId))
           {
-              const GameData : GameObjectsDto = this.gameService.getGameData(gameId);
+              const GameData : GameData = this.gameService.getGameData(gameId);
               if (GameData)
                   this.server.to(gameId).emit("updateGame", GameData);
           }
@@ -51,7 +51,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           const gameId : string = this.gameService.getPlayerGameId(client.id);
           if (gameId && this.gameService.isInGame(gameId))
           {
-              const GameData : GameObjectsDto = this.gameService.getGameData(gameId);
+              const GameData : GameData = this.gameService.getGameData(gameId);
               if (GameData) {
                   client.leave(gameId);
                   this.server.to(gameId).emit("updateGame", GameData);
@@ -66,7 +66,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('checkInGame')
-  checkInGame (@ConnectedSocket() client: Socket, @MessageBody() dto : JoinGameDto) : void {
+  checkInGame (@ConnectedSocket() client: Socket, @MessageBody() dto : InGameDto) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
           const gameOptions = this.gameService.getGameOptions(queue.gameId);
@@ -75,7 +75,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
       else {
           const gameId : string = this.gameService.reconnectToGame(client.id, dto.displayName);
-          const GameData : GameObjectsDto = this.gameService.getGameData(gameId);
+          const GameData : GameData = this.gameService.getGameData(gameId);
           if (gameId) {
               client.join(gameId);
               this.server.to(gameId).emit("updateGame", GameData);
@@ -97,7 +97,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   reconnectGame (@ConnectedSocket() client: Socket) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
-          const GameData : GameObjectsDto = this.gameService.getGameData(queue.gameId);
+          const GameData : GameData = this.gameService.getGameData(queue.gameId);
           if (GameData) {
               client.join(queue.gameId);
               this.server.to(queue.gameId).emit("updateGame", GameData);
@@ -108,7 +108,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('update')
-  async emitGameUpdate(gameId: string, gameData: GameObjectsDto): Promise<void> {
+  async emitGameUpdate(gameId: string, gameData: GameData): Promise<void> {
     const player1 = gameData.players.player1;
     const player2 = gameData.players.player2;
 
@@ -130,26 +130,25 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('start')
-  async startGame(@ConnectedSocket() client: Socket, @MessageBody() gameOptions: GameOptionDto): Promise<void> {
-  const queue = this.gameService.getQueue(client.id);
-  
-  if (queue) {
-    const gameId = await this.gameService.startGame(client.id, queue.gameId, gameOptions);
-
-    if (gameId) {
-      // Notify the clients about the start of the game
-      client.join(gameId);
-      this.server.to(gameId).emit('gameStarted');
+  async startGame(@ConnectedSocket() client: Socket, @MessageBody() mode: string): Promise<void> {
+    const dto : GameOptionDto = {
+        player1: null,
+        player2: null,
+        gametype: GameTypeEnum.LADDER,
+        gamemode: mode,
+        isInGame: false,
     }
-  } else {
-    // Handle the case where the player is not in a queue
-    client.emit('notInQueue');
+    const gameId = await this.gameService.startGame(client.id, null, dto);
+    if (gameId) {
+        client.join(gameId);
+        this.server.to(gameId).emit('gameStarted');
+        console.log("game started");
+    }
   }
-}
 
   @SubscribeMessage('create')
   async createGame (
-      @ConnectedSocket() client: Socket, @MessageBody() gameOptions : string) : Promise<void> {
+      @ConnectedSocket() client: Socket, @MessageBody() gameOptions : GameOptionDto) : Promise<void> {
       if (!gameOptions || this.gameService.isPlayer(client.id))
           client.emit('notCreated');
       else {
@@ -158,7 +157,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           if (gameId) {
               client.join(gameId);
               client.emit('created');
-            //   this.server.emit('newGame');
+              this.server.emit('newGame');
           }
           else
               client.emit('notCreated');
@@ -167,7 +166,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('join')
-  async joinGame (@ConnectedSocket() client: Socket, @MessageBody() dto : JoinGameDto) : Promise<void> {
+  async joinGame (@ConnectedSocket() client: Socket, @MessageBody() dto : InGameDto) : Promise<void> {
       if (!dto)
           client.emit('notStarted');
       else {
@@ -177,8 +176,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           }
           const gameOption : GameOptionDto = await this.gameService.joinGame(client.id, dto);
           if (gameOption) {
-              client.join(dto.gameId);
-              this.server.to(dto.gameId).emit("started", gameOption);
+            client.join(dto.gameId);
+            // this.server.to(dto.gameId).emit("started", gameOption);
+            client.emit('joined');
           }
           else
               client.emit("notStarted");
@@ -186,7 +186,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('init')
-  initialData(@ConnectedSocket() client: Socket, @MessageBody() dto : GameObjectsDto) : void {
+  initialData(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
           this.gameService.setGameData(queue.gameId, dto)
@@ -195,46 +195,49 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('KeyRelease')
-  onKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() dto : GameObjectsDto) : void {
+  onKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
       const queue = this.gameService.getQueue(client.id);
       if (queue) {
           if (queue.isFirst)
-              dto.leftPaddle.delta = 0;
+              dto.paddle[0].delta = 0;
           else
-              dto.rightPaddle.delta = 0;
+              dto.paddle[1].delta = 0;
           this.server.to(queue.gameId).emit("updateGame", dto);
           this.gameService.setGameData(queue.gameId, dto);
       }
   }
 
   @SubscribeMessage('UpKey')
-  UpKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() dto : GameObjectsDto) : void {
-    const paddle = data.paddle;
-    //   const queue = this.gameService.getQueue(client.id);
-    //   if (queue) {
-    //       if (queue.isFirst)
-    //           dto.leftPaddle.delta = -dto.leftPaddle.speed;
-    //       else
-    //           dto.rightPaddle.delta = -dto.rightPaddle.speed;
-    //       this.server.to(queue.gameId).emit("updateGame", dto);
-    //       this.gameService.setGameData(queue.gameId, dto);
-    //   }
-    // paddle[0].position[1] += paddle[0].paddleSpeed * delta;
+  UpKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
+    const leftPaddle = dto.paddle[0];
+    const rightPaddle = dto.paddle[1];
+    const queue = this.gameService.getQueue(client.id);
+    // 키 입력 로직 어떻게...
+    if (queue) {
+        if (queue.isFirst)
+            leftPaddle.paddleSpeed = -leftPaddle.delta;
+        else
+            rightPaddle.paddleSpeed = -rightPaddle.delta;
+            this.server.to(queue.gameId).emit("updateGame", dto);
+            this.gameService.setGameData(queue.gameId, dto);
+    }
     console.log("up");
   }
 
   @SubscribeMessage('DownKey')
-  DownKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() dto : GameObjectsDto) : void {
-    //   const queue = this.gameService.getQueue(client.id);
-    //   if (queue) {
-    //       if (queue.isFirst)
-    //           dto.leftPaddle.delta = dto.leftPaddle.speed;
-    //       else
-    //           dto.rightPaddle.delta = dto.rightPaddle.speed;
-    //       this.server.to(queue.gameId).emit("updateGame", dto);
-    //       this.gameService.setGameData(queue.gameId, dto);
-    //   }
-    // paddle[0].position[1] -= paddle[0].paddleSpeed * delta;
+  DownKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
+    const leftPaddle = dto.paddle[0];
+    const rightPaddle = dto.paddle[1];
+    const queue = this.gameService.getQueue(client.id);
+    // 키 입력 로직 어떻게...
+    if (queue) {
+        if (queue.isFirst)
+            leftPaddle.paddleSpeed = -leftPaddle.delta;
+        else
+            rightPaddle.paddleSpeed = -rightPaddle.delta;
+            this.server.to(queue.gameId).emit("updateGame", dto);
+            this.gameService.setGameData(queue.gameId, dto);
+    }
     console.log("down");
   }
 

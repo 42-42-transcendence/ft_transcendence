@@ -1,6 +1,7 @@
 import { GameTypeEnum } from "../enums/gameType.enum";
 import { GameModeEnum } from "../enums/gameMode.enum";
-
+import { User } from '../../user/entities/user.entity';
+import { UserService } from "../../user/user.service";
 import { vec2 } from "gl-matrix";
 
 export class Paddle {
@@ -65,31 +66,13 @@ export interface KeyPress {
 	down: boolean;
 };
 
-export interface GameInfoDto {
-    readonly player1 : string;
-    readonly player2 : string;
-    readonly gameId : string;
-    // readonly player1score: number;
-    // readonly player2Score : number;
+export class Players {
+    player1: string
+    player1Score: number
+    player2: string
+    player2Score: number
 }
 
-export interface GameOptionDto {
-    player1 : string;
-    player2 : string;
-    paddleHeight : number;
-    ballSpeed : number;
-    paddleSpeed : number;
-    gametype: GameTypeEnum;
-    gamemode: GameModeEnum;
-    isInGame : boolean;
-}
-
-export interface JoinGameDto { // will combine with GameInfoDto
-    readonly displayName : string;
-    readonly gameId : string;
-    readonly player1 : string;
-    readonly player2 : string;
-}
 
 export class GameData {
 	paddle: Paddle[] = [new Paddle(-0.96, 0), new Paddle(0.96, 0)];
@@ -101,4 +84,28 @@ export class GameData {
 	scores: [number, number] = [0, 0];
 	lastTime: number = 0;
 	mode: GameModeEnum.NORMAL;
+    players: Players;
+}
+
+export interface GameInfoDto {
+    readonly player1 : string;
+    readonly player2 : string;
+    readonly gameId : string;
+    readonly player1score: number;
+    readonly player2score : number;
+}
+
+export interface GameOptionDto {
+    player1 : Players;
+    player2 : Players;
+    gametype: GameTypeEnum;
+    gamemode: string;
+    isInGame : boolean;
+}
+
+export interface InGameDto { 
+    readonly displayName : string;
+    readonly gameId : string;
+    readonly player1 : string;
+    readonly player2 : string;
 }

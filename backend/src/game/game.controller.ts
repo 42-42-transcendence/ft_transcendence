@@ -31,10 +31,17 @@ export class GameController {
     return this.gameService.findGameById(id);
 }
 
-  // @ApiOperation({ summary: '게임 참가' })
-  // @ApiOkResponse({ description: '참가 성공' , type: [Game]})
-  // @Get('join')
-  // gamesToJoin() : GameInfoDto[] {
-  //     return this.gameService.getGamesToJoin();
-  // }
+  @ApiOperation({ summary: '게임 참가' })
+  @ApiOkResponse({ description: '참가 성공' , type: [Game]})
+  @Get('join')
+  gamesToJoin() : GameInfoDto[] {
+      return this.gameService.getGamesToJoin();
+  }
+
+  @ApiOperation({ summary: '게임 초대' })
+  @ApiOkResponse({ description: '초대 성공' , type: [Game]})
+  @Get('invite')
+  inviteGame() : GameInfoDto[] {
+      return this.gameService.getGamesToJoin();
+  }
 }

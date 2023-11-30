@@ -9,5 +9,5 @@ export class NotificationWithChannelIDDto {
 
     user: User;
 
-    channelID: string;
+    data: string;
 }

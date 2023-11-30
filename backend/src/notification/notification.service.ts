@@ -18,17 +18,17 @@ export class NotificationService {
         if (!result) {
             throw new BadRequestException('알림을 만들 수 없습니다.');
         }
-        
+
         return (result);
     }
 
-    async createNotificationWithChannelID(notificationWithChannelIDDto: NotificationWithChannelIDDto): Promise<Notification> {
-        const result = await this.notificationRepository.createNotificationWithChannelID(notificationWithChannelIDDto);
+    async createNotificationWithData(notificationWithChannelIDDto: NotificationWithChannelIDDto): Promise<Notification> {
+        const result = await this.notificationRepository.createNotificationWithData(notificationWithChannelIDDto);
 
         if (!result) {
             throw new BadRequestException('알림을 만들 수 없습니다.');
         }
-        
+
         return (result);
     }
 

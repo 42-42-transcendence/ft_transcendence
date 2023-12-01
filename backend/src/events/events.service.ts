@@ -35,6 +35,10 @@ export class EventsService {
         return (this.clients.get(userID));
     }
 
+    hasClient(userID: string): boolean {
+        return (this.clients.has(userID));
+    }
+
     addNormalGameQueueUser(userID: string) {
         this.normalGameQueue.push(userID);
     }

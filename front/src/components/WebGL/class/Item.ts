@@ -11,15 +11,15 @@ export class Item extends GameObject {
         if (rand < 1) {
             if (paddle.height < 0.8)
                 paddle.height += 0.05;
-            console.log("패들 길이 증가!");
+            // console.log("패들 길이 증가!");
         } else if (rand < 2) {
             if (paddle.paddleSpeed < 2.0)
                 paddle.paddleSpeed += 0.12;
-            console.log("패들 속도 증가!");
+            // console.log("패들 속도 증가!");
         } else {
             if (paddle.ballVelocityFactor < 3.0)
                 paddle.ballVelocityFactor += 0.1;
-            console.log("공 속도 증가!");
+            // console.log("공 속도 증가!");
         }
     }
 

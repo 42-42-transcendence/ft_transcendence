@@ -3,6 +3,7 @@ import {PaddlePos} from "./Paddle";
 import data from "../interface/gameData";
 import {GameObject} from "./GameObject";
 import {CanvasPosition, GameManager} from "./GameManager";
+import {Paddle} from "./Paddle";
 
 export class Ball extends GameObject{
     public handleWithWallCollision(side: CanvasPosition) {

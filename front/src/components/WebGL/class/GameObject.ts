@@ -44,20 +44,43 @@ export abstract class GameObject {
         this.position[1] += this.direction[1] * this.velocity * delta * this.factor;
     }
 
+
+    public objectInsidePaddle(paddle: Paddle) {
+        const paddleHeightHalf = paddle.height / 2.0;
+        const paddleWidthHalf = paddle.width / 2.0;
+
+        let paddleTop = paddle.position[1] + paddleHeightHalf;
+        let paddleBottom = paddle.position[1] - paddleHeightHalf;
+        let paddleLeft = paddle.position[0] - paddleWidthHalf;
+        let paddleRight = paddle.position[0] + paddleWidthHalf;
+
+        const objectTop = this.position[1] + this.radius;
+        const objectBottom = this.position[1] - this.radius;
+        const objectLeft = this.position[0] - this.radius;
+        const objectRight = this.position[0] + this.radius;
+
+        return (objectTop > paddleBottom && objectBottom < paddleTop && objectLeft < paddleRight && objectRight > paddleLeft);
+    }
+
+    public objectInsideCanvas() {
+        return this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0;
+    }
+
     protected crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
 
     protected calculateCollision(a: vec2, b: vec2, c : vec2, d :vec2) {
         const crossB_D = this.crossProduct(b, d);
-        if (crossB_D === 0) {
+        const crossD_B = this.crossProduct(d, b);
+        if (crossB_D === 0 || crossD_B === 0) {
             return { p: -1, q: -1 };
         }
-        const p = (this.crossProduct(vec2.sub(vec2.create(), c, a), d)) / this.crossProduct(b, d);
-        const q = (this.crossProduct(vec2.sub(vec2.create(), a, c), b)) / this.crossProduct(d, b);
+        const p = (this.crossProduct(vec2.sub(vec2.create(), c, a), d)) / crossB_D;
+        const q = (this.crossProduct(vec2.sub(vec2.create(), a, c), b)) / crossD_B;
         return {p, q};
     }
 
     protected checkCollision(p: number, q: number, l: number, delta: number) : boolean {
-        return (q < 0 || q > l) || p > delta || p < 0;
+        return (q >= 0 && q <= l) && p < delta && p > 0;
     }
 
     public checkWithPaddleCollision(delta: number) {
@@ -76,7 +99,7 @@ export abstract class GameObject {
                 const { c, d, r } = this.makePaddlePosition(pos);
                 const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
 
-                if (!this.checkCollision(p, q, r, delta)) {
+                if (this.checkCollision(p, q, r, delta)) {
                     return {p, pos};
                 }
             }
@@ -88,22 +111,27 @@ export abstract class GameObject {
         const a = this.position;
         const direction = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
 
-        const walls = [
-            CanvasPosition.TopLeft,
-            CanvasPosition.BottomRight,
-            CanvasPosition.TopRight,
-            CanvasPosition.BottomLeft,
+        const cornerCanvasArray = [
+            { corner: BallCorner.TopRight, canvasPos: [CanvasPosition.TopRight, CanvasPosition.TopLeft] },
+            { corner: BallCorner.BottomRight, canvasPos: [CanvasPosition.TopRight, CanvasPosition.BottomRight] },
+            { corner: BallCorner.BottomLeft, canvasPos: [CanvasPosition.BottomLeft, CanvasPosition.BottomRight] },
+            { corner: BallCorner.TopLeft, canvasPos: [CanvasPosition.BottomLeft, CanvasPosition.TopLeft]}
         ];
 
-        for (const pos of walls) {
-            const {c, d, r} = this.makeCanvasPosition(pos);
-            const {p, q} = this.calculateCollision(a, direction, c, d);
+        for (const { corner, canvasPos } of cornerCanvasArray) {
+            const ballPos = this.makeBallPosition(corner);
 
-            if (!this.checkCollision(p, q, r, delta)) {
-                return {p, pos};
+            for (const pos of canvasPos) {
+                const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
+                const { c, d, r } = this.makeCanvasPosition(pos);
+                const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
+
+                if (this.checkCollision(p, q, r, delta)) {
+                    return {p, pos};
+                }
             }
         }
-        return undefined;
+        return undefined; // 충돌이 없는 경우
     }
 
     public handleWithWallCollision(side: CanvasPosition) {

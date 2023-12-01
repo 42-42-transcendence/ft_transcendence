@@ -10,6 +10,30 @@ export class AIManager {
         return AIManager.instance;
     }
 
+    public testPlayer1() {
+        const movePaddle = () => {
+            const topBoundary = 1.0; // 캔버스의 상단 경계
+            const bottomBoundary = -1.0; // 캔버스의 하단 경계
+
+            const paddleY = data.paddle[0].position[1];
+            const paddleHeightHalf = data.paddle[0].height / 2;
+
+            let switcher = true;
+
+            if (switcher && paddleY + paddleHeightHalf >= topBoundary - 0.001) {
+                data.paddle[0].keyPress.up = false;
+                data.paddle[0].keyPress.down = true;
+                switcher = false;
+            }
+            else if (paddleY - paddleHeightHalf <= bottomBoundary + 0.001) {
+                data.paddle[0].keyPress.up = true;
+                data.paddle[0].keyPress.down = false;
+                switcher = true;
+            }
+        };
+        movePaddle();
+    }
+
     public GuaranteeConflict(copy: Ball, delta: number, depth: number = 0) {
         if (depth > 10) {
             data.paddle[1].keyPress.up = false;
@@ -26,7 +50,7 @@ export class AIManager {
                     return;
                 }
                 copy.handleWithPaddleCollision(collisionResult.pos);
-                copy.move(0.001);
+                copy.move(0.000001);
                 this.GuaranteeConflict(copy, delta, depth + 1);
                 return;
             }
@@ -37,7 +61,7 @@ export class AIManager {
             copy.move(collisionResult.p);
             if (collisionResult.pos < 2) {
                 copy.direction[1] *= -1;
-                copy.move(0.001);
+                copy.move(0.000001);
                 this.GuaranteeConflict(copy, delta, depth + 1);
                 return;
             }

@@ -11,6 +11,7 @@ import { EventsGateway } from 'src/events/events.gateway';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { UserStatus } from 'src/user/enums/user-status.enum';
 import { NotificationService } from 'src/notification/notification.service';
+import { GameModeEnum } from './enums/gameMode.enum';
 
 @ApiTags('GAME')
 @Controller('api/game')
@@ -128,22 +129,52 @@ export class GameController {
   @Get('match/:mode')
   @UseGuards(AuthGuard())
   async startGameMatching(
-    @GetAuth() auth: Auth
+    @GetAuth() auth: Auth,
+    @Param('mode') mode: string,
   ):Promise<{ message: string }> {
     const user = await auth.user;
 
+    if (this.eventsGateway.hasAlreadyGameMatching(user)) {
+      throw new BadRequestException(`${user.nickname}님은 현재 다른 게임 매칭 대기중입니다.`);
+    }
 
-    return ({ message: `성공적으로 매칭에 들어갔습니다` });
+    if (mode === GameModeEnum.NORMAL) {
+      await this.eventsGateway.normalGameMatching(user);
+    }
+    else if (mode === GameModeEnum.FAST) {
+      await this.eventsGateway.fastGameMatching(user);
+    }
+    else if (mode === GameModeEnum.OBJECT) {
+      await this.eventsGateway.objectGameMatching(user);
+    }
+    else {
+      throw new BadRequestException(`${mode}모드는 현재 없는 모드입니다.`);
+    }
+
+    return ({ message: `성공적으로 매칭에 들어갔습니다.` });
   }
 
   @Delete('match/:mode')
   @UseGuards(AuthGuard())
   async cancelGameMatching(
-    @GetAuth() auth: Auth
+    @GetAuth() auth: Auth,
+    @Param('mode') mode: string,
   ):Promise<{ message: string }> {
     const user = await auth.user;
 
+    if (mode === GameModeEnum.NORMAL) {
+      this.eventsGateway.deleteNormalGameQueueUser(user.userID);
+    }
+    else if (mode === GameModeEnum.FAST) {
+      this.eventsGateway.deleteFastGameQueueUser(user.userID);
+    }
+    else if (mode === GameModeEnum.OBJECT) {
+      this.eventsGateway.deleteObjectGameQueueUser(user.userID);
+    }
+    else {
+      throw new BadRequestException(`${mode}모드는 현재 없는 모드입니다.`);
+    }
 
-    return ({ message: `성공적으로 매칭에 들어갔습니다` });
+    return ({ message: `성공적으로 매칭을 취소했습니다.` });
   }
 }

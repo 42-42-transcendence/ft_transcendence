@@ -6,19 +6,22 @@ import { RelationService } from 'src/relation/relation.service';
 import { Socket } from 'socket.io';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
+import { UserService } from 'src/user/user.service';
+import { UserStatus } from 'src/user/enums/user-status.enum';
 
 @Injectable()
 export class EventsService {
     constructor(
         private relationService: RelationService,
         private channelMemberService: ChannelMemberService,
+        private userService: UserService,
     ) {}
 
     private clients: Map<string, Socket> = new Map();
 
-    private normalGameQueue: Map<string, Socket> = new Map();
-    private fastGameQueue: Map<string, Socket> = new Map();
-    private objectGameQueue: Map<string, Socket> = new Map();
+    private normalGameQueue: string[] = [];
+    private fastGameQueue: string[] = [];
+    private objectGameQueue: string[] = [];
 
     addClient(userID: string, socket: Socket) {
         this.clients.set(userID, socket);
@@ -32,40 +35,103 @@ export class EventsService {
         return (this.clients.get(userID));
     }
 
-    addNormalGameQueueUser(userID: string, socket: Socket) {
-        this.normalGameQueue.set(userID, socket);
+    addNormalGameQueueUser(userID: string) {
+        this.normalGameQueue.push(userID);
     }
 
     deleteNormalGameQueueUser(userID: string) {
-        this.normalGameQueue.delete(userID);
+        const index = this.normalGameQueue.indexOf(userID);
+
+        if (index !== -1) {
+            this.normalGameQueue.splice(index, 1);
+        }
     }
 
-    getNormalGameQueueUser(userID: string): Socket | undefined  {
-        return (this.normalGameQueue.get(userID));
+    hasNormalGameQueueUser(userID: string): boolean  {
+        const index = this.normalGameQueue.indexOf(userID);
+
+        if (index === -1) {
+            return (false);
+        }
+        return (true);
     }
 
-    addFastGameQueueUser(userID: string, socket: Socket) {
-        this.fastGameQueue.set(userID, socket);
+    async getReadyNormalGameUser(): Promise<User> {
+        while (this.normalGameQueue.length > 0){
+            const user = await this.userService.getUserByIdWithWsException(
+                this.normalGameQueue.shift()
+            );
+            if (user.status === UserStatus.ONLINE) {
+                return (user);
+            }
+        }
+        return (undefined);
+    }
+
+    addFastGameQueueUser(userID: string) {
+        this.fastGameQueue.push(userID);
     }
 
     deleteFastGameQueueUser(userID: string) {
-        this.fastGameQueue.delete(userID);
+        const index = this.fastGameQueue.indexOf(userID);
+
+        if (index !== -1) {
+            this.fastGameQueue.splice(index, 1);
+        }
     }
 
-    getFastGameQueueUser(userID: string): Socket | undefined  {
-        return (this.fastGameQueue.get(userID));
+    hasFastGameQueueUser(userID: string): boolean  {
+        const index = this.fastGameQueue.indexOf(userID);
+
+        if (index === -1) {
+            return (false);
+        }
+        return (true);
     }
 
-    addObjectGameQueueUser(userID: string, socket: Socket) {
-        this.objectGameQueue.set(userID, socket);
+    async getReadyFastGameUser(): Promise<User> {
+        while (this.fastGameQueue.length > 0){
+            const user = await this.userService.getUserByIdWithWsException(
+                this.fastGameQueue.shift()
+            );
+            if (user.status === UserStatus.ONLINE) {
+                return (user);
+            }
+        }
+        return (undefined);
+    }
+
+    addObjectGameQueueUser(userID: string) {
+        this.objectGameQueue.push(userID);
     }
 
     deleteObjectGameQueueUser(userID: string) {
-        this.objectGameQueue.delete(userID);
+        const index = this.objectGameQueue.indexOf(userID);
+
+        if (index !== -1) {
+            this.objectGameQueue.splice(index, 1);
+        }
     }
 
-    getObjectGameQueueUser(userID: string): Socket | undefined  {
-        return (this.objectGameQueue.get(userID));
+    hasObjectGameQueueUser(userID: string): boolean  {
+        const index = this.objectGameQueue.indexOf(userID);
+
+        if (index === -1) {
+            return (false);
+        }
+        return (true);
+    }
+
+    async getReadyObjectGameUser(): Promise<User> {
+        while (this.objectGameQueue.length > 0){
+            const user = await this.userService.getUserByIdWithWsException(
+                this.objectGameQueue.shift()
+            );
+            if (user.status === UserStatus.ONLINE) {
+                return (user);
+            }
+        }
+        return (undefined);
     }
 
 

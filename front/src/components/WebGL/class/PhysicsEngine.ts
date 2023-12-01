@@ -1,19 +1,9 @@
 import {GameObject} from "./GameObject";
-import {Paddle} from "./Paddle";
 import data from "../interface/gameData";
 
 class PhysicsEngine {
     static GuaranteeConflict(object: GameObject, delta: number, depth: number = 0) {
-        console.log("delta : " + delta);
-        if (depth > 10) {
-            console.log("Depth over: " + object.position[0] + " " + object.position[1]);
-            console.log("Direction: " + object.direction[0] + " " + object.direction[1]);
-            console.log("Velocity: " + object.velocity);
-            console.log("factor: " + object.factor);
-            console.log("P: " + delta);
-            while (true) {}
-            return;
-        }
+        if (depth > 30) return;
 
         const collisionProcesses = [
             {

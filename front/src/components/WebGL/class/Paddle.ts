@@ -1,5 +1,4 @@
 import { vec2 } from "gl-matrix";
-import data from "../interface/gameData";
 
 export enum PaddlePos{
     LeftFront,

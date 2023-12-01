@@ -1,7 +1,6 @@
 import data from '../interface/gameData';
 import { render } from './render';
 import update from "./update";
-import {GameManager} from "../class/GameManager";
 
 export function gameLoop(timeStamp: number) {
 	let delta = (timeStamp - data.lastTime) / 1000.0;

@@ -23,6 +23,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { SocketException } from './socket.exception';
 import { UserStatus } from 'src/user/enums/user-status.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
 
 
 
@@ -84,10 +85,12 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       });
       await Promise.all(leaveChannels);
 
+      // this.allDeleteGameMatching(user.userID);
       this.eventsService.removeClient(user.userID);
-      if (user.status === UserStatus.ONLINE) {
+      if (user.status !== UserStatus.OFFLINE) {
         await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
       }
+      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
 
       console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
 
@@ -225,6 +228,105 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (client) {
       client.emit("updatedNotification", notification);
     }
+  }
+
+  async sendInviteGameNotification(message: string, notiType: NotiType, user: User, sendUser: string) {
+    const client = this.eventsService.getClient(user.userID);
+    if (client && user.status === UserStatus.ONLINE) {
+      const notification = await this.notificationService.createNotificationWithData({
+        message,
+        notiType,
+        user,
+        data: sendUser
+      });
+      client.emit("updatedNotification", notification);
+    }
+  }
+
+  async sendStartGameEvent(user: User, gameID: string) {
+    const client = this.eventsService.getClient(user.userID);
+    client.emit("startGame", gameID);
+  }
+
+  hasAlreadyGameMatching(user: User): boolean {
+    if (this.eventsService.hasNormalGameQueueUser(user.userID)
+      || this.eventsService.hasFastGameQueueUser(user.userID)
+      || this.eventsService.hasObjectGameQueueUser(user.userID)) {
+        return (true);
+    }
+    return (false);
+  }
+
+  deleteNormalGameQueueUser(userID: string) {
+    this.eventsService.deleteNormalGameQueueUser(userID);
+  }
+
+  deleteFastGameQueueUser(userID: string) {
+    this.eventsService.deleteFastGameQueueUser(userID);
+  }
+
+  deleteObjectGameQueueUser(userID: string) {
+    this.eventsService.deleteObjectGameQueueUser(userID);
+  }
+
+  allDeleteGameMatching(userID: string) {
+    this.eventsService.deleteNormalGameQueueUser(userID);
+    this.eventsService.deleteFastGameQueueUser(userID);
+    this.eventsService.deleteObjectGameQueueUser(userID);
+  }
+
+  async normalGameMatching(user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const readyUser = await this.eventsService.getReadyNormalGameUser();
+    if (!readyUser) {
+      this.eventsService.addNormalGameQueueUser(user.userID);
+      return ;
+    }
+    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+    // 게임 룸 만들기
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+    client.emit("startGame", '1234');
+    readyUserClient.emit("startGame", '1234');
+  }
+
+  async fastGameMatching(user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const readyUser = await this.eventsService.getReadyFastGameUser();
+    if (!readyUser) {
+      this.eventsService.addFastGameQueueUser(user.userID);
+      return ;
+    }
+    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+    // 게임 룸 만들기
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+    client.emit("startGame", '1234');
+    readyUserClient.emit("startGame", '1234');
+  }
+
+  async objectGameMatching(user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const readyUser = await this.eventsService.getReadyObjectGameUser();
+    if (!readyUser) {
+      this.eventsService.addObjectGameQueueUser(user.userID);
+      return ;
+    }
+    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+    // 게임 룸 만들기
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+    client.emit("startGame", '1234');
+    readyUserClient.emit("startGame", '1234');
   }
 
 }

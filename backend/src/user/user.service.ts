@@ -45,11 +45,21 @@ export class UserService {
 		return (this.userRepository.getUserById(userID));
 	}
 
-	async getUserByIdWithException(userID: string) {
+	async getUserByIdWithException(userID: string): Promise<User> {
 		const user = this.userRepository.getUserById(userID);
 
 		if (!user) {
 			throw new NotFoundException(`${userID}를 찾을 수 없습니다.`);
+		}
+
+		return (user);
+	}
+
+	async getUserByIdWithWsException(userID: string): Promise<User> {
+		const user = this.userRepository.getUserById(userID);
+
+		if (!user) {
+			throw new SocketException('NotFound', `${userID}을 가진 유저를 찾을 수 없습니다.`);
 		}
 
 		return (user);
@@ -66,5 +76,5 @@ export class UserService {
 	async updateUserStatus(user: User, status: UserStatus): Promise<User> {
 		return (this.userRepository.updateUserStatus(user, status));
 	}
- 
+
 }

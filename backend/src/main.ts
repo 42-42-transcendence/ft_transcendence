@@ -8,7 +8,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.useWebSocketAdapter(new SocketIoAdapter(app));
-  // app.useGlobalFilters(new SocketExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('ft_transcendence API')
@@ -18,9 +17,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3095;
-  await app.listen(process.env.PORT);
+  const port = 3001;
+  await app.listen(3001);
   console.log(`Listening on port: ${port}`);
-  
+
 }
 bootstrap();

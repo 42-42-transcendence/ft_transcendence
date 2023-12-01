@@ -1,7 +1,7 @@
 import { User } from "src/user/entities/user.entity";
 import { NotiType } from "../enums/noti-type.enum";
 
-export class NotificationWithChannelIDDto {
+export class NotificationWithDataDto {
 
     message: string;
 

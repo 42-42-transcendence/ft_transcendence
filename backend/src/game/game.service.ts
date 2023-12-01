@@ -24,10 +24,12 @@ const data = new GameData();
 
 @Injectable()
 export class GameService {
-    constructor(@InjectRepository(Game) private gameRepository : Repository<Game>,
-                private userService : UserService, 
-                @Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
-                private gameEngine: GameEngine) {}
+    constructor(
+        @InjectRepository(Game) private gameRepository : Repository<Game>,
+        private userService : UserService,
+        @Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
+        @Inject(forwardRef(() => GameEngine)) private gameEngine: GameEngine
+    ) {}
 
     private playerToGameId = new Map<string, Queue>();
     private gameIdToGameOption = new Map<string, GameOptionDto>();
@@ -44,7 +46,7 @@ export class GameService {
         console.log(user.nickname);
         console.log(user.userID);
         const game = await this.gameRepository.save({player1 : user.userID, player2 : null});
-        this.playerToGameId.set(clientId, {gameId : game.id, isFirst : true});    
+        this.playerToGameId.set(clientId, {gameId : game.id, isFirst : true});
         this.gameIdToGameOption.set(game.id, gameOptions);
         this.gameGateway.server.to(gameId).emit("created");
         return game.id;
@@ -66,7 +68,7 @@ export class GameService {
                 player2 : "player2",
             }
             const gameOption = await this.joinGame(clientId2, ingamedata);
-        
+
             if (!gameOption) {
             return null;
             }
@@ -75,7 +77,7 @@ export class GameService {
 
         return (gameId);
     }
-      
+
     // private async startGameLoop(gameId: string): Promise<void> {
     //     setInterval(async () => {
     //       await this.updateGame(gameId);
@@ -83,7 +85,7 @@ export class GameService {
     //       this.gameGateway.server.to(gameId).emit("updateGame", gameData);
     //     }, 20);
     // }
-      
+
     async joinGame (clientId : string, dto : InGameDto) : Promise<GameOptionDto> {
         const gameOption : GameOptionDto = this.getGameOptions(dto.gameId);
         if (!gameOption || gameOption.isInGame) {
@@ -100,12 +102,12 @@ export class GameService {
 
         // const queue = this.getQueue(clientId);
         // const player1 = this.playerToGameId.get(queue.gameId);
-      
+
         // if (player1 && player1.isFirst) {
-            
+
         //     const gameOptions = this.getGameOptions(queue.gameId);
         //     const gameId = await this.startGame(clientId, player1.gameId, gameOptions);
-        
+
         //     if (gameId) {
         //       this.gameGateway.server.to(gameId).emit('gameStarted');
         //     }
@@ -123,19 +125,19 @@ export class GameService {
     //         let paddleBottom = paddle.position[1] - paddleHeightHalf;
     //         let paddleLeft = paddle.position[0] - paddleWidthHalf;
     //         let paddleRight = paddle.position[0] + paddleWidthHalf;
-    
+
     //         const BallTop = ballPos[1] + radius;
     //         const BallBottom = ballPos[1] - radius;
     //         const BallLeft = ballPos[0] - radius;
     //         const BallRight = ballPos[0] + radius;
-    
+
     //         return (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft);
     //     };
-        
+
     //     const handleBallPaddleCollision = () =>{
     //         const ball = data.ball;
     //         const paddle = data.paddle;
-    
+
     //         for (let i = 0; i < 2; i++) {
     //             if (checkBallPaddleCollision(ball.position, paddle[i])) {
     //                 let normalReflect = vec2.fromValues(i == 0 ? 1 : -1, 0); // 왼쪽 패들이면 1, 오른쪽 패들이면 -1
@@ -146,14 +148,14 @@ export class GameService {
     //             }
     //         }
     //     }
-    
+
     //     const handleBallWallCollision = () => {
     //         const ball = data.ball;
     //         if (ball.position[1] + ball.radius > 1.0 || ball.position[1] - ball.radius < -1.0) {
     //             ball.direction[1] *= -1; // 위, 아래 벽에 닿을 경우 공의 반사를 구현 (정반사)
     //         }
     //     }
-    
+
     //     const collisionGuarantee = (ball: Ball, delta: number) => {
     //         for (let i = 0; i < 2; i++) {
     //             const dir = i === 0 ? 1 : -1;
@@ -165,10 +167,10 @@ export class GameService {
     //             const hh = data.paddle[i].height / 2.0;
     //             const dx = ball.direction[0] * ball.velocity;
     //             const dy= ball.direction[1] * ball.velocity;
-    
+
     //             const t = (x2 - x1 + (wh * dir) - hh) / dx;
     //             const k = y2 - y1 - dy * t;
-    
+
     //             /* 충돌이 없다면 */
     //             if ((k < 0 || k > hh * 2) && t > delta) {
     //                 updateBallPosition(delta);
@@ -187,11 +189,11 @@ export class GameService {
     //         vec2.add(tempVec2, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta));
     //         return tempVec2;
     //     }
-    
+
     //     const updateBallPosition = (delta: number) => {
     //         data.ball.position = calculateBallPosition(data.ball, delta);
     //     }
-    
+
     //     const updatePaddlePosition = (delta: number) => {
     //         const paddle = data.paddle;
     //         /* 현재 player1의 패들 위치만 고려 */
@@ -202,7 +204,7 @@ export class GameService {
     //         } else {
     //             paddle[0].position[1] += 0;
     //         }
-    
+
     //         /* 패들 위치 제한 */
     //         if (paddle[0].position[1] - paddle[0].height / 2.0 < -1.0) {
     //             paddle[0].position[1] = -1.0 + paddle[0].height / 2.0;
@@ -210,7 +212,7 @@ export class GameService {
     //         if (paddle[0].position[1] + paddle[0].height / 2.0 > 1.0)
     //             paddle[0].position[1] = 1.0 - paddle[0].height / 2.0;
     //     }
-        
+
     //     this.gameGateway.emitGameUpdate(gameId, gamedata);
     // }
 
@@ -239,7 +241,7 @@ export class GameService {
     deleteGameData (gameId : string) {
         this.gameIdToGameData.delete(gameId);
     }
-    
+
     async setplayer2(gameId : string, player2 : string) : Promise<void> {
         const game : Game = await this.findGameById(gameId);
         const user = await this.userService.createUserDummy();
@@ -371,7 +373,7 @@ export class GameService {
 
     getQueue(clientId : string) : Queue {
         return this.playerToGameId.get(clientId);
-        
+
     }
 
     getGameOptions(gameId : string) : GameOptionDto {

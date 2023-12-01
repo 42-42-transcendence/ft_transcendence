@@ -1,5 +1,5 @@
 export enum GameModeEnum {
-  SPEED = 'speed',
+  FAST = 'fast',
   OBJECT = 'object',
   NORMAL = 'normal',
 }

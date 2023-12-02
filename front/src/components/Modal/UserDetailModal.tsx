@@ -72,7 +72,22 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
     }
   };
 
-  const gameHandler = () => {};
+  const inviteGameHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/game/invite`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
 
   const addFriendHandler = async () => {
     const ret = await request<{ message: string }>(
@@ -254,7 +269,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
               userInfo.status !== 'online' ||
               isLoading
             }
-            onClick={gameHandler}
+            onClick={inviteGameHandler}
           >
             게임 신청
           </button>

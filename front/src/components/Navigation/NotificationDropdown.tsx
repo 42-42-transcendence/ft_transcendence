@@ -1,4 +1,4 @@
-import styles from '../../styles/Dropdown.module.css';
+import styles from '../../styles/Navigation.module.css';
 import type { Notification } from '../../store/Notification/notification';
 import NotificationItem from './NotificationItem';
 
@@ -7,14 +7,13 @@ type Props = {
 };
 
 const NotificationDropdown = ({ notifications }: Props) => {
-  console.log(notifications);
   const notificationItemList = notifications.map((notification) => (
     <NotificationItem
       key={notification.notiID}
       id={notification.notiID}
       notiType={notification.notiType}
       message={notification.message}
-      channelID={notification.channelID}
+      channelID={notification.data}
     />
   ));
 

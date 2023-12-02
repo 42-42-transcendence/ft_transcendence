@@ -1,12 +1,12 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-type NotificationType = 'friend' | 'invite' | 'dm' | 'ban';
+type NotificationType = 'friend' | 'invite' | 'dm' | 'ban' | 'game';
 
 type Notification = {
   notiID: string;
   notiType: NotificationType;
   message: string;
-  channelID?: string;
+  data?: string;
 };
 
 type NotificationState = {

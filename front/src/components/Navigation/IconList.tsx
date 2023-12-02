@@ -13,8 +13,12 @@ const IconList = () => {
     useState<boolean>(false);
   const [showUserDropdown, setShowUserDropdown] = useState<boolean>(false);
 
-  const notificationState = useNotificationState();
-  const notificationCount = notificationState.notifications.length;
+  const { notifications } = useNotificationState();
+
+  const filteredNotifications = notifications.filter(
+    (notification) => notification.notiType !== 'game'
+  );
+  const notificationCount = filteredNotifications.length;
 
   const toggleShowNotificationHandler = () => {
     setShowNotificationDropdown((prev) => !prev);
@@ -52,9 +56,7 @@ const IconList = () => {
           <small className={styles.new}>{notificationCount}</small>
         )}
         {showNotificationDropdown && (
-          <NotificationDropdown
-            notifications={notificationState.notifications}
-          />
+          <NotificationDropdown notifications={filteredNotifications} />
         )}
       </li>
       <li onBlur={offUserDropDownHandler} className={styles.icon_item}>

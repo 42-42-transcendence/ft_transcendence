@@ -56,9 +56,15 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         dispatch(notificationActions.appendNotification(notification));
       });
 
-      newSocket.on('tokenExpired', (message) => {
-        console.log('tokenExpired:', message);
+      newSocket.on('sessionExpired', (message) => {
         navigate('/login', { state: { message: message } });
+      });
+
+      /** sangmiha
+       * 여기서 필요한 데이터 서버에서 받아서 사용하시면 될 겁니다.
+       */
+      newSocket.on('startGame', (gameID: string) => {
+        navigate(`/game/${gameID}`);
       });
 
       setSocket(newSocket);

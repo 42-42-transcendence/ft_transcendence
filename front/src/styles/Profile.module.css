@@ -25,6 +25,29 @@
   align-items: center;
 }
 
+.avatar-label {
+  cursor: pointer;
+}
+
+.avatar-patch-button {
+  color: var(--text-white);
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--active-color);
+  margin-top: 16px;
+}
+
+.avatar-patch-button:hover {
+  background-color: var(--active-hover-color);
+}
+
+.feedback {
+  margin: 16px auto;
+  color: var(--focus-color);
+}
+
 .detail {
   display: grid;
   grid-template-areas:

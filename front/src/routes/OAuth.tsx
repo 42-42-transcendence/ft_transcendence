@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 
 type oAuthResponseData = {
   jwtToken: string;
-  userName: string;
+  isFirst: string;
 };
 
 type loaderData = {
@@ -30,10 +30,9 @@ const OAuth = () => {
             return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
           } else {
             dispatch(authActions.setAuthToken(ret.jwtToken));
-
             return (
               <Navigate
-                to={ret.userName === '' ? '/setting-profile' : '/'}
+                to={ret.isFirst === '' ? '/setting-profile' : '/'}
                 replace={true}
               />
             );

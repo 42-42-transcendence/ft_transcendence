@@ -38,8 +38,8 @@ export class User {
   })
   status: UserStatus;
 
-  // @Column({ nullable: false })
-  // isSecondAuth: boolean;
+  @Column({ nullable: true })
+  otpAuthSecret: string;
 
   // @Column({
   //   nullable: false,

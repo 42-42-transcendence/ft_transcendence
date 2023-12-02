@@ -9,7 +9,7 @@ export class SocketExceptionFilter extends BaseWsExceptionFilter {
         const ctx = host.switchToWs();
         const client: Socket = ctx.getClient();
 
-        client.emit('tokenExpired', exception.message);
+        client.emit("sessionExpired", exception.message);
         console.log(exception);
     }
 }

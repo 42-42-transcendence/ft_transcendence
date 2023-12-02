@@ -57,16 +57,20 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
       const user = await this.authService.getUserByAuthWithWsException(auth);
+      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
+      if (this.eventsService.hasClient(user.userID)) {
+        const beforeClient = this.eventsService.getClient(user.userID);
+        beforeClient.emit("sessionExpired", `${user.nickname}님이 다른 곳에서 새로 로그인 하셨습니다.`);
+      }
       this.eventsService.addClient(user.userID, client);
       if (user.status === UserStatus.OFFLINE) {
         await this.userService.updateUserStatus(user, UserStatus.ONLINE);
       }
 
-      console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
+      console.log(`[socket.io] ----------- ${user.nickname} ${client.id} connect -------------------`);
     } catch (e) {
       console.log(e);
     }
-
   }
 
   async handleDisconnect(client: Socket) {
@@ -86,19 +90,21 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       await Promise.all(leaveChannels);
 
       // this.allDeleteGameMatching(user.userID);
-      this.eventsService.removeClient(user.userID);
-      if (user.status !== UserStatus.OFFLINE) {
-        await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
+      const saveClient = this.eventsService.getClient(user.userID);
+      // 현재 client.id와 저장하고 있는 client.id가 같을 때만 client를 지우고, status를 변경한다
+      if (client.id === saveClient.id) {
+        this.eventsService.removeClient(user.userID);
+        if (user.status !== UserStatus.OFFLINE) {
+          await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
+        }
       }
       await this.notificationService.deleteAllGameNotiByUserID(user.userID);
 
-      console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
+      console.log(`[socket.io] ----------- ${user.nickname} ${client.id} disconnect ----------------`);
 
     } catch (e) {
       console.log(e);
     }
-
-
   }
 
 

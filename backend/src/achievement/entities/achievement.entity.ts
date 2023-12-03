@@ -1,10 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { UserAchievement } from '../../user-achievement/entities/user-achievement.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Achievement {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: number;
 
   @ApiProperty({

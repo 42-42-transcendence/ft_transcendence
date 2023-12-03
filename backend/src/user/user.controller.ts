@@ -16,7 +16,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UerinfoUserDto } from './dto/userinfo-user.dto';
-import { UerprofileUserDto } from './dto/userprofile-user.dto';
+import { UserprofileUserDto } from './dto/userprofile-user.dto';
 
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -57,13 +57,12 @@ export class UserController {
     type: User,
   })
   @Put('setup')
-  async createUser(@Body('userID') nickname: string): Promise<{ userID: string }> {
-    const createdUser = await this.userService.createUser(nickname);
+  async createUser(@Body('userID') userID: string, @GetAuth() auth: Auth): Promise<{ message: string }> {
+    const createdUser = await this.userService.createUser(userID);
+    this.userService.relationAuthUser(createdUser, auth);
     const ret = {
-      userID: createdUser.nickname,
+      message: createdUser.nickname,
     };
-    const User = this.userService.getUserByNickname(createdUser.nickname);
-    (await User).userAchievements;
     console.log('ok2');
     return ret;
   }
@@ -77,11 +76,12 @@ export class UserController {
     type: User,
   })
   @Get('profile/:user')
-  async getUserProfile(@Param('user') nickname): Promise<UerprofileUserDto> {
+  async getUserProfile(@Param('user') nickname): Promise<UserprofileUserDto> {
     const createdUser = await this.userService.getUserByNickname(nickname);
-    // await this.userService.getAchievements(nickname);
-    const userinfo = this.userService.getUserProfile(nickname);
-    return userinfo;
+    const createdUserd = await this.userService.getAchievements(createdUser);
+    console.log(createdUserd.userAchievements[0].achievement.description);
+    const userprofile = await this.userService.getUserProfile(createdUserd);
+    return userprofile;
   }
 
   @ApiOperation({
@@ -93,7 +93,7 @@ export class UserController {
   })
   @Get('user/:userid')
   async getUserInfo(@Param('userid') UserID, @GetAuth() auth: Auth): Promise<UerinfoUserDto> {
-    const createdUser = await this.userService.getUserById(UserID);
+    const createdUser = await this.userService.getUserByNickname(UserID);
     const firstuser = await auth.user;
     let relation = (await this.RelationService.getRelationByUsersWithException(firstuser, createdUser)).relationType;
     if (relation == null) {

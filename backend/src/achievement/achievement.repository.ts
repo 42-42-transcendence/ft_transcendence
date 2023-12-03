@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { Achievement } from './entities/achievement.entity';
-import { achievements } from './achievement';
+import { achievements, Achievements } from './achievement';
+import { AchievementDto } from './dto/achievement.dto';
 
 @Injectable()
 export class AchievementRepository extends Repository<Achievement> {
@@ -16,12 +17,20 @@ export class AchievementRepository extends Repository<Achievement> {
       description: achievements[id].description,
     });
 
-    const result = this.save(createdachievement);
+    const result = await this.save(createdachievement);
+    console.log(result.description);
     return result;
   }
 
-  async findachievement(id: number): Promise<boolean> {
-    if (!this.find({ where: { id: id } })) return false;
-    return true;
+  async getachievementById(id: number): Promise<Achievement> {
+    return await this.findOne({ where: { id } });
+  }
+
+  async findAll(): Promise<Achievement[]> {
+    return await this.find();
+  }
+
+  async initAchievement() {
+    for (let i = 0; i < 10; i++) await this.createachievement(i);
   }
 }

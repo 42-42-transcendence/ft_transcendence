@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, UnauthorizedException, UseFilters } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import { User } from 'src/user/entities/user.entity';
 export class AuthService {
   constructor(
     private authRepository: AuthRepository,
+    private userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -54,20 +55,18 @@ export class AuthService {
 
   // 본래 회원가입 되어있는지 아닌지(user 객체가 있는지 없는지)를 확인하여 boolean값을 반환하는 메소드
   // 현재는 임시 테스트로 username을 반환하게 했음
-  async isSignup(intraUID: string): Promise<string> {
+  async isSignup(intraUID: string): Promise<boolean> {
     const auth = await this.authRepository.getAuthByIntraID(intraUID);
 
     if (!auth) {
-      await this.authRepository.createAuth(intraUID);
-      // const newUser = await this.userRepository.createUser(intraName);
-      // const updataAuth = await this.authRepository.relationAuthUser(newAuth, newUser);
-      // return false;
-      return '';
+      const newAuth = await this.authRepository.createAuth(intraUID);
+      return false;
     } else {
       const user = await auth.user;
-      if (user) return user.nickname;
+      if (user) return true;
+      else return false;
     }
-    return '';
+    return false;
   }
 
   async createJWT(intraUID: string): Promise<string> {
@@ -113,6 +112,14 @@ export class AuthService {
 
     if (!user) {
       throw new SocketException('NotFound', `해당 토큰의 유저를 찾을수 없습니다.`);
+    }
+    return user;
+  }
+  async getUserByAuthWithHttpException(auth: Auth): Promise<User> {
+    const user = await auth.user;
+
+    if (!user) {
+      return null;
     }
     return user;
   }

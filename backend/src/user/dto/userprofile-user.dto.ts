@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Achievement } from 'src/achievement/entities/achievement.entity';
+import { UserAchievementlistDto } from 'src/user-achievement/dto/user-ahievement-list.dto';
 import { UserAchievement } from 'src/user-achievement/entities/user-achievement.entity';
 
-export class UerprofileUserDto {
+export class UserprofileUserDto {
   @ApiProperty({
     description: '닉네임',
     example: 'vdoohkimv',
@@ -41,5 +43,5 @@ export class UerprofileUserDto {
     description: '도전과제',
     example: '(byeonkim, first_victory), ...',
   })
-  achievements: UserAchievement[];
+  achievements: UserAchievementlistDto[];
 }

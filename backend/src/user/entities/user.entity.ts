@@ -104,6 +104,7 @@ export class User {
 
   @OneToOne(() => Auth, (auth) => auth.user, {
     onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
   })
   auth: Promise<Auth>;
 

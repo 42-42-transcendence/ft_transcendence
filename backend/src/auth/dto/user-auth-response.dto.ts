@@ -10,10 +10,10 @@ export class UserAuthResponseDto {
   jwtToken: string;
 
   @ApiProperty({
-    description: '유저 닉네임',
-    example: 'doohkim',
+    description: '유저 가입 여부',
+    example: 'True False',
     required: true,
     nullable: true,
   })
-  userName: string;
+  isFirst: boolean;
 }

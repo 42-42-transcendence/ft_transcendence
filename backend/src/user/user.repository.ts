@@ -5,10 +5,12 @@ import { ChannelMember } from 'src/channel-member/entities/channel-member.entity
 import { UserStatus } from './enums/user-status.enum';
 import { faker } from '@faker-js/faker';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UerprofileUserDto } from './dto/userprofile-user.dto';
+import { UserprofileUserDto } from './dto/userprofile-user.dto';
 import { UserAchievementRepository } from 'src/user-achievement/user-achievement.repository';
 import { achievements, Achievements } from 'src/achievement/achievement';
 import { UserAchievement } from 'src/user-achievement/entities/user-achievement.entity';
+import { AchievementRepository } from 'src/achievement/achievement.repository';
+import { UserAchievementlistDto } from 'src/user-achievement/dto/user-ahievement-list.dto';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -28,18 +30,6 @@ export class UserRepository extends Repository<User> {
 
     return result;
   }
-
-  async createUser_default(nickname: string): Promise<User> {
-    const nick = nickname;
-
-    const UserTable = this.create({
-      nickname: nick,
-    });
-
-    const result = await this.save(UserTable);
-    return result;
-  }
-  //실제 POST요청 createUSER
 
   async getUserById(userID: string): Promise<User> {
     const user = await this.findOneBy({ userID });
@@ -71,59 +61,75 @@ export class UserRepository extends Repository<User> {
     return await this.find();
   }
 
-  async getUserProfile(nickname: string): Promise<UerprofileUserDto> {
-    const createdUser = await this.getUserByNickname(nickname);
+  async getUserachievementListByUser(user: User): Promise<UserAchievementlistDto[]> {
+    const achlist: UserAchievementlistDto[] = [];
+    for (let i: number = 0; i < 10; i++) {
+      const tmpach = {
+        id: (await user.userAchievements[i].achievement).id,
+        title: (await user.userAchievements[i].achievement).name,
+        description: (await user.userAchievements[i].achievement).description,
+        isAchieved: await user.userAchievements[i].isAchieved,
+      };
+      achlist.push(tmpach);
+    }
+    return achlist;
+  }
+
+  async getUserProfile(user: User): Promise<UserprofileUserDto> {
+    console.log(user.userAchievements[0].achievement.description);
+    const achlist: UserAchievementlistDto[] = [];
+    for (let i = 0; i < 10; i++) {
+      const tmpinfo = {
+        id: user.userAchievements[i].achievement.id,
+        title: user.userAchievements[i].achievement.name,
+        description: user.userAchievements[i].achievement.description,
+        isAchieved: user.userAchievements[i].isAchieved,
+      };
+      achlist.push(tmpinfo);
+    }
     const userinfo = {
-      nickname: createdUser.nickname,
-      image: createdUser.avatar,
-      winCount: createdUser.win,
-      loseCount: createdUser.lose,
-      ladderPoint: createdUser.point,
-      achievements: createdUser.userAchievements,
+      nickname: user.nickname,
+      image: user.avatar,
+      winCount: user.win,
+      loseCount: user.lose,
+      ladderPoint: user.point,
+      achievements: achlist,
     };
     return userinfo;
   }
 
-  async getAchivements(nickname: string) {
-    const user = await this.findOne({
-      where: { nickname: nickname },
-    });
-    if (user) {
-      if (user.win >= 1 || user.lose >= 1) {
-        const ret1 = await this.addAchievement(nickname, Achievements.FIRSTGAME, true);
-        user.userAchievements.push(ret1);
-      } else {
-        const ret1 = await this.addAchievement(nickname, Achievements.FIRSTGAME, false);
-        user.userAchievements.push(ret1);
-      }
-      if (user.win >= 1) {
-        const ret2 = await this.addAchievement(nickname, Achievements.FIRSTWIN, true);
-        user.userAchievements.push(ret2);
-      } else {
-        const ret2 = await this.addAchievement(nickname, Achievements.FIRSTWIN, false);
-        user.userAchievements.push(ret2);
-      }
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.FIRSTWIN, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.FOUR, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.FIVE, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.SIX, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.SEVEN, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.EIGHT, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.NINE, false));
-      user.userAchievements.push(await this.addAchievement(nickname, Achievements.TEN, false));
-    }
+  async succesachievement(user: User, id: number): Promise<User> {
+    const userchieve = await this.userAchievementRepository.setuserachievementsuccess(user, id);
+    userchieve.isAchieved = true;
+    await this.save(user);
+    return user;
   }
-  async addAchievement(Usernickname: string, achievementId: number, isAchieved: boolean): Promise<UserAchievement> {
-    const user = await this.getUserByNickname(Usernickname);
-    if (!user) {
-      throw new NotFoundException('User not found');
+
+  async setAchievement(User: User): Promise<UserAchievement[]> {
+    const retlist: UserAchievement[] = [];
+    console.log('aaaaaaaaasssssssssssssssssssssssss');
+    for (let i = 0; i < 10; i++) {
+      retlist.push(await this.userAchievementRepository.createuserachievement(User, i));
+      console.log(retlist[i].achievement.description);
+      console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
     }
-    const existingUserAchievement = await this.userAchievementRepository.findOne({
-      where: { nickname: Usernickname, achievementId: achievementId },
-    });
-    if (!existingUserAchievement) {
-      return this.userAchievementRepository.adduserachievement(Usernickname, achievementId, isAchieved);
+    return retlist;
+  }
+
+  async getAchivements(user: User): Promise<User> {
+    //도전과제 생성됐는지 검사
+    let achlist;
+    if (!user.userAchievements || user.userAchievements.length === 0) {
+      console.log('tttttttttttttttttttttttttttttttttttttttttttttttttttttt');
+      console.log('tttttttttttttttttttttttttttttttttttttttttttttttttttttt');
+      achlist = await this.setAchievement(user);
+      console.log('tttttttttttttttttttttttttttttttttttttttttttttttttttttt');
     }
+    user.userAchievements = achlist;
+    if (user.win >= 1 || user.lose >= 1) await this.succesachievement(user, Achievements.FIRSTGAME);
+    if (user.win >= 1) await this.succesachievement(user, Achievements.FIRSTWIN);
+    console.log(user.userAchievements[0].userachievementID);
+    return user;
   }
 
   async changeStatus(nickname: string, status: UserStatus) {

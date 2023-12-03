@@ -1,9 +1,9 @@
-import { vec2 } from "gl-matrix";
+import {vec2} from "gl-matrix";
 import {CanvasPosition} from "./GameManager";
 import {Paddle, PaddlePos} from "./Paddle";
 import data from "../interface/gameData";
 
-export enum BallCorner {
+export enum ObjectCorner {
     TopRight,
     BottomRight,
     TopLeft,
@@ -46,6 +46,7 @@ export abstract class GameObject {
 
 
     public objectInsidePaddle(paddle: Paddle) {
+        console.log("objectInsidePaddle");
         const paddleHeightHalf = paddle.height / 2.0;
         const paddleWidthHalf = paddle.width / 2.0;
 
@@ -62,8 +63,10 @@ export abstract class GameObject {
         return (objectTop > paddleBottom && objectBottom < paddleTop && objectLeft < paddleRight && objectRight > paddleLeft);
     }
 
-    public objectInsideCanvas() {
-        return this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0;
+    public objectOutsideCanvas() {
+        console.log("objectOutsideCanvas");
+        return this.position[0] + this.radius > 1.0 || this.position[0] - this.radius < -1.0 ||
+            this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0;
     }
 
     protected crossProduct = (a: vec2, b: vec2): number => a[0] * b[1] - a[1] * b[0];
@@ -85,14 +88,14 @@ export abstract class GameObject {
 
     public checkWithPaddleCollision(delta: number) {
         const cornerPaddleArray = [
-            { corner: BallCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
-            { corner: BallCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
-            { corner: BallCorner.BottomLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftUp] },
-            { corner: BallCorner.TopLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftDown] }
+            { corner: ObjectCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
+            { corner: ObjectCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
+            { corner: ObjectCorner.BottomLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftUp] },
+            { corner: ObjectCorner.TopLeft, paddlePos: [PaddlePos.LeftFront, PaddlePos.LeftDown] }
         ];
 
         for (const { corner, paddlePos } of cornerPaddleArray) {
-            const ballPos = this.makeBallPosition(corner);
+            const ballPos = this.makeObjectPosition(corner);
 
             for (const pos of paddlePos) {
                 const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
@@ -108,30 +111,47 @@ export abstract class GameObject {
     }
 
     public checkWithWallCollision(delta: number) : {p : number, pos : CanvasPosition} | undefined {
-        const a = this.position;
-        const direction = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
-
         const cornerCanvasArray = [
-            { corner: BallCorner.TopRight, canvasPos: [CanvasPosition.TopRight, CanvasPosition.TopLeft] },
-            { corner: BallCorner.BottomRight, canvasPos: [CanvasPosition.TopRight, CanvasPosition.BottomRight] },
-            { corner: BallCorner.BottomLeft, canvasPos: [CanvasPosition.BottomLeft, CanvasPosition.BottomRight] },
-            { corner: BallCorner.TopLeft, canvasPos: [CanvasPosition.BottomLeft, CanvasPosition.TopLeft]}
+            { corner: ObjectCorner.TopRight, canvasPos: [CanvasPosition.Top, CanvasPosition.Right] },
+            { corner: ObjectCorner.BottomRight, canvasPos: [CanvasPosition.Right, CanvasPosition.Bottom] },
+            { corner: ObjectCorner.BottomLeft, canvasPos: [CanvasPosition.Left, CanvasPosition.Bottom] },
+            { corner: ObjectCorner.TopLeft, canvasPos: [CanvasPosition.Left, CanvasPosition.Top]}
         ];
 
+        let minCollisionResult = { p: Number.MAX_VALUE, pos: CanvasPosition.Top }; // 초기화
+
         for (const { corner, canvasPos } of cornerCanvasArray) {
-            const ballPos = this.makeBallPosition(corner);
+            const objectPos = this.makeObjectPosition(corner);
 
             for (const pos of canvasPos) {
-                const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
+                const objectDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
                 const { c, d, r } = this.makeCanvasPosition(pos);
-                const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
+                const { p, q } = this.calculateCollision(objectPos, objectDirection, c, d);
 
-                if (this.checkCollision(p, q, r, delta)) {
-                    return {p, pos};
+                if (this.checkCollision(p, q, r, delta) && p < minCollisionResult.p) {
+                    minCollisionResult = { p, pos };
                 }
             }
         }
-        return undefined; // 충돌이 없는 경우
+        return minCollisionResult.p !== Number.MAX_VALUE ? minCollisionResult : undefined;
+    }
+
+    public clampWithPaddle(pos: PaddlePos) {
+        const paddle = data.paddle;
+        this.move(0.0001);
+    }
+
+    public clampWithWall(pos: CanvasPosition) {
+        const precision = 2;
+        const min = -1.0 + this.radius * 1.1;
+        const max = 1.0 - this.radius * 1.1;
+        const x = this.clamp(this.position[0], min, max);
+        const y = this.clamp(this.position[1], min, max);
+        this.position = vec2.fromValues(x, y);
+    }
+
+    private clamp(value: number, min: number, max: number) {
+        return Math.min(Math.max(value, min), max);
     }
 
     public handleWithWallCollision(side: CanvasPosition) {
@@ -190,19 +210,19 @@ export abstract class GameObject {
         let r = 2.0;
 
         switch (canvasPosition) {
-            case CanvasPosition.TopRight:
+            case CanvasPosition.Top:
                 c = vec2.fromValues(1.0, 1.0);
                 d = vec2.fromValues(-1.0, 0.0);
                 break;
-            case CanvasPosition.BottomRight:
+            case CanvasPosition.Right:
                 c = vec2.fromValues(1.0, -1.0);
                 d = vec2.fromValues(0.0, 1.0);
                 break;
-            case CanvasPosition.TopLeft:
+            case CanvasPosition.Left:
                 c = vec2.fromValues(-1.0, 1.0);
                 d = vec2.fromValues(0.0, -1.0);
                 break;
-            case CanvasPosition.BottomLeft:
+            case CanvasPosition.Bottom:
                 c = vec2.fromValues(-1.0, -1.0);
                 d = vec2.fromValues(1.0, 0.0);
                 break;
@@ -210,15 +230,15 @@ export abstract class GameObject {
         return {c, d, r};
     }
 
-    protected makeBallPosition(ballCorner: BallCorner) : vec2 {
-        switch (ballCorner) {
-            case BallCorner.TopRight:
+    protected makeObjectPosition(objectCorner: ObjectCorner) : vec2 {
+        switch (objectCorner) {
+            case ObjectCorner.TopRight:
                 return vec2.fromValues(this.position[0] + this.radius, this.position[1] + this.radius);
-            case BallCorner.BottomRight:
+            case ObjectCorner.BottomRight:
                 return vec2.fromValues(this.position[0] + this.radius, this.position[1] - this.radius);
-            case BallCorner.TopLeft:
+            case ObjectCorner.TopLeft:
                 return vec2.fromValues(this.position[0] - this.radius, this.position[1] + this.radius);
-            case BallCorner.BottomLeft:
+            case ObjectCorner.BottomLeft:
                 return vec2.fromValues(this.position[0] - this.radius, this.position[1] - this.radius);
         }
     }

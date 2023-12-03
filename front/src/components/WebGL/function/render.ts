@@ -66,9 +66,9 @@ export function render() {
 
 	drawLine(line);
 	drawBall(data.ball);
-	drawPaddle(data.paddle[0]);
-	drawPaddle(data.paddle[1]);
 	for (let i = 0; i < ItemManager.getInstance().items.length; i++) {
 		drawItem(ItemManager.getInstance().items[i]);
 	}
+	drawPaddle(data.paddle[0]);
+	drawPaddle(data.paddle[1]);
 }

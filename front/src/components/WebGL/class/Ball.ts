@@ -10,7 +10,7 @@ export class Ball extends GameObject{
             this.direction[1] *= -1;
             return false;
         }
-        if (side === CanvasPosition.BottomRight)
+        if (side === CanvasPosition.Right)
             GameManager.scoreUpdate(0);
         else
             GameManager.scoreUpdate(1);

@@ -2,10 +2,10 @@ import data from "../interface/gameData";
 import {vec2} from "gl-matrix";
 
 export enum CanvasPosition {
-    TopRight,
-    BottomLeft,
-    BottomRight,
-    TopLeft,
+    Top,
+    Bottom,
+    Right,
+    Left,
 }
 
 export class GameManager {

@@ -8,6 +8,7 @@ import usePress from "../components/WebGL/hook/usePress";
 import { useParams, useLocation } from 'react-router-dom';
 import usePopstate from "../components/WebGL/hook/usePopstate";
 import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
+import GameResultModal from "../components/Modal/GameResultModal";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -70,6 +71,7 @@ const GamePage = () => {
                 ></canvas>
                 <div ref={scoreRef2} style={{position: "absolute"}}> 0 </div>
                 <div ref={profileRef2} style={{position: "absolute"}}> player2 </div>
+                {['win', 'lost'].includes(data.gameResult) && <GameResultModal result={data.gameResult as 'win' | 'lost'} />}
             </div>
         </main>
     );

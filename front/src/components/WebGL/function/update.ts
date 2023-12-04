@@ -17,11 +17,10 @@ function update(delta: number) {
 	if (GameManager.isMatchConcluded()) {
 		/* 임시 초기화, 게임 종료 조건 추가 */
 		GameManager.resetGame();
-		// window.cancelAnimationFrame(data.requestId);
 	}
 	if (data.AIMode) {
 		AIManager.getInstance().GuaranteeConflict(data.ball.clone(), 10000);
-		AIManager.getInstance().testPlayer1();
+		// AIManager.getInstance().testPlayer1(); // 테스트용
 	}
 	/* player 패들 이동 */
 	data.paddle[0].updatePosition(delta);

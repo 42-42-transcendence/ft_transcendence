@@ -3,7 +3,6 @@ import data from '../interface/gameData';
 import {GameManager} from "../class/GameManager";
 
 const handler = () => {
-    console.log('뒤로 가기 감지');
     cancelAnimationFrame(data.requestId);
     GameManager.cleanupWebGL();
     data.isFirstRender = true;

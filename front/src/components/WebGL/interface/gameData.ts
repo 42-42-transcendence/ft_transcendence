@@ -19,6 +19,7 @@ let data: gameData = {
 	mode: 'normal',
 	uColorLocation: null,
 	requestId: 0,
+	gameResult: '',
 	AIMode: false,
 };
 

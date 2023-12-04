@@ -8,7 +8,7 @@ import type { User } from '../Social';
 import type { Role } from '../Chatting';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
-import useAuthState from '../../store/Auth/useAuthState';
+import useUserState from '../../store/User/useUserState';
 
 type Props = {
   targetUserID: string;
@@ -22,9 +22,9 @@ type Props = {
 const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const navigate = useNavigate();
   const closeModalHandler = useCloseModal();
-  const { myID } = useAuthState();
   const { isLoading, error, request } = useRequest();
   const params = useParams();
+  const userState = useUserState();
 
   const [userInfo, setUserInfo] = useState<User | null>({
     nickname: 'heryu',
@@ -72,7 +72,22 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
     }
   };
 
-  const gameHandler = () => {};
+  const inviteGameHandler = async () => {
+    const ret = await request<{ message: string }>(
+      `${SERVER_URL}/api/game/invite`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ targetUserID: targetUserID }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (ret !== null) {
+      closeModalHandler();
+    }
+  };
 
   const addFriendHandler = async () => {
     const ret = await request<{ message: string }>(
@@ -188,7 +203,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
     contents = <div className={styles.header}>Something Wrong</div>;
   } else if (userInfo === null) {
     contents = <div className={styles.header}>유저를 찾을 수 없습니다.</div>;
-  } else if (myID === targetUserID) {
+  } else if (userState.id === targetUserID) {
     contents = (
       <>
         <div className={styles.header}>
@@ -254,7 +269,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
               userInfo.status !== 'online' ||
               isLoading
             }
-            onClick={gameHandler}
+            onClick={inviteGameHandler}
           >
             게임 신청
           </button>

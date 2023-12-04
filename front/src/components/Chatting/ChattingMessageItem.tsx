@@ -1,6 +1,6 @@
 import { Message } from '.';
 import AvatarImage from '../../UI/AvatarImage';
-import useAuthState from '../../store/Auth/useAuthState';
+import useUserState from '../../store/User/useUserState';
 import styles from '../../styles/Chatting.module.css';
 import SystemMessageItem from './SystemMessageItem';
 
@@ -11,17 +11,18 @@ type Props = {
 
 const formatTimeToHHMM = (dateStr: string): string => {
   const date = new Date(dateStr);
+
   let hoursString = date.getHours().toString();
   let minutesString = date.getMinutes().toString();
 
-  if (hoursString.length === 1) hoursString = hoursString + '0';
-  if (minutesString.length === 1) minutesString = minutesString + '0';
+  if (hoursString.length === 1) hoursString = '0' + hoursString;
+  if (minutesString.length === 1) minutesString = '0' + minutesString;
 
   return `${hoursString}:${minutesString}`;
 };
 
 const ChattingMessageItem = ({ message, image }: Props) => {
-  const authState = useAuthState();
+  const userState = useUserState();
   if (message.chatType === 'system') {
     return (
       <li className={styles['message-item']}>
@@ -30,7 +31,7 @@ const ChattingMessageItem = ({ message, image }: Props) => {
     );
   }
 
-  const isOther = message.userNickname !== authState.myID;
+  const isOther = message.userNickname !== userState.id;
 
   return (
     <li className={styles['message-item']}>

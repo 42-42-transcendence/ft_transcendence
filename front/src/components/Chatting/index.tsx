@@ -18,7 +18,7 @@ import ChatInvitationModal from '../Modal/ChatInvitationModal';
 import ChatRoomConfigModal from '../Modal/ChatRoomConfigModal';
 import MessageModal from '../Modal/MessageModal';
 import UserDetailModal from '../Modal/UserDetailModal';
-import useAuthState from '../../store/Auth/useAuthState';
+import useUserState from '../../store/User/useUserState';
 
 export type Role = 'owner' | 'staff' | 'guest';
 export type ChatMember = {
@@ -51,11 +51,11 @@ const isBlockedMember = (targetID: string, members: ChatMember[]) => {
 
 const Chatting = () => {
   const { request } = useRequest();
-  const { myID } = useAuthState();
   const { socket } = useSocket();
   const params = useParams();
   const navigate = useNavigate();
   const openMessageModalHandler = useOpenModal('showMessage');
+  const userState = useUserState();
 
   const [channelTitle, setChannelTitle] = useState<string>('Chatting Room');
   const [firedMessage, setFiredMessage] = useState<string>('');
@@ -64,7 +64,7 @@ const Chatting = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<ChatMember[]>([]);
 
-  const chatMember = members.find((member) => member.nickname === myID);
+  const chatMember = members.find((member) => member.nickname === userState.id);
   const targetMember = members.find(
     (member) => member.nickname === activatedUserID
   );
@@ -118,6 +118,7 @@ const Chatting = () => {
   );
 
   const updatedMembesrHandler = useCallback((members: ChatMember[]) => {
+    console.log(members);
     setMembers(members);
   }, []);
 

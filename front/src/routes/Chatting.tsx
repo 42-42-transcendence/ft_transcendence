@@ -32,7 +32,7 @@ const ChattingPage = () => {
   const { isLoading, error, request } = useRequest();
 
   const requestAuthenticated = useCallback(
-    async (password: string = '') => {
+    async (password: string = '', isRedirected: boolean = false) => {
       const ret = await request<RequestAuthenticated>(
         `${SERVER_URL}/api/channel/${params.channelID}/join`,
         {
@@ -41,14 +41,13 @@ const ChattingPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            channelID: params.channelID,
             password: password,
+            isRedirected: isRedirected,
           }),
         }
       );
 
       if (ret === null) return;
-
       setIsAuthenticated(ret.isAuthenticated);
       if (ret.isAuthenticated) {
         closeModalHandler();
@@ -58,11 +57,11 @@ const ChattingPage = () => {
   );
 
   useEffect(() => {
-    if (location.state?.redirect === true) {
-      setIsAuthenticated(true);
-      return;
-    }
     const protectedChattingPage = async () => {
+      if (location.state?.redirect === true) {
+        requestAuthenticated('', true);
+        return;
+      }
       const ret = await request<RequestPasswordRequired>(
         `${SERVER_URL}/api/channel/${params.channelID}/join`,
         {

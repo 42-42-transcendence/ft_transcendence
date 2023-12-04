@@ -3,9 +3,7 @@ import defaultThumNailURI from '../../assets/42logo.svg';
 import AvatarImage from '../../UI/AvatarImage';
 import { useEffect, useState } from 'react';
 import { SERVER_URL } from '../../App';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { actions as authActions } from '../../store/Auth/auth';
 import useRequest from '../../http/useRequest';
 import loadingImage from '../../assets/loading.gif';
 
@@ -14,7 +12,6 @@ const InitProfileForm = () => {
   const [enteredName, setEnteredName] = useState<string>('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const { isLoading, error, request } = useRequest();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,7 +78,6 @@ const InitProfileForm = () => {
     );
     if (responseName === null) return;
 
-    dispatch(authActions.setMyID(enteredName));
     navigate('/');
   };
 

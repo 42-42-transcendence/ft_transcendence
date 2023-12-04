@@ -30,7 +30,7 @@ const OAuth = () => {
             return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
           } else {
             dispatch(authActions.setAuthToken(ret.jwtToken));
-            dispatch(authActions.setMyID(ret.userName));
+
             return (
               <Navigate
                 to={ret.userName === '' ? '/setting-profile' : '/'}

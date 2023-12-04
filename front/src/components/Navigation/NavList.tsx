@@ -2,15 +2,14 @@ import { NavLink } from 'react-router-dom';
 
 import styles from '../../styles/Navigation.module.css';
 import logo from '../../assets/42logo.svg';
-import { RootStoreType } from '../../store';
-import { useSelector } from 'react-redux';
+import useUserState from '../../store/User/useUserState';
 
 const checkNavActivation = ({ isActive }: { isActive: boolean }): string => {
   return isActive ? styles.active : '';
 };
 
 const NavList = () => {
-  const auth = useSelector((state: RootStoreType) => state.auth);
+  const userState = useUserState();
 
   return (
     <ul className={styles.nav_list}>
@@ -20,7 +19,10 @@ const NavList = () => {
         </NavLink>
       </div>
       <li>
-        <NavLink to={`/dashboard/${auth.myID}`} className={checkNavActivation}>
+        <NavLink
+          to={`/dashboard/${userState.id}`}
+          className={checkNavActivation}
+        >
           전적
         </NavLink>
       </li>

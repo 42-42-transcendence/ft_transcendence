@@ -17,7 +17,9 @@ const ChannelItem = ({
           <div>{title}</div>
           {password && <img src={lockIcon} alt="lock icon" />}
         </div>
-        <div>{type !== 'direct' && total && `${total}/10`}</div>
+        <div className={styles.total}>
+          {type !== 'dm' && `참여인원: ${total}`}
+        </div>
       </li>
     </Link>
   );

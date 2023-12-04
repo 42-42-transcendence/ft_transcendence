@@ -11,7 +11,7 @@ const GameResultModal = ({ result }: Props) => {
     const navigate = useNavigate();
 
     const closeAndRedirectHandler = () => {
-        navigate('/Main');
+        navigate('/');
     };
 
     return (

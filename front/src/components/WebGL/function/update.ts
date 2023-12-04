@@ -14,10 +14,6 @@ function update(delta: number) {
 	/* 공 위치 업데이트 */
 	PhysicsEngine.GuaranteeConflict(data.ball, delta);
 	/* 게임 종료 조건 확인 */
-	if (GameManager.isMatchConcluded()) {
-		/* 임시 초기화, 게임 종료 조건 추가 */
-		GameManager.resetGame();
-	}
 	if (data.AIMode) {
 		AIManager.getInstance().GuaranteeConflict(data.ball.clone(), 10000);
 		// AIManager.getInstance().testPlayer1(); // 테스트용
@@ -25,6 +21,10 @@ function update(delta: number) {
 	/* player 패들 이동 */
 	data.paddle[0].updatePosition(delta);
 	data.paddle[1].updatePosition(delta);
+	if (GameManager.isMatchConcluded()) {
+		/* 임시 초기화, 게임 종료 조건 추가 */
+		GameManager.endGame();
+	}
 }
 
 export default update;

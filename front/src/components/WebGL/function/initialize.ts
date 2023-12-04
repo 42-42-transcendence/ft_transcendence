@@ -25,6 +25,7 @@ function initialize(state: any) {
 	}
 
 	data.lastTime = performance.now();
+	data.endGame = false;
 
 	data.ball = new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02);
 	if (state.gameMode === 'fast') {

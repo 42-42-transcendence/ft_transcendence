@@ -9,6 +9,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import usePopstate from "../components/WebGL/hook/usePopstate";
 import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
 import GameResultModal from "../components/Modal/GameResultModal";
+import useGameEvent from "../components/WebGL/hook/useGameEvent";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,6 +20,7 @@ const GamePage = () => {
     const [error, setError] = useState(null);
     const { gameId } = useParams();
     const { state } = useLocation();
+    const gameResult = useGameEvent();
     useBeforeunload();
     usePopstate();
     useCanvasSize();
@@ -71,7 +73,7 @@ const GamePage = () => {
                 ></canvas>
                 <div ref={scoreRef2} style={{position: "absolute"}}> 0 </div>
                 <div ref={profileRef2} style={{position: "absolute"}}> player2 </div>
-                {['win', 'lost'].includes(data.gameResult) && <GameResultModal result={data.gameResult as 'win' | 'lost'} />}
+                {gameResult && <GameResultModal result={gameResult as 'win' | 'lost'} />}
             </div>
         </main>
     );

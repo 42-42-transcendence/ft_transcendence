@@ -20,14 +20,8 @@ export class GameManager {
     }
 
     static cleanupWebGL() {
-        const gl = data.gl;
-        // WebGL 컨텍스트가 유효한지 확인
-        if (!gl) {
-            console.error("WebGL 컨텍스트가 유효하지 않습니다.");
-            return;
-        }
+        const gl = data.gl as WebGLRenderingContext;
 
-        // 버퍼 해제
         if (data.paddleBuffer) {
             gl.deleteBuffer(data.paddleBuffer);
             data.paddleBuffer = null;
@@ -40,7 +34,7 @@ export class GameManager {
             gl.deleteBuffer(data.lineBuffer);
             data.lineBuffer = null;
         }
-        // 셰이더 프로그램 해제
+
         if (data.program) {
             data.program.forEach(program => {
                 if (program) {
@@ -63,16 +57,21 @@ export class GameManager {
         ball.factor = 1.0;
     }
 
-    static resetGame() {
-        const ball = data.ball;
-        for (let i = 0; i < 2; i++) {
-            ball.position[i] = 0;
-            data.scores[i] = 0;
-            data.scoreRef[i]!.innerText = String(data.scores[i]);
-        }
-        ball.direction = vec2.fromValues(1.0, 0);
+    static endGame() {
+        // const ball = data.ball;
+        /* 테스트용 초기화 코드 */
+        // for (let i = 0; i < 2; i++) {
+        //     ball.position[i] = 0;
+        //     data.scores[i] = 0;
+        //     data.scoreRef[i]!.innerText = String(data.scores[i]);
+        // }
+        // ball.direction = vec2.fromValues(1.0, 0);
+
+        /* 게임 종료 */
+        console.log('게임 종료');
+        window.dispatchEvent(new CustomEvent('gameEnd', {}));
     }
     static isMatchConcluded() {
-        return data.scores[0] === 5 || data.scores[1] === 5
+        return data.scores[0] === 5 || data.scores[1] === 5;
     }
 }

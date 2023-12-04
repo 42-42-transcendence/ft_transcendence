@@ -30,9 +30,7 @@ class PhysicsEngine {
                     return;
                 // object.position =
                 if (process.CheckObjectInside()) {
-                    console.log("object inside");
                     process.clamp(collisionResult);
-                    console.log("chang pos: " + object.position[0], object.position[1]);
                 }
                 const restAfterCollision = delta - collisionResult.p;
                 this.GuaranteeConflict(object, restAfterCollision, depth + 1);

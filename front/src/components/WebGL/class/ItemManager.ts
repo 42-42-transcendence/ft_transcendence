@@ -45,4 +45,8 @@ export class ItemManager {
         this.items.forEach(item => PhysicsEngine.GuaranteeConflict(item, delta));
         this.items = this.items.filter(item => !item.toBeDestroyed);
     }
+
+    public clearItems() {
+        this.items = [];
+    }
 }

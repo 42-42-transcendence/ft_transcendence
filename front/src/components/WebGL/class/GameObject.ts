@@ -46,7 +46,6 @@ export abstract class GameObject {
 
 
     public objectInsidePaddle(paddle: Paddle) {
-        console.log("objectInsidePaddle");
         const paddleHeightHalf = paddle.height / 2.0;
         const paddleWidthHalf = paddle.width / 2.0;
 
@@ -64,7 +63,6 @@ export abstract class GameObject {
     }
 
     public objectOutsideCanvas() {
-        console.log("objectOutsideCanvas");
         return this.position[0] + this.radius > 1.0 || this.position[0] - this.radius < -1.0 ||
             this.position[1] + this.radius > 1.0 || this.position[1] - this.radius < -1.0;
     }

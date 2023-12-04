@@ -5,8 +5,9 @@ import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
 import initialize from '../components/WebGL/function/initialize';
 import usePress from "../components/WebGL/hook/usePress";
-import { io } from "socket.io-client";
 import { useParams, useLocation } from 'react-router-dom';
+import usePopstate from "../components/WebGL/hook/usePopstate";
+import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,6 +18,8 @@ const GamePage = () => {
     const [error, setError] = useState(null);
     const { gameId } = useParams();
     const { state } = useLocation();
+    useBeforeunload();
+    usePopstate();
     useCanvasSize();
     usePress();
 
@@ -35,7 +38,7 @@ const GamePage = () => {
             /* shader 세팅 */
             shader();
             /* 렌더링 */
-            requestAnimationFrame(gameLoop);
+            data.requestId = requestAnimationFrame(gameLoop);
         } catch (e : any) {
             setError(e.message);
         }

@@ -1,7 +1,7 @@
 import {Paddle} from '../class/Paddle';
 
 let data: gameData = {
-	paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
+	paddle: [null, null],
 	ball : null,
 	scores: [0, 0],
 	gl: null,

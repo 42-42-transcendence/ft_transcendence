@@ -54,6 +54,9 @@ export function render() {
 	data.gl!.clear(data.gl!.COLOR_BUFFER_BIT | data.gl!.DEPTH_BUFFER_BIT);
 
 	if (data.isFirstRender) {
+		console.log('first render');
+		console.log('first render');
+		console.log('first render');
 		initializeBuffer(data.paddleBuffer, data.paddle[0].paddleVertices);
 		initializeBuffer(data.ballBuffer, data.ball.vertices);
 		initializeBuffer(data.lineBuffer, line.lineVertices);

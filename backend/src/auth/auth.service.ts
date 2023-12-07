@@ -60,11 +60,11 @@ export class AuthService {
 
     if (!auth) {
       const newAuth = await this.authRepository.createAuth(intraUID);
-      return false;
+      return true;
     } else {
       const user = await auth.user;
-      if (user) return true;
-      else return false;
+      if (user) return false;
+      else return true;
     }
     return false;
   }

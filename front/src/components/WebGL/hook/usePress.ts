@@ -2,9 +2,8 @@ import data from '../interface/gameData';
 import { useEffect } from 'react';
 import { useSocket } from '../../../socket/SocketContext';
 
-const { socket } = useSocket();
-
 function usePress() {
+	const { socket } = useSocket();
 	function keyDownHandler(event : KeyboardEvent) {
 		if (socket === null) {
 			console.error('socket is null');

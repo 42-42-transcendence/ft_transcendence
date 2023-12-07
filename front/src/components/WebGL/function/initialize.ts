@@ -1,15 +1,10 @@
 import data from '../interface/gameData';
-import {gameDataFromServer} from "../interface/gameData";
 import {Paddle} from '../class/Paddle';
 import {vec2} from 'gl-matrix';
 import {Ball} from '../class/Ball';
-import { useSocket } from '../../../socket/SocketContext';
-import {GameManager} from "../class/GameManager";
-
-const { socket } = useSocket();
 
 function initialize(state: any) {
-	if (data.canvasRef === null || socket === null) return;
+	if (data.canvasRef === null) return;
 	data.gl = data.canvasRef.getContext('webgl');
 	if (!data.gl) {
 		throw new Error('WebGL not supported');
@@ -42,31 +37,6 @@ function initialize(state: any) {
 		data.paddle[0].speed = 1.0;
 		data.paddle[1].speed = 1.0;
 	}
-
-	socket.on('updateData', (gameData: any) => {
-		gameDataFromServer.height[0] = gameData.height[0];
-		gameDataFromServer.height[1] = gameData.height[0];
-		gameDataFromServer.paddlePos[0][0] = gameData.paddlePos[0][0];
-		gameDataFromServer.paddlePos[0][1] = gameData.paddlePos[0][1];
-		gameDataFromServer.paddlePos[1][0] = gameData.paddlePos[1][0];
-		gameDataFromServer.paddlePos[1][1] = gameData.paddlePos[1][1];
-		gameDataFromServer.ballPos[0] = gameData.ballPos[0];
-		gameDataFromServer.ballPos[1] = gameData.ballPos[1];
-	});
-
-	socket.on('endGame', () => {
-		data.endGame = true;
-	});
-
-	socket.on('startGame', () => {
-		data.endGame = false;
-	});
-
-	socket.on('scoreUpdate', (score: number[]) => {
-		data.scores[0] = score[0];
-		data.scores[1] = score[1];
-		GameManager.scoreUpdate(null);
-	});
 }
 
 export default initialize;

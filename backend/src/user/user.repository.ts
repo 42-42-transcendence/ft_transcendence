@@ -72,8 +72,16 @@ export class UserRepository extends Repository<User> {
 		return (result);
 	}
 
+	async turnOnOtp(user: User): Promise<User> {
+		user.isActiveOtp = true;
+
+		const result = await this.save(user);
+		return (result);
+	}
+
 	async removeOtpAuthSecret(user: User): Promise<User> {
 		user.otpAuthSecret = null;
+		user.isActiveOtp = false;
 
 		const result = await this.save(user);
 		return (result);

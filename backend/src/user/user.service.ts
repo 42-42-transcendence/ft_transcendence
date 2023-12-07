@@ -81,6 +81,10 @@ export class UserService {
 		return (this.userRepository.saveOtpAuthSecret(user, secret));
 	}
 
+	async turnOnOtp(user: User): Promise<User> {
+		return (this.userRepository.turnOnOtp(user));
+	}
+
 	async removeOtpAuthSecret(user: User): Promise<User> {
 		return (this.userRepository.removeOtpAuthSecret(user));
 	}

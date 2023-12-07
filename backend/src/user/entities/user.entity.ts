@@ -41,6 +41,11 @@ export class User {
   @Column({ nullable: true })
   otpAuthSecret: string;
 
+  @Column({
+    default: false,
+  })
+  isActiveOtp: boolean;
+
   // @Column({
   //   nullable: false,
   //   default: '/Users/jwee/ft_transcendence/backend/defaultImage.jpeg',

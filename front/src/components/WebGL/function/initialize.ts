@@ -22,6 +22,7 @@ function initialize(state: any) {
 		data.profileRef[0].innerHTML = state.player[0];
 		data.profileRef[1].innerHTML = state.player[1];
 		data.mode = state.gameMode;
+		data.forTestSocket = state.socket;
 	}
 
 	data.lastTime = performance.now();

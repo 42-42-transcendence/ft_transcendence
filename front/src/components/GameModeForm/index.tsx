@@ -18,8 +18,31 @@ const GameModeForm = () => {
 
   const navigate = useNavigate();
   const handlePlayerButton = async (playerType: 'player1' | 'player2') => {
+    const socket = io('http://localhost:3001/');
 
+    if (playerType === 'player1'){
+      if (socket) {
+        socket.emit('start', { gameMode: enteredMode });
+        console.log("emit start1");
+      }
+    }
+    if (playerType === 'player2'){
+      if (socket) {
+        socket.emit('start', { gameMode: enteredMode });
+        console.log("emit start2");
+      }
+    }
+    socket.on('created', () => {
+      console.log("game created by player");
+      // navigate(`/game/${data.gameId}`, { state: { gameMode: enteredMode, gameId: data.gameId, player: data.player } });
+    });
+    socket.on('joined', (data: any) => {
+      console.log("game joined by player");
+      openHandler();
+      navigate(`/game/${data.gameId}`, { state: { socket: socket, gameMode: enteredMode, gameId: data.gameId, player: [data.player1, data.player2]} });
+    });
   }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const socket = io('http://localhost:3001/');
     if (socket) {

@@ -25,6 +25,7 @@ let data: gameData = {
 	mode: 'normal',
 	uColorLocation: null,
 	requestId: 0,
+	forTestSocket: null,
 	endGame: false,
 };
 

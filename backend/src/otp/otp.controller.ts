@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { OtpService } from './otp.service';
 import { UserService } from 'src/user/user.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
@@ -16,7 +16,13 @@ export class OtpController {
     private userService: UserService,
   ) {}
 
-
+  @ApiOperation({
+    summary: 'otp 활성화 되어 있는지 확인'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Boolean 
+  })
   @Get()
   async getIsOtp(
     @GetAuth() auth: Auth,
@@ -28,6 +34,12 @@ export class OtpController {
   }
 
   // 일단 저장해놨다가 클라쪽에서 취소를 하면 지우는 식으로 가기
+  @ApiOperation({
+    summary: 'otp 시크릿 저장하고 qrcode 반환'
+  })
+  @ApiOkResponse({
+    description: '성공'
+  })
   @Post()
   async registerOtp(
     @GetAuth() auth: Auth,
@@ -44,6 +56,13 @@ export class OtpController {
   }
 
 
+  @ApiOperation({
+    summary: 'otp가 제대로 등록이 되었는지 확인'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: String 
+  })
   @Post('validate')
   async validateOtpCode(
     @GetAuth() auth: Auth,
@@ -62,6 +81,13 @@ export class OtpController {
   }
 
 
+  @ApiOperation({
+    summary: '로그인시 otp 인증 확인'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: String 
+  })
   @Post('login')
   async loginOtpCode(
     @GetAuth() auth: Auth,
@@ -78,6 +104,13 @@ export class OtpController {
   }
 
 
+  @ApiOperation({
+    summary: 'otp 인증 비활성화'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: String
+  })
   @Delete()
   async deactivateOtp(
     @GetAuth() auth: Auth

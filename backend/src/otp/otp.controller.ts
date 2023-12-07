@@ -81,10 +81,11 @@ export class OtpController {
   @Delete()
   async deactivateOtp(
     @GetAuth() auth: Auth
-  ) {
+  ): Promise<{ message: string }>  {
     const user = await auth.user;
 
     await this.userService.removeOtpAuthSecret(user);
+    return ({ message: `성공적으로 비활성화되었습니다.` });
   }
 
 }

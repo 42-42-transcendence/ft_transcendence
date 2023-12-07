@@ -50,13 +50,18 @@ export class AuthController {
   @Get()
   @UseGuards(AuthGuard())
   async checkTokenIsValidated(): Promise<{ message: string }> {
-    return { message: '유효한 토큰입니다.' };
+    console.log('------------- token 검증 ---------------');
+    return { message: 'valid' };
   }
 
   @Get('nickname')
   @UseGuards(AuthGuard())
   async getUserNicknameByToken(@GetAuth() auth: Auth): Promise<{ nickname: string }> {
+    console.log('----------- auth 진입 ---------------');
     const user = await this.authService.getUserByAuthWithHttpException(auth);
+    console.log('----------- auth getnickname return null ---------------');
+    if (!user) return { nickname: '' };
+    console.log('----------- auth getnickname return nickname ---------------');
     return { nickname: user.nickname };
   }
 }

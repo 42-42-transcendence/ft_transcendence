@@ -11,6 +11,8 @@ import {
   Query,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,6 +29,8 @@ import { Auth } from 'src/auth/entities/auth.entity';
 import { RelationService } from '../relation/relation.service';
 import { userInfo } from 'os';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import 'multer';
 
 @ApiTags('USER')
 @Controller('api/user')
@@ -56,12 +60,25 @@ export class UserController {
     description: '성공',
     type: User,
   })
+  @UseInterceptors(FileInterceptor('avatar'))
   @Put('setup')
-  async createUser(@Body('userID') userID: string, @GetAuth() auth: Auth): Promise<{ message: string }> {
+  async createUser(
+    @Body('userID') userID: string,
+    @GetAuth() auth: Auth,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ message: string }> {
+    if (file) {
+      console.log('profile image set');
+    }
+    console.log('------------------------- userID -------------------------');
+    // 닉네임 업데이트 요청인 경우
+    console.log(userID);
+
     const createdUser = await this.userService.createUser(userID);
     this.userService.relationAuthUser(createdUser, auth);
+
     const ret = {
-      message: createdUser.nickname,
+      message: createdUser.nickname || 'ok2', // 여기서 필요에 따라 적절한 값을 반환
     };
     console.log('ok2');
     return ret;
@@ -75,8 +92,8 @@ export class UserController {
     description: '성공',
     type: User,
   })
-  @Get('profile/:user')
-  async getUserProfile(@Param('user') nickname): Promise<UserprofileUserDto> {
+  @Get('profile/:targetUserID')
+  async getUserProfile(@Param('targetUserID') nickname): Promise<UserprofileUserDto> {
     const createdUser = await this.userService.getUserByNickname(nickname);
     const createdUserd = await this.userService.getAchievements(createdUser);
     console.log(createdUserd.userAchievements[0].achievement.description);

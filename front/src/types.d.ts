@@ -23,5 +23,4 @@ interface gameData {
 	uColorLocation: WebGLUniformLocation | null;
 	requestId: number;
 	endGame: boolean;
-	AIMode: boolean;
 }

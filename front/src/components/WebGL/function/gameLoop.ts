@@ -13,7 +13,7 @@ export function gameLoop(timeStamp: number) {
 	// 	requestAnimationFrame(gameLoop);
 	// 	return;
 	// }
-	if (data.AIMode)
+	if (data.mode === 'AI')
 		update(delta);
 	else
 		receive();

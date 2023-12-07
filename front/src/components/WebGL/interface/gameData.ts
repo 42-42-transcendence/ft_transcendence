@@ -26,7 +26,6 @@ let data: gameData = {
 	uColorLocation: null,
 	requestId: 0,
 	endGame: false,
-	AIMode: false,
 };
 
 export default data;

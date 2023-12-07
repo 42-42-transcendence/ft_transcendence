@@ -68,20 +68,12 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<{ message: string }> {
     if (file) {
-      console.log('profile image set');
-    }
-    console.log('------------------------- userID -------------------------');
-    // 닉네임 업데이트 요청인 경우
-    console.log(userID);
-
-    const createdUser = await this.userService.createUser(userID);
-    this.userService.relationAuthUser(createdUser, auth);
-
-    const ret = {
-      message: createdUser.nickname || 'ok2', // 여기서 필요에 따라 적절한 값을 반환
-    };
-    console.log('ok2');
-    return ret;
+      return await this.userService.createImageUser(file, auth);
+    } else if (userID) {
+      console.log('------------------------- userID -------------------------');
+      // 닉네임 업데이트 요청인 경우
+      return await this.userService.createNicknameUser(userID, auth);
+    } else return { message: 'null image' };
   }
   //이미지 요청 response 필요
 
@@ -96,7 +88,6 @@ export class UserController {
   async getUserProfile(@Param('targetUserID') nickname): Promise<UserprofileUserDto> {
     const createdUser = await this.userService.getUserByNickname(nickname);
     const createdUserd = await this.userService.getAchievements(createdUser);
-    console.log(createdUserd.userAchievements[0].achievement.description);
     const userprofile = await this.userService.getUserProfile(createdUserd);
     return userprofile;
   }

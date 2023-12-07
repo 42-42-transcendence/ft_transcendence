@@ -53,7 +53,7 @@ export class UserRepository extends Repository<User> {
       nickname: faker.person.firstName(),
     });
 
-    const result = this.save(dummy);
+    const result = await this.save(dummy);
     return result;
   }
 
@@ -107,11 +107,8 @@ export class UserRepository extends Repository<User> {
 
   async setAchievement(User: User): Promise<UserAchievement[]> {
     const retlist: UserAchievement[] = [];
-    console.log('aaaaaaaaasssssssssssssssssssssssss');
     for (let i = 0; i < 10; i++) {
       retlist.push(await this.userAchievementRepository.createuserachievement(User, i));
-      console.log(retlist[i].achievement.description);
-      console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
     }
     return retlist;
   }
@@ -120,15 +117,11 @@ export class UserRepository extends Repository<User> {
     //도전과제 생성됐는지 검사
     let achlist;
     if (!user.userAchievements || user.userAchievements.length === 0) {
-      console.log('tttttttttttttttttttttttttttttttttttttttttttttttttttttt');
-      console.log('tttttttttttttttttttttttttttttttttttttttttttttttttttttt');
       achlist = await this.setAchievement(user);
-      console.log('tttttttttttttttttttttttttttttttttttttttttttttttttttttt');
     }
     user.userAchievements = achlist;
     if (user.win >= 1 || user.lose >= 1) await this.succesachievement(user, Achievements.FIRSTGAME);
     if (user.win >= 1) await this.succesachievement(user, Achievements.FIRSTWIN);
-    console.log(user.userAchievements[0].userachievementID);
     return user;
   }
 

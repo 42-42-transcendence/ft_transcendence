@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 
 import RootLayout from './RootLayout';
 import ErrorPage from './Error';
@@ -13,6 +13,7 @@ import ChattingPage from './Chatting';
 import OAuth, { loader as oAuthLoader } from './OAuth';
 import ProtectedRouter from './ProtectedRouter';
 import SocialPage from './Social';
+import Otp from './Otp';
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
     path: '/oauth',
     element: <OAuth />,
     loader: oAuthLoader,
+  },
+  {
+    path: '/otp',
+    element: <Otp />,
   },
 ]);
 

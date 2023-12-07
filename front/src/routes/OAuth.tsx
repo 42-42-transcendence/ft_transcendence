@@ -11,7 +11,8 @@ import { Suspense } from 'react';
 
 type oAuthResponseData = {
   jwtToken: string;
-  isFirst: string;
+  isFirst: boolean;
+  otpIsActivated: boolean;
 };
 
 type loaderData = {
@@ -28,14 +29,20 @@ const OAuth = () => {
         {(ret: oAuthResponseData | string) => {
           if (typeof ret === 'string') {
             return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
-          } else {
+          } else if (ret.isFirst) {
             dispatch(authActions.setAuthToken(ret.jwtToken));
+            return <Navigate to="/setting-profile" replace={true} />;
+          } else if (ret.otpIsActivated) {
             return (
               <Navigate
-                to={ret.isFirst ? '/setting-profile' : '/'}
+                to="/otp"
                 replace={true}
+                state={{ jwtToken: ret.jwtToken }}
               />
             );
+          } else {
+            dispatch(authActions.setAuthToken(ret.jwtToken));
+            return <Navigate to="/" replace={true} />;
           }
         }}
       </Await>
@@ -50,7 +57,7 @@ const requestOAuth = async (
   const authCode = url.searchParams.get('code');
 
   try {
-    const res = await fetch(`http://localhost:3001/api/auth`, {
+    const authResponse = await fetch(`http://localhost:3001/api/auth`, {
       method: 'POST',
       body: JSON.stringify({ code: authCode }),
       headers: {
@@ -58,12 +65,30 @@ const requestOAuth = async (
       },
     });
 
-    if (!res.ok) {
-      throw new Error('Login Faile');
+    if (!authResponse.ok) {
+      throw new Error('Login Failed');
     }
 
-    const data = await res.json();
-    return data;
+    const authData = await authResponse.json();
+
+    // const otpResponse = await fetch(`http://localhost:3001/api/otp`, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Bearer ' + authData.jwtToken,
+    //   },
+    // });
+
+    // if (!otpResponse.ok) {
+    //   throw new Error('OTP Failed');
+    // }
+    // const otpData = await otpResponse.json();
+
+    return {
+      ...authData,
+      otpIsActivated: false,
+      // otpIsActivated: otpData.isActive,
+    };
   } catch (e) {
     if (typeof e === 'string') return e;
     else if (e instanceof Error) return e.message;

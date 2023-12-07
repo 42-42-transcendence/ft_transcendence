@@ -29,17 +29,20 @@ const ProtectedRouter = () => {
         setTokenIsValidated(true);
       } else {
         setTokenIsValidated(false);
+        return;
       }
 
-      const userResponse = await request<{ nickname: string }>(
+      const nickcnameResponse = await request<{ nickname: string }>(
         `${SERVER_URL}/api/auth/nickname`,
         {
           method: 'GET',
         }
       );
 
-      if (userResponse !== null) {
-        dispatch(userActions.setUserID(userResponse.nickname));
+      if (nickcnameResponse !== null) {
+        dispatch(userActions.setUserID(nickcnameResponse.nickname));
+      } else {
+        return;
       }
     };
 
@@ -49,6 +52,7 @@ const ProtectedRouter = () => {
   if (tokenIsValidated === null || isLoading) {
     return <h1 style={{ textAlign: 'center' }}>...Loading...</h1>;
   }
+
   if (tokenIsValidated === true) {
     if (location.pathname === '/setting-profile') {
       return <Outlet />;
@@ -61,6 +65,7 @@ const ProtectedRouter = () => {
       );
     }
   }
+
   return <Navigate to="/login" />;
 };
 export default ProtectedRouter;

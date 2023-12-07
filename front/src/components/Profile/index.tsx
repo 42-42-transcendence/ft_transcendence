@@ -11,26 +11,6 @@ import useRequest from '../../http/useRequest';
 import { useParams } from 'react-router-dom';
 import { SERVER_URL } from '../../App';
 
-// const DUMMY = {
-//   nickname: 'heryu',
-//   image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-//   winCount: 12,
-//   loseCount: 8,
-//   ladderPoint: 1200,
-//   achievements: [
-//     { id: '1', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '2', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '3', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '4', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '5', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '6', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '7', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '8', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '9', title: 'asdf', description: 'haha', isAchieved: true },
-//     { id: '19', title: 'asdf', description: 'haha', isAchieved: true },
-//   ],
-// };
-
 export type Achievement = {
   id: string;
   title: string;
@@ -70,7 +50,6 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfile();
-    // setProfileInfo(DUMMY);
   }, [fetchProfile]);
 
   useEffect(() => {

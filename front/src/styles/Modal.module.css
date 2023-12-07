@@ -191,3 +191,39 @@
   margin: 32px;
   text-align: center;
 }
+
+.otp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.otp-detail {
+  margin: 0;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--active-color);
+}
+
+.otp-label {
+  margin: 8px auto;
+}
+
+.otp-input {
+  background-color: var(--tone-deep-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  border: none;
+  outline: none;
+
+  width: 120px;
+  color: var(--active-color);
+  font-size: 20px;
+  text-align: center;
+}
+.otp-input::placeholder {
+  font-size: 16px;
+}

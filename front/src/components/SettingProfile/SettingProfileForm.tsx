@@ -54,14 +54,15 @@ const InitProfileForm = () => {
     }
     setFeedbackMessage('');
 
+    const formData = new FormData();
+    if (enteredAvatarFile !== null)
+      formData.append('avatar', enteredAvatarFile);
+
     const responseFile = await request<{ message: string }>(
       `${SERVER_URL}/api/user/setup`,
       {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        body: enteredAvatarFile,
+        body: formData,
       }
     );
     if (responseFile === null) return;

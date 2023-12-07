@@ -7,6 +7,9 @@ import userIcon from '../../assets/user-icon.svg';
 import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
 import useNotificationState from '../../store/Notification/useNotificationState';
+import QRCodeModal from '../Modal/QRCodeModal';
+import useModalState from '../../store/Modal/useModalState';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 const IconList = () => {
   const [showNotificationDropdown, setShowNotificationDropdown] =
@@ -14,6 +17,10 @@ const IconList = () => {
   const [showUserDropdown, setShowUserDropdown] = useState<boolean>(false);
 
   const { notifications } = useNotificationState();
+
+  const showQRCode = useModalState('showQRCode');
+  const openQRCodeModal = useOpenModal('showQRCode');
+  const [qrCodeURL, setQRCodeURL] = useState<string>('');
 
   const filteredNotifications = notifications.filter(
     (notification) => notification.notiType !== 'game'
@@ -38,6 +45,11 @@ const IconList = () => {
     setTimeout(() => {
       setShowUserDropdown(false);
     }, 150);
+  };
+
+  const openQRCodeHandler = (qrCodeURL: string) => {
+    setQRCodeURL(qrCodeURL);
+    openQRCodeModal();
   };
 
   return (
@@ -66,7 +78,10 @@ const IconList = () => {
         >
           <img src={userIcon} alt="user icon" />
         </button>
-        {showUserDropdown && <UserDropdown />}
+        {showUserDropdown && (
+          <UserDropdown onOpenQRCodeModal={openQRCodeHandler} />
+        )}
+        {showQRCode && <QRCodeModal qrCodeURL={qrCodeURL} />}
       </li>
     </ul>
   );

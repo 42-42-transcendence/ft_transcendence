@@ -1,6 +1,7 @@
 import data from '../interface/gameData';
 import { render } from './render';
 import update from "./update";
+import receive from "./receive";
 
 export function gameLoop(timeStamp: number) {
 	if (data.endGame) {
@@ -8,15 +9,16 @@ export function gameLoop(timeStamp: number) {
 		return;
 	}
 	let delta = (timeStamp - data.lastTime) / 1000.0;
-	console.log(data.requestId);
 	// if (timeStamp < data.lastTime + (1000 / 30)) {
 	// 	requestAnimationFrame(gameLoop);
 	// 	return;
 	// }
+	if (data.AIMode)
+		update(delta);
+	else
+		receive();
 	render();
-	update(delta);
 	data.lastTime = timeStamp;
-	console.log(data.ball.position[0], data.ball.position[1]);
 	data.requestId = requestAnimationFrame(gameLoop);
 }
 

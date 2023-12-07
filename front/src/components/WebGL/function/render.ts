@@ -51,6 +51,7 @@ function drawLine(line: Line) {
 }
 
 export function render() {
+	if (data.endGame) return;
 	data.gl!.clear(data.gl!.COLOR_BUFFER_BIT | data.gl!.DEPTH_BUFFER_BIT);
 
 	if (data.isFirstRender) {

@@ -1,4 +1,10 @@
-import {Paddle} from '../class/Paddle';
+import { vec2 } from 'gl-matrix';
+
+export let gameDataFromServer = {
+	paddlePos: [vec2.fromValues(0, 0), vec2.fromValues(0, 0)],
+	height: [0, 0],
+	ballPos: vec2.fromValues(0, 0),
+}
 
 let data: gameData = {
 	paddle: [null, null],

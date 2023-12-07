@@ -37,7 +37,7 @@ const GameModeForm = () => {
     console.log('1초 지연');
     await new Promise((res) => setTimeout(res, 1000));
     // 받은 데이터 처리
-    navigate(`/game/10`, { state: { gameMode: enteredMode, gameId: 10, player: ["김봉삼", "감미선"]} });
+    navigate(`/game/` + "asdfasdf", { state: { gameMode: enteredMode, player: ["김봉삼", "감미선"]} });
   };
 
   return (

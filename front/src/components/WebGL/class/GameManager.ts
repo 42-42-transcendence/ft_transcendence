@@ -11,11 +11,14 @@ export enum CanvasPosition {
 
 export class GameManager {
     /* the playerSide 0 = leftPlayer and 1 is the other player */
-    static scoreUpdate(playerSide: number) {
+    static scoreUpdate(playerSide: number | null) {
         if (playerSide === 0 || playerSide === 1) {
             ++data.scores[playerSide];
             data.scoreRef[playerSide]!.innerText = String(data.scores[playerSide]);
             this.resetBallPosition();
+        } else {
+            data.scoreRef[0]!.innerText = String(data.scores[0]);
+            data.scoreRef[1]!.innerText = String(data.scores[1]);
         }
     }
 

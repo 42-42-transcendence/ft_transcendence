@@ -69,9 +69,9 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         navigate(`/game/${gameID}`);
       });
 
-      newSocket.on('updateData', (gameData: any) => {
+      newSocket.on('updateGame', (gameData: any) => {
         gameDataFromServer.height[0] = gameData.height[0];
-        gameDataFromServer.height[1] = gameData.height[0];
+        gameDataFromServer.height[1] = gameData.height[1];
         gameDataFromServer.paddlePos[0][0] = gameData.paddlePos[0][0];
         gameDataFromServer.paddlePos[0][1] = gameData.paddlePos[0][1];
         gameDataFromServer.paddlePos[1][0] = gameData.paddlePos[1][0];

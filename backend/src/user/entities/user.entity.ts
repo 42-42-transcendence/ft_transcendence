@@ -41,7 +41,7 @@ export class User {
 
   @ApiProperty({
     description: '프로필 이미지',
-    example: './User/byeonkim/images/kobe.jpg',
+    example: '..//images/kobe.jpg',
     required: true,
   })
   @Column({

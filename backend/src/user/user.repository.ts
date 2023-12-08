@@ -38,6 +38,11 @@ export class UserRepository extends Repository<User> {
     return user;
   }
 
+  async setUserAvatar(user: User, extension: string): Promise<void> {
+    user.avatar = await `http://localhost:3001/assets/profiles/${(await user.auth).intraUID}.${extension}`;
+    await this.save(user);
+  }
+
   async getJoinChannels(userID: string): Promise<ChannelMember[]> {
     const user = await this.getUserById(userID);
 

@@ -76,9 +76,8 @@ export class UserService {
   }
 
   async createNicknameUser(userID: string, auth: Auth): Promise<{ message: string }> {
-    //user 객체는 아니까, 이 유저가 쓸 프로필 사진 저장. assets
     // assests/profiles/authUID.png
-    // ㄴ 만약 authUID가 있는지 검사 후, 교체 -> 어차피 writeFile은 덮어씌움
+    // ㄴ 만약 authUID가 있는지는, 어차피 writeFile은 덮어씌움
     // user 객체가 이미 있으면, 그냥 return?
     // image size, image 확장자 검사 한 번 더
     // nickname 중복검사
@@ -86,8 +85,8 @@ export class UserService {
     if (user) {
       throw new NotFoundException(`${userID}를 가진 유저가 이미 있습니다.`);
     }
-    const createdUser = await this.createUser(userID);
-    await this.relationAuthUser(createdUser, auth);
+    const createdUser = await this.userRepository.createUser(userID);
+    await this.authrepository.relationAuthUser(auth, createdUser);
     console.log('-------------- user db saved --------------');
     const ret = { message: 'user db saved' };
     return ret;
@@ -99,6 +98,7 @@ export class UserService {
     const extension = file.originalname.split('.').pop();
     const filePath = path.join(__dirname, `../../assets/profiles/${authuid}.${extension}`);
     await fs.writeFile(filePath, file.buffer);
+    await this.userRepository.setUserAvatar(await auth.user, extension);
     console.log('-------------- file saved --------------');
 
     const ret = { message: 'file saved' };

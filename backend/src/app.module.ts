@@ -15,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
 import { NotificationModule } from './notification/notification.module';
+import { OtpModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { NotificationModule } from './notification/notification.module';
     AuthModule,
     EventsModule,
     NotificationModule,
+    OtpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

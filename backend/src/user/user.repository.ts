@@ -64,4 +64,26 @@ export class UserRepository extends Repository<User> {
 		const result = await this.save(user);
 		return (result);
 	}
+
+	async saveOtpAuthSecret(user: User, secret: string): Promise<User> {
+		user.otpAuthSecret = secret;
+
+		const result = await this.save(user);
+		return (result);
+	}
+
+	async turnOnOtp(user: User): Promise<User> {
+		user.isActiveOtp = true;
+
+		const result = await this.save(user);
+		return (result);
+	}
+
+	async removeOtpAuthSecret(user: User): Promise<User> {
+		user.otpAuthSecret = null;
+		user.isActiveOtp = false;
+
+		const result = await this.save(user);
+		return (result);
+	}
 }

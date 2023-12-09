@@ -2,19 +2,23 @@ import Modal from '../../UI/Modal';
 
 import styles from '../../styles/Modal.module.css';
 import loadingImage from '../../assets/loading.gif';
+import {useNavigate} from "react-router-dom";
 
 import useCloseModal from '../../store/Modal/useCloseModal';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
 import { useEffect } from 'react';
+import useUserState from '../../store/User/useUserState';
 
 type Props = {
   mode: string;
 };
 
 const GameMatchingModal = ({ mode }: Props) => {
+  const navigate = useNavigate();
   const { isLoading, error, request } = useRequest();
   const closeModalHandler = useCloseModal();
+  const userState = useUserState();
 
   useEffect(() => {
     const startMatch = async () => {
@@ -25,7 +29,10 @@ const GameMatchingModal = ({ mode }: Props) => {
         }
       );
     };
-    startMatch();
+    if (mode === 'AI')
+      navigate(`/game/AI-mode`, { state: { gameMode: mode, player: [userState.id, "AI"]} });
+    else
+      startMatch();
 
     return () => {
       const cancelMatch = async () => {
@@ -36,8 +43,8 @@ const GameMatchingModal = ({ mode }: Props) => {
           }
         );
       };
-
-      cancelMatch();
+      if (mode !== 'AI')
+        cancelMatch();
       closeModalHandler();
     };
   }, [request, mode, closeModalHandler]);

@@ -5,8 +5,11 @@ import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
 import initialize from '../components/WebGL/function/initialize';
 import usePress from "../components/WebGL/hook/usePress";
-import { io } from "socket.io-client";
 import { useParams, useLocation } from 'react-router-dom';
+import usePopstate from "../components/WebGL/hook/usePopstate";
+import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
+import GameResultModal from "../components/Modal/GameResultModal";
+import useGameEvent from "../components/WebGL/hook/useGameEvent";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,6 +20,9 @@ const GamePage = () => {
     const [error, setError] = useState(null);
     const { gameId } = useParams();
     const { state } = useLocation();
+    const gameResult = useGameEvent();
+    useBeforeunload();
+    usePopstate();
     useCanvasSize();
     usePress();
 
@@ -28,15 +34,13 @@ const GamePage = () => {
             data.scoreRef[0] = scoreRef1.current;
             data.profileRef[1] = profileRef2.current;
             data.scoreRef[1] = scoreRef2.current;
-            console.log(gameId);
-            console.log(state);
 
             /* webGL 초기화 */
             initialize(state);
             /* shader 세팅 */
             shader();
             /* 렌더링 */
-            requestAnimationFrame(gameLoop);
+            data.requestId = requestAnimationFrame(gameLoop);
         } catch (e : any) {
             setError(e.message);
         }
@@ -68,6 +72,7 @@ const GamePage = () => {
                 ></canvas>
                 <div ref={scoreRef2} style={{position: "absolute"}}> 0 </div>
                 <div ref={profileRef2} style={{position: "absolute"}}> player2 </div>
+                {gameResult && <GameResultModal result={gameResult as 'win' | 'lost'} />}
             </div>
         </main>
     );

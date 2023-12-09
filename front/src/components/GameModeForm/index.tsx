@@ -19,20 +19,20 @@ const GameModeForm = () => {
   };
 
   return (
-    <>
-      <Form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.container}>
-          <h2>GAME MODE</h2>
-          <GameModeSelectionList
-            setEnteredMode={setEnteredMode}
-            enteredMode={enteredMode}
-          />
-          <CardButton className={styles.start}>START</CardButton>
-        </div>
-      </Form>
+      <>
+        <Form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.container}>
+            <h2>GAME MODE</h2>
+            <GameModeSelectionList
+                setEnteredMode={setEnteredMode}
+                enteredMode={enteredMode}
+            />
+            <CardButton className={styles.start}>START</CardButton>
+          </div>
+        </Form>
 
-      {showGameMatching && <GameMatchingModal mode={enteredMode} />}
-    </>
+        {showGameMatching && <GameMatchingModal mode={enteredMode} />}
+      </>
   );
 };
 

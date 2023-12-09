@@ -17,7 +17,7 @@ const ChattingForm = ({ socket, channelID }: Props) => {
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (enteredInput.length === 0 || enteredInput.length > 50) {
+    if (enteredInput.trim().length === 0 || enteredInput.length > 50) {
       return;
     }
 

@@ -14,7 +14,8 @@ type Props = {
 
 const UserDropdown = ({ onOpenQRCodeModal }: Props) => {
   const userState = useUserState();
-  const [otpIsActivated, setOtpIsActivated] = useState<boolean | null>(null);
+  // const [otpIsActivated, setOtpIsActivated] = useState<boolean | null>(null);
+  const [otpIsActivated, setOtpIsActivated] = useState<boolean | null>(false);
   const dispatch = useDispatch();
   const { isLoading, error, request } = useRequest();
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const UserDropdown = ({ onOpenQRCodeModal }: Props) => {
       }
     };
 
-    fetchOtpInfo();
+    // fetchOtpInfo();
   }, [request]);
 
   const navigateHandler = () => {

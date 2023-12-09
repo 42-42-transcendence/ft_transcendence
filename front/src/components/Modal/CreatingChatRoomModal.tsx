@@ -118,9 +118,9 @@ const CreatingChatRoomModal = () => {
           <input
             className={styles.input}
             type="password"
-            maxLength={8}
+            maxLength={16}
             placeholder={
-              enteredType === 'private' ? '' : '비밀번호 입력 (최대 8자)'
+              enteredType === 'private' ? '' : '비밀번호 입력 (최대 16자)'
             }
             value={enteredPassword}
             onChange={changePasswordHandler}

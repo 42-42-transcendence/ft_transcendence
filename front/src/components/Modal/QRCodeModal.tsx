@@ -73,7 +73,7 @@ const QRCodeModal = ({ qrCodeURL }: Props) => {
             type="text"
             id="otp"
             maxLength={6}
-            placeholder="- 빼고 입력"
+            placeholder="공백 없이 입력"
             value={enteredOtp}
             onChange={changeOtpHandler}
           />

@@ -54,6 +54,18 @@ const InitProfileForm = () => {
     }
     setFeedbackMessage('');
 
+    const responseName = await request<{ message: string }>(
+      `${SERVER_URL}/api/user/setup`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userID: enteredName }),
+      }
+    );
+    if (responseName === null) return;
+
     const formData = new FormData();
     if (enteredAvatarFile !== null)
       formData.append('avatar', enteredAvatarFile);
@@ -66,18 +78,6 @@ const InitProfileForm = () => {
       }
     );
     if (responseFile === null) return;
-
-    const responseName = await request<{ message: string }>(
-      `${SERVER_URL}/api/user/setup`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userID: enteredName }),
-      }
-    );
-    if (responseName === null) return;
 
     navigate('/');
   };

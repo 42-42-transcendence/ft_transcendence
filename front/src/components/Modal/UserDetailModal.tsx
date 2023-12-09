@@ -33,16 +33,16 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
     status: 'online',
   });
 
-  // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     const ret = await request<User>(`${SERVER_URL}/api/user`, {
-  //       method: 'GET',
-  //     });
-  //     setUserInfo(ret);
-  //   };
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const ret = await request<User>(`${SERVER_URL}/api/user`, {
+        method: 'GET',
+      });
+      setUserInfo(ret);
+    };
 
-  //   fetchUserInfo();
-  // }, [request]);
+    fetchUserInfo();
+  }, [request]);
 
   const profileHandler = () => {
     closeModalHandler();

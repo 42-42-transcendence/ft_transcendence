@@ -39,7 +39,7 @@ const Profile = () => {
 
   const fetchProfile = useCallback(async () => {
     const ret = await request<ProfileInfo>(
-      `${SERVER_URL}/api/profile/${params.userID}`,
+      `${SERVER_URL}/api/user/profile/${params.userID}`,
       {
         method: 'GET',
       }
@@ -83,6 +83,9 @@ const Profile = () => {
       return;
     }
 
+    const formData = new FormData();
+    if (enteredAvatarFile !== null)
+      formData.append('avatar', enteredAvatarFile);
     const ret = await request<{ message: string }>(
       `${SERVER_URL}/api/user/setup`,
       {
@@ -90,7 +93,7 @@ const Profile = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        body: enteredAvatarFile,
+        body: formData,
       }
     );
 

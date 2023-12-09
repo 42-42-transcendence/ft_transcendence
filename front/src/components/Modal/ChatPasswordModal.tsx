@@ -23,7 +23,7 @@ const ChatPasswordModal = ({ onPassowrdSubmit, isLoading }: Props) => {
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (enteredPassword.length === 0) {
+    if (enteredPassword.length === 0 || enteredPassword.length > 16) {
       return;
     }
 
@@ -45,8 +45,8 @@ const ChatPasswordModal = ({ onPassowrdSubmit, isLoading }: Props) => {
           <input
             className={styles.input}
             type="password"
-            maxLength={8}
-            placeholder="비밀번호 입력 (최대 8자)"
+            maxLength={16}
+            placeholder="비밀번호 입력 (최대 16자)"
             value={enteredPassword}
             onChange={changeHandler}
           />

@@ -91,57 +91,6 @@ export class User {
   @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   userAchievements: UserAchievement[];
 
-  @ApiProperty({
-    description: '프로필 이미지',
-    example: '..//images/kobe.jpg',
-    required: true,
-  })
-  @Column({
-    nullable: true,
-    default: 'default_image',
-  })
-  avatar: string;
-
-  @ApiProperty({
-    description: '승리 횟수',
-    example: '0',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 0,
-  })
-  win: number;
-
-  @ApiProperty({
-    description: '패배 횟수',
-    example: '0',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 0,
-  })
-  lose: number;
-
-  @ApiProperty({
-    description: '랭크 점수',
-    example: '1000',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 1000,
-  })
-  point: number;
-
-  @ApiProperty({
-    description: '도전과제',
-    example: '[{it, title, description}]',
-  })
-  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
-  userAchievements: UserAchievement[];
-
   @Column({ nullable: true })
   otpAuthSecret: string;
 

@@ -35,7 +35,7 @@ export class GameService {
         const gameId = clientId;
         if (!gameId)
             return null;
-        const user = await this.userService.createUserDummy("player1"); //user 로 대체
+        const user = await this.userService.createUserDummy(); //user 로 대체
         if (!user)
             return null;
         console.log(user.nickname);
@@ -125,7 +125,7 @@ export class GameService {
 
     async setplayer2(gameId : string, player2 : string) : Promise<void> {
         const game : Game = await this.findGameById(gameId);
-        const user = await this.userService.createUserDummy(player2);
+        const user = await this.userService.createUserDummy();
         if (user)
             game.player2 = user.nickname;
         console.log(user.nickname);

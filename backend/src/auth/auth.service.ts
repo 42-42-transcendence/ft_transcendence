@@ -124,12 +124,4 @@ export class AuthService {
     }
     return user;
   }
-  async getUserByAuthWithHttpException(auth: Auth): Promise<User> {
-    const user = await auth.user;
-
-    if (!user) {
-      throw new NotFoundException(`해당 토큰의 유저를 찾을수 없습니다.`);
-    }
-    return user;
-  }
 }

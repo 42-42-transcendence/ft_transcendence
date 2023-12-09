@@ -56,16 +56,6 @@ export class UserService {
 		return (user);
 	}
 
-	async getUserByNicknameWithWsException(nickname: string): Promise<User> {
-		const user = this.userRepository.getUserByNickname(nickname);
-
-		if (!user) {
-			throw new SocketException('NotFound', `${nickname}을 가진 유저를 찾을 수 없습니다.`);
-		}
-
-		return (user);
-	}
-
 	async getUserById(userID: string): Promise<User> {
 		return this.userRepository.getUserById(userID);
 	}

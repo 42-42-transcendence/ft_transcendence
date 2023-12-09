@@ -17,7 +17,12 @@ import { AchievementRepository } from 'src/achievement/achievement.repository';
 import { AuthRepository } from 'src/auth/auth.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), AuthModule, RelationModule, UserAchievementModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    AuthModule,
+    RelationModule,
+    UserAchievementModule
+  ],
   controllers: [UserController],
   providers: [UserService, UserRepository, UserAchievementRepository, AchievementRepository, AuthRepository],
   exports: [UserService, UserRepository],

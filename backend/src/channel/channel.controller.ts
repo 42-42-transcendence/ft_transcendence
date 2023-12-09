@@ -1,21 +1,22 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Inject, forwardRef, BadRequestException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { ChannelDto } from './dto/channel.dto';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Channel } from './entities/channel.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
-import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { ChatService } from 'src/chat/chat.service';
-import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { UserService } from 'src/user/user.service';
 import { RelationService } from 'src/relation/relation.service';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotiType } from 'src/notification/enums/noti-type.enum';
+import * as bcrypt from 'bcrypt';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -27,21 +28,49 @@ export class ChannelController {
     private chatService: ChatService,
     private userService: UserService,
     private relationService: RelationService,
+    private notificationService: NotificationService,
     @Inject(forwardRef(() => EventsGateway))
     private eventsGateway: EventsGateway,
   ) {}
 
-  // 임시로 채널이 없으면 더미를 생성하게 함
+
   @ApiOperation({
-    summary: '모든 채널 조회'
+    summary: '모든 공개 채널 및 유저가 참여한 private, dm 채널 조회'
   })
   @ApiOkResponse({
     description: '성공',
     type: [Channel]
   })
   @Get()
-  async getAllChannels(): Promise<Channel[]> {
-    return (await this.channelService.getAllChannels());
+  async getAllChannels(
+    @GetAuth() auth: Auth
+  ): Promise<Channel[]> {
+    const user = await auth.user;
+    const channels: Channel[] = [];
+    const publicChannels = await this.channelService.getPublicChannels();
+    const privateChannels = await this.channelMemberService.getPrivateChannelsByUser(user);
+    const dmChannels = await this.channelMemberService.getDmChannelsByUser(user);
+
+    channels.push(...publicChannels);
+    channels.push(...privateChannels);
+    channels.push(...dmChannels);
+
+    return (channels);
+  }
+
+
+  @ApiOperation({
+    summary: 'channelID로 채널 정보를 가져온다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<Channel>
+  })
+  @Get(':id')
+  async getChannelInfoById(
+    @Param('id') channelID: string
+  ): Promise<Channel> {
+    return (await this.channelService.getChannelById(channelID));
   }
 
 
@@ -61,8 +90,9 @@ export class ChannelController {
     const channel = await this.channelService.createChannel(createChannelDto);
     const role = ChannelMemberRole.OWNER;
 
-    await this.channelMemberService.relationChannelMember({ channel, user, role });
     await this.channelService.enterUserToChannel(channel);
+    await this.channelMemberService.relationChannelMember({ channel, user, role });
+
 
     return ({ channelID: channel.channelID });
   }
@@ -101,12 +131,24 @@ export class ChannelController {
   async checkJoinChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('password') password: string
+    @Body('password') password: string,
+    @Body('isRedirected') isRedirected: boolean
   ): Promise<{ isAuthenticated: boolean }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const member = await this.channelMemberService.getChannelMemberByChannelUser(channel, user);
     const content = `${user.nickname}님께서 입장하셨습니다.`;
+
+    if (isRedirected === true) {
+      if (member.role === ChannelMemberRole.INVITE) {
+        await this.channelService.enterUserToChannel(channel);
+        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
+      }
+      // 멀티 페이지 생각해볼 것 (알림으로 들어갈시 아마 또 떠버리게 될거임)
+      this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
+      return ({ isAuthenticated: true });
+    }
 
     // DM도 일단 이렇게 느슨하게 설정
     if ((channel.type === ChannelTypeEnum.PRIVATE) || (channel.type === ChannelTypeEnum.DM)) {
@@ -114,14 +156,15 @@ export class ChannelController {
         return ({ isAuthenticated: false });
       }
       if (member.role === ChannelMemberRole.INVITE) {
-        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
         await this.channelService.enterUserToChannel(channel);
+        await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
         this.eventsGateway.updatedSystemMessage(content, channel, user);
+        this.eventsGateway.updatedMembersForAllUsers(channel);
       }
       return ({ isAuthenticated: true });
     }
 
-    if (channel.password !== password) {
+    if (password !== '' && !(await bcrypt.compare(password, channel.password))) {
       return ({ isAuthenticated: false });
     }
 
@@ -130,19 +173,21 @@ export class ChannelController {
     }
 
     if (member && (member.role === ChannelMemberRole.INVITE)) {
-      await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       await this.channelService.enterUserToChannel(channel);
+      await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     if (!member) {
+      await this.channelService.enterUserToChannel(channel);
       await this.channelMemberService.relationChannelMember({
         channel,
         user,
         role: ChannelMemberRole.GUEST
       });
-      await this.channelService.enterUserToChannel(channel);
       this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     return ({ isAuthenticated: true });
@@ -163,17 +208,26 @@ export class ChannelController {
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    await this.channelMemberService.deleteChannelMember(channel, user);
+    const member = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    // 현재 chat을 만들고 channel 정보업데이트를 하면, chat이 삭제되는 현상이 있음.
+    // orphanedRowAction 없다면, chat의 channel을 null로 만든다
+    // 해결할려면, 일단 channel 정보 먼저 업데이트하고, chat을 만드는 방법밖에 없음...
     await this.channelService.leaveUserToChannel(channel);
+    if (member.role === ChannelMemberRole.OWNER && channel.total > 0) {
+      const newOwner = await this.channelMemberService.delegateChannelOwner(channel);
+      const newOwnerUser = await this.channelMemberService.getUserFromChannelMember(newOwner);
+      const content = `${user.nickname}님이 ${newOwnerUser.nickname}님에게 OWNER를 위임했습니다.`;
+      await this.eventsGateway.updatedSystemMessage(content, channel, newOwnerUser);
+    }
+    await this.channelMemberService.deleteChannelMemberById(member.channelMemberID);
+    const newChannel = await this.channelService.getChannelByIdWithException(channelID);
     const content = `${user.nickname}님께서 퇴장하셨습니다.`;
-    const chat = await this.chatService.createChatMessage({
-      content,
-      chatType: ChatType.SYSTEM,
-      userNickname: user.nickname,
-      channel,
-      user
-    });
-    this.eventsGateway.updatedMessage(user.userID, channel.channelID, chat);
+    await this.eventsGateway.updatedSystemMessage(content, newChannel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(newChannel);
+
+    if (channel.total === 0) {
+      await this.channelService.deleteChannelById(channel.channelID);
+    }
 
     return { message: `${user.nickname}님이 ${channel.title}을 나가셨습니다.`};
   }
@@ -199,7 +253,8 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}님은 채널을 제거할 권한이 없습니다.`);
     }
 
-    // this.eventsGateway.server.to(channel.channelID).emit("firedMessage", { message: `${kickedUser.nickname}님께서는 추방되었습니다.` });
+    this.eventsGateway.server.to(channel.channelID).emit(
+      "firedChannel", `${channel.title}채널이 제거되었습니다.`);
     await this.channelService.deleteChannelById(channelID);
 
     return ({ message: `해당 채널을 제거했습니다.` });
@@ -227,7 +282,8 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}은 권한이 없습니다.`);
     }
 
-    await this.channelService.updateChannelInfo(channel, updateChannelDto);
+    const result = await this.channelService.updateChannelInfo(channel, updateChannelDto);
+    this.eventsGateway.server.to(result.channelID).emit("updatedChannelTitle", result.title);
 
     return ({ message: `해당 채널의 정보를 수정했습니다.` });
   }
@@ -244,11 +300,11 @@ export class ChannelController {
   async assignToChannelStaff(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('newStaffUser') newStaffUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const newStaffUser = await this.userService.getUserByIdWithException(newStaffUserID);
+    const newStaffUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, newStaffUser);
 
@@ -299,7 +355,7 @@ export class ChannelController {
 
 
   @ApiOperation({
-    summary: '특정 인원을 추방시키고 채널에 못들어오게 한다'
+    summary: '특정 인원을 추방시킨다'
   })
   @ApiOkResponse({
     description: '성공',
@@ -309,11 +365,11 @@ export class ChannelController {
   async kickUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('kickedUser') kickedUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const kickedUser = await this.userService.getUserByIdWithException(kickedUserID);
+    const kickedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
     const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, kickedUser);
 
@@ -335,21 +391,86 @@ export class ChannelController {
     }
 
     if (objectUserRole.role === ChannelMemberRole.BLOCK) {
-      throw new BadRequestException(`${kickedUser.nickname}님은 이미 추방되었습니다.`);
+      throw new BadRequestException(`${kickedUser.nickname}님은 이미 영구 추방되었습니다.`);
     }
 
-    // 이 사이에 추방유저를 채널로비로 이동시키는 무언가가 있어야함.
-    // this.eventsGateway.server.to(channel.channelID).emit("firedMessage", { message: `${kickedUser.nickname}님께서는 추방되었습니다.` });
+    await this.eventsGateway.kickOutSpecificClient(
+      `${kickedUser.nickname}님은 ${channel.title}에서 추방되었습니다.`,
+      kickedUser,
+      channel
+    )
+    await this.channelService.leaveUserToChannel(channel);
 
+    // 멤버 지워야 함
+    await this.channelMemberService.deleteChannelMemberById(objectUserRole.channelMemberID);
+
+    const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
+    await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
+
+    return ({ message: content });
+  }
+
+
+  @ApiOperation({
+    summary: '특정 인원을 영구 추방시킨다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Post(':id/ban')
+  async banUserFromChannel(
+    @GetAuth() auth: Auth,
+    @Param('id') channelID: string,
+    @Body('targetUserID') targetUser: string,
+  ): Promise<{ message: string }> {
+    const user = await auth.user;
+    const channel = await this.channelService.getChannelByIdWithException(channelID);
+    const banedUser = await this.userService.getUserByNicknameWithException(targetUser);
+    const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, banedUser);
+
+    if (!subjectUserRole) {
+      throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (subjectUserRole.role !== ChannelMemberRole.OWNER
+        && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
+      throw new BadRequestException(`${user.nickname}님은 강퇴권한이 없습니다.`);
+    }
+
+    if (!objectUserRole || (objectUserRole.role === ChannelMemberRole.INVITE)) {
+      throw new BadRequestException(`${banedUser.nickname}님은 채널에 존재하지 않습니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.OWNER) {
+      throw new BadRequestException(`${banedUser.nickname}님은 채널 소유자입니다.`);
+    }
+
+    if (objectUserRole.role === ChannelMemberRole.BLOCK) {
+      throw new BadRequestException(`${banedUser.nickname}님은 이미 영구 추방되었습니다.`);
+    }
+
+    await this.channelService.leaveUserToChannel(channel);
     await this.channelMemberService.updateChannelMemberRoleByChannelMember(
       objectUserRole,
       ChannelMemberRole.BLOCK
     );
-    await this.channelService.leaveUserToChannel(channel);
-    await this.eventsGateway.updatedMembersForAllUsers(channel);
+    await this.eventsGateway.kickOutSpecificClient(
+      `${banedUser.nickname}님은 ${channel.title}에서 영구 추방되었습니다.`,
+      banedUser,
+      channel
+    )
 
-    const content = `${kickedUser.nickname}님께서 추방되었습니다.`;
+    const content = `${banedUser.nickname}님께서 영구 추방되었습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
+    await this.eventsGateway.updatedMembersForAllUsers(channel);
+    await this.eventsGateway.updatedNotification(
+      `${banedUser.nickname}님은 ${channel.title}채널에서 영구 추방되었습니다.`,
+      NotiType.BAN,
+      banedUser
+    )
 
     return ({ message: content });
   }
@@ -366,13 +487,13 @@ export class ChannelController {
   async inviteToChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('invitedUser') invitedUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const invitedUser = await this.userService.getUserByIdWithException(invitedUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
-    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, invitedUser);
+    const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUser(channel, invitedUser);
 
     if (!subjectUserRole) {
       throw new BadRequestException(`${user.nickname}님은 채널에 존재하지 않습니다.`);
@@ -403,8 +524,12 @@ export class ChannelController {
 
     const content = `${invitedUser.nickname}님께 초대를 보냈습니다.`;
     await this.eventsGateway.updatedSystemMessage(content, channel, user);
-
-    // noti로 해당 인물에게 초대 알림을 보내야함
+    await this.eventsGateway.updatedNotificationWithData(
+      `${user.nickname}님이 ${channel.title}로 초대하셨습니다.`,
+      NotiType.INVITE,
+      invitedUser,
+      channel.channelID
+    );
 
     return ({ message: content });
   }
@@ -420,21 +545,32 @@ export class ChannelController {
   @Post('DM')
   async createDirectMessage(
     @GetAuth() auth: Auth,
-    @Body('invitedUser') invitedUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
-    const invitedUser = await this.userService.getUserByIdWithException(invitedUserID);
+    const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
+    var title: string = `${user.nickname}-${invitedUser.nickname} DM`;
+
+    if (user.nickname > invitedUser.nickname) {
+      title = `${invitedUser.nickname}-${user.nickname} DM`;
+    }
     const channel = await this.channelService.createChannel({
-      title: `${user.nickname}-${invitedUser.nickname} DM`,
+      title,
       password: '',
       type: ChannelTypeEnum.DM
     });
-    const role = ChannelMemberRole.OWNER;
+    const role = ChannelMemberRole.GUEST;
 
+    await this.channelService.enterUserToChannel(channel);
+    await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user, role });
-    await this.channelService.enterUserToChannel(channel);
     await this.channelMemberService.relationChannelMember({ channel, user: invitedUser, role });
-    await this.channelService.enterUserToChannel(channel);
+    await this.eventsGateway.updatedNotificationWithData(
+      `${user.nickname}님으로부터 DM이 도착했습니다.`,
+      NotiType.DM,
+      invitedUser,
+      channel.channelID
+    )
 
     return ({ channelID: channel.channelID });
   }
@@ -452,11 +588,11 @@ export class ChannelController {
   async blockUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('blockedUser') blockedUserID: string,
+    @Body('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
-    const blockedUser = await this.userService.getUserByIdWithException(blockedUserID);
+    const blockedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const relation = await this.relationService.getRelationByUsers(user, blockedUser);
 
     if (!relation) {
@@ -474,7 +610,7 @@ export class ChannelController {
     }
     await this.eventsGateway.updatedMembersForOneUser(user, channel);
 
-    return ({ message: `${blockedUser.nickname}님께 초대를 보냈습니다.` })
+    return ({ message: `${blockedUser.nickname}님을 차단했습니다.` })
   }
 
 
@@ -486,15 +622,15 @@ export class ChannelController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Post(':id/staff')
+  @Post(':id/mute')
   async muteUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('mutedUser') mutedUserID: string,
+    @Body('targetUserID') targetUser: string,
     ): Promise<{ message: string }> {
       const user = await auth.user;
       const channel = await this.channelService.getChannelByIdWithException(channelID);
-      const mutedUser = await this.userService.getUserByIdWithException(mutedUserID);
+      const mutedUser = await this.userService.getUserByNicknameWithException(targetUser);
       const subjectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, user);
       const objectUserRole = await this.channelMemberService.getChannelMemberByChannelUserWithException(channel, mutedUser);
 
@@ -521,6 +657,7 @@ export class ChannelController {
         this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
         const content = `${mutedUser.nickname}님께서 뮤트가 해제되었습니다.`;
         await this.eventsGateway.updatedSystemMessage(content, channel, user);
+        this.eventsGateway.updatedMembersForAllUsers(channel);
 
         return ({ message: content });
       }
@@ -534,6 +671,7 @@ export class ChannelController {
 
       const content = `${mutedUser.nickname}님께서 뮤트되었습니다.`;
       await this.eventsGateway.updatedSystemMessage(content, channel, user);
+      this.eventsGateway.updatedMembersForAllUsers(channel);
 
       return ({ message: content });
     }

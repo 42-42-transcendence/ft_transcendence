@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
+import { v4 as uuidv4 } from 'uuid';
 import { UserStatus } from './enums/user-status.enum';
 import { faker } from '@faker-js/faker';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -44,9 +45,14 @@ export class UserRepository extends Repository<User> {
     return await user.channelMembers;
   }
 
-  async getUserByNickname(nickname: string): Promise<User> {
-    return await this.findOneBy({ nickname });
-  }
+	async getUserByNickname(nickname: string): Promise<User> {
+		const user = await this
+			.createQueryBuilder('user')
+			.where('user.nickname = :nickname', { nickname })
+			.getOne();
+
+		return (user);
+	}
 
   async createUserDummy(): Promise<User> {
     const dummy = this.create({
@@ -135,4 +141,33 @@ export class UserRepository extends Repository<User> {
     createduser.status = status;
     await this.save(createduser);
   }
+
+	async updateUserStatus(user: User, status: UserStatus): Promise<User> {
+		user.status = status;
+
+		const result = await this.save(user);
+		return (result);
+	}
+
+	async saveOtpAuthSecret(user: User, secret: string): Promise<User> {
+		user.otpAuthSecret = secret;
+
+		const result = await this.save(user);
+		return (result);
+	}
+
+	async turnOnOtp(user: User): Promise<User> {
+		user.isActiveOtp = true;
+
+		const result = await this.save(user);
+		return (result);
+	}
+
+	async removeOtpAuthSecret(user: User): Promise<User> {
+		user.otpAuthSecret = null;
+		user.isActiveOtp = false;
+
+		const result = await this.save(user);
+		return (result);
+	}
 }

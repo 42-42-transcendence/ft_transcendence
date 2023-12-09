@@ -39,7 +39,7 @@ export class Game {
     required: true,
   })
   @Column({ nullable: true, default: null })
-  player2: string;
+  player2 : string;
 
   @ApiProperty({
     description: 'winner 아이디',
@@ -70,7 +70,7 @@ export class Game {
     example: 'Ladder',
     required: true,
   })
-  @Column({ type: 'enum', enum: ['Ladder', 'Private'] })
+  @Column({ type: 'enum', enum: [GameTypeEnum.LADDER, GameTypeEnum.PRIVATE] })
   gameType: GameTypeEnum;
 
   @ApiProperty({
@@ -78,7 +78,7 @@ export class Game {
     example: 'Normal',
     required: true,
   })
-  @Column({ type: 'enum', enum: ['Normal', 'Speed', 'Obstacle'], default: 'Normal' })
+  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT, GameModeEnum.FAST], default: GameModeEnum.NORMAL })
   gameMode: GameModeEnum;
 
   @ApiProperty({

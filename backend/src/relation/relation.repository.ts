@@ -15,11 +15,11 @@ export class RelationRepository extends Repository<Relation> {
   async createRelation(relationDto: RelationDto): Promise<Relation> {
     const { subjectUser, objectUser, relationType } = relationDto;
 
-    const relation = new Relation();
-    relation.subjectUser = Promise.resolve(subjectUser);
-    relation.objectUser = Promise.resolve(objectUser);
-    relation.relationType = relationType;
-    const result = await this.save(relation);
+		const relation = new Relation();
+		relation.subjectUser = subjectUser;
+		relation.objectUser = objectUser;
+		relation.relationType = relationType;
+		const result = await this.save(relation);
 
     return result;
   }
@@ -38,13 +38,16 @@ export class RelationRepository extends Repository<Relation> {
     if (result.affected === 0) throw new NotFoundException('없는 User 관계입니다.');
   }
 
-  async getRelationByUsers(subjectUser: User, objectUser: User): Promise<Relation> {
-    const relation = await this.createQueryBuilder('relation')
-      .leftJoinAndSelect('relation.subjectUser', 'subjectUser')
-      .leftJoinAndSelect('relation.objectUser', 'objectUser')
-      .where('subjectUser.userID = :userID', { userID: subjectUser.userID })
-      .andWhere('objectUser.userID = :userID', { userID: objectUser.userID })
-      .getOne();
+	async getRelationByUsers(subjectUser: User, objectUser: User): Promise<Relation> {
+
+		// where, andwhere의 변수를 같은 이름으로 지으면 안된다...
+		const relation = await this
+			.createQueryBuilder('relation')
+			.leftJoinAndSelect('relation.subjectUser', 'subjectUser')
+			.leftJoinAndSelect('relation.objectUser', 'objectUser')
+			.where('subjectUser.userID = :subjectUserID', { subjectUserID: subjectUser.userID })
+			.andWhere('objectUser.userID = :objectUserID', { objectUserID: objectUser.userID })
+			.getOne();
 
     return relation;
   }

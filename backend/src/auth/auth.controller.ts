@@ -40,24 +40,26 @@ export class AuthController {
     console.log('--------------------- auth success ----------------------');
   }
 
+
   @ApiOperation({
-    summary: '토큰이 유효한지 확인한다',
+    summary: '토큰이 유효한지 확인한다'
   })
   @ApiOkResponse({
     description: '성공',
-    type: Promise<{ message: string }>,
+    type: Promise<{ message: string }>
   })
   @Get()
   @UseGuards(AuthGuard())
   async checkTokenIsValidated(): Promise<{ message: string }> {
-    console.log('------------- token 검증 ---------------');
-    return { message: 'valid' };
+    return ({ message: '유효한 토큰입니다.'});
   }
 
   @Get('nickname')
   @UseGuards(AuthGuard())
-  async getUserNicknameByToken(@GetAuth() auth: Auth): Promise<{ nickname: string }> {
+  async getUserNicknameByToken(
+    @GetAuth() auth: Auth
+  ): Promise<{ nickname: string }> {
     const user = await this.authService.getUserByAuthWithHttpException(auth);
-    return { nickname: user.nickname };
+    return ({ nickname: user.nickname });
   }
 }

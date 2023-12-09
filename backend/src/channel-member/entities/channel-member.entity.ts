@@ -21,10 +21,10 @@ export class ChannelMember {
     type: 'string'
   })
   @ManyToOne(() => Channel, (channel) => channel.channelMembers, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
-  // @JoinColumn({ referencedColumnName: 'channelID' })
-  channel: Promise<Channel>;
+  channel: Channel;
 
   @ApiProperty({
     description: 'User 외래키',
@@ -32,10 +32,10 @@ export class ChannelMember {
     type: 'string'
   })
   @ManyToOne(() => User, (user) => user.channelMembers, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
-  // @JoinColumn({ referencedColumnName: 'userID' })
-  user: Promise<User>;
+  user: User;
 
   @ApiProperty({
     description: 'User의 채널 권한',

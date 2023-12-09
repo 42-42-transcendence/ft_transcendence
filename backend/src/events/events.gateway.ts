@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, UseFilters, forwardRef } from '@nestjs/common';
+import { Inject, UseFilters, forwardRef } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -10,23 +10,24 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { ChannelMemberService } from 'src/channel-member/channel-member.service';
-import { ChannelMemberDto } from 'src/channel-member/dto/channel-member.dto';
-import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
-import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 import { ChannelService } from 'src/channel/channel.service';
 import { Channel } from 'src/channel/entities/channel.entity';
 import { ChatService } from 'src/chat/chat.service';
-import { CreateChatMessageDto } from 'src/chat/dto/create-chat-message.dto';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { EventsService } from './events.service';
 import { Chat } from 'src/chat/entities/chat.entity';
 import { SocketExceptionFilter } from './socket.filter';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotiType } from 'src/notification/enums/noti-type.enum';
+import { SocketException } from './socket.exception';
+import { UserStatus } from 'src/user/enums/user-status.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
 
 
 
-// @UseFilters(new SocketExceptionFilter())
+@UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:3000',
@@ -34,11 +35,12 @@ import { SocketExceptionFilter } from './socket.filter';
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    private userService: UserService,
     private channelMemberService: ChannelMemberService,
     private chatService: ChatService,
     private authService: AuthService,
+    private notificationService: NotificationService,
     private eventsService: EventsService,
+    private userService: UserService,
     @Inject(forwardRef(() => ChannelService))
     private channelService: ChannelService,
   ) {}
@@ -52,27 +54,57 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   async handleConnection(client: Socket) {
-    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await this.authService.getUserByAuthWithWsException(auth);
-    this.eventsService.addClient(user.userID, client);
-    console.log(`[socket.io] ----------- ${user.nickname} connect -------------------`);
+    try {
+      const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+      const user = await this.authService.getUserByAuthWithWsException(auth);
+      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
+      if (this.eventsService.hasClient(user.userID)) {
+        const beforeClient = this.eventsService.getClient(user.userID);
+        beforeClient.emit("sessionExpired", `${user.nickname}님이 다른 곳에서 새로 로그인 하셨습니다.`);
+      }
+      this.eventsService.addClient(user.userID, client);
+      if (user.status === UserStatus.OFFLINE) {
+        await this.userService.updateUserStatus(user, UserStatus.ONLINE);
+      }
+
+      console.log(`[socket.io] ----------- ${user.nickname} ${client.id} connect -------------------`);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async handleDisconnect(client: Socket) {
-    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
-    const user = await this.authService.getUserByAuthWithWsException(auth);
-    const channelMembers = await user.channelMembers;
+    try {
+      const nickname = client.handshake.query.userID;
+      if (typeof nickname !== 'string') {
+        throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+      }
+      const user = await this.userService.getUserByNicknameWithWsException(nickname);
+      const channelMembers = await user.channelMembers;
 
-    const leaveChannels = channelMembers.map(async channelMember => {
-      const channel = await channelMember.channel;
+      const leaveChannels = channelMembers.map(async channelMember => {
+        const channel = await this.channelMemberService.getChannelFromChannelMember(channelMember);
 
-      await this.leaveChannelSession(client, { channelID: channel.channelID });
-    });
-    await Promise.all(leaveChannels);
+        await this.leaveChannelSession(client, { channelID: channel.channelID });
+      });
+      await Promise.all(leaveChannels);
 
-    this.eventsService.removeClient(user.userID);
+      // this.allDeleteGameMatching(user.userID);
+      const saveClient = this.eventsService.getClient(user.userID);
+      // 현재 client.id와 저장하고 있는 client.id가 같을 때만 client를 지우고, status를 변경한다
+      if (client.id === saveClient.id) {
+        this.eventsService.removeClient(user.userID);
+        if (user.status !== UserStatus.OFFLINE) {
+          await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
+        }
+      }
+      await this.notificationService.deleteAllGameNotiByUserID(user.userID);
 
-    console.log(`[socket.io] ----------- ${user.nickname} disconnect ----------------`);
+      console.log(`[socket.io] ----------- ${user.nickname} ${client.id} disconnect ----------------`);
+
+    } catch (e) {
+      console.log(e);
+    }
   }
 
 
@@ -89,7 +121,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (!client.rooms.has(channel.channelID)) {
       client.join(channel.channelID);
     }
-    console.log(`[socket.io] ----------- join ${data.channelID} -----------------`);
+    console.log(`[socket.io] ----------- join ${channel.channelID} -----------------`);
 
     return { title, messages, members };
   }
@@ -101,6 +133,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       console.log(`[socket.io] ----------- leave ${data.channelID} ----------------`);
     }
   }
+
 
   @SubscribeMessage('sendMessage')
   async sendMessage(client: Socket, data: any) {
@@ -118,37 +151,44 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         channel,
       };
       const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      client.to(channel.channelID).emit("updatedMessage", { message: chat });
+      this.server.to(channel.channelID).emit("updatedMessage", chat);
     }
     else {
-      const createChatMessageDto = {
-        content: `${user.nickname}님은 현재 뮤트상태입니다.`,
-        chatType: ChatType.SYSTEM,
-        userNickname: user.nickname,
-        user,
-        channel,
-      };
-      const chat = await this.chatService.createChatMessage(createChatMessageDto);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMessage", { message: chat });
+      // 메세지 이거... db저장하면 안됨.
+      const chat = this.chatService.createMuteMessage(user, channel);
+      if (client && client.rooms.has(channel.channelID)) {
+        client.emit("updatedMessage", chat);
+      }
     }
   }
 
+  @SubscribeMessage('notification')
+  async getAllNotificationsByUser(client: Socket) {
+    const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
+    const user = await this.authService.getUserByAuthWithWsException(auth);
+    const notifications = await this.notificationService.getAllNotiByUserID(user.userID);
+
+    return (notifications);
+  }
+
+
   async updatedMessage(userID: string, channelID: string, chat: Chat) {
     const client = this.eventsService.getClient(userID);
-    client.to(channelID).emit("updatedMessage", { message: chat });
+    if (client && client.rooms.has(channelID)) {
+      client.to(channelID).emit("updatedMessage", chat);
+    }
   }
 
 
   async updatedMembersForAllUsers(channel: Channel) {
     const channelMembers = await channel.channelMembers;
     const emitUpdatedMembers = channelMembers.map(async member => {
-      const user = await member.user;
+      const user = await this.channelMemberService.getUserFromChannelMember(member);
       const client = this.eventsService.getClient(user.userID);
-      if (client === undefined || !client.rooms.has(channel.channelID)) {
-        return ;
-      }
       const members = await this.eventsService.createEventsMembers(channelMembers, user);
-      this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
+      if (client && client.rooms.has(channel.channelID)) {
+        client.emit("updatedMembers", members);
+      }
     });
     await Promise.all(emitUpdatedMembers);
   }
@@ -157,7 +197,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const client = this.eventsService.getClient(user.userID);
     const channelMembers = await channel.channelMembers;
     const members = await this.eventsService.createEventsMembers(channelMembers, user);
-    this.server.to(channel.channelID).to(client.id).emit("updatedMembers", { members: members });
+    if (client && client.rooms.has(channel.channelID)) {
+      client.emit("updatedMembers", members);
+    }
   }
 
   async updatedSystemMessage(content: string, channel: Channel, user: User) {
@@ -168,6 +210,129 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       channel,
       user
     });
-    this.server.to(channel.channelID).emit("updatedMessage", { message: chat });
+    this.server.to(channel.channelID).emit("updatedMessage", chat);
   }
+
+  async kickOutSpecificClient(message: string, user: User, channel: Channel) {
+    const client = this.eventsService.getClient(user.userID);
+    if (client) {
+      client.emit('firedChannel', message);
+    };
+  }
+
+  async updatedNotification(message: string, notiType: NotiType, user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const notification = await this.notificationService.createNotification({ message, notiType, user });
+    if (client) {
+      client.emit("updatedNotification", notification);
+    }
+  }
+
+  async updatedNotificationWithData(message: string, notiType: NotiType, user: User, data: string) {
+    const client = this.eventsService.getClient(user.userID);
+    const notification = await this.notificationService.createNotificationWithData({ message, notiType, user, data });
+    if (client) {
+      client.emit("updatedNotification", notification);
+    }
+  }
+
+  async sendInviteGameNotification(message: string, notiType: NotiType, user: User, sendUser: string) {
+    const client = this.eventsService.getClient(user.userID);
+    if (client && user.status === UserStatus.ONLINE) {
+      const notification = await this.notificationService.createNotificationWithData({
+        message,
+        notiType,
+        user,
+        data: sendUser
+      });
+      client.emit("updatedNotification", notification);
+    }
+  }
+
+  async sendStartGameEvent(user: User, gameID: string) {
+    const client = this.eventsService.getClient(user.userID);
+    client.emit("startGame", gameID);
+  }
+
+  hasAlreadyGameMatching(user: User): boolean {
+    if (this.eventsService.hasNormalGameQueueUser(user.userID)
+      || this.eventsService.hasFastGameQueueUser(user.userID)
+      || this.eventsService.hasObjectGameQueueUser(user.userID)) {
+        return (true);
+    }
+    return (false);
+  }
+
+  deleteNormalGameQueueUser(userID: string) {
+    this.eventsService.deleteNormalGameQueueUser(userID);
+  }
+
+  deleteFastGameQueueUser(userID: string) {
+    this.eventsService.deleteFastGameQueueUser(userID);
+  }
+
+  deleteObjectGameQueueUser(userID: string) {
+    this.eventsService.deleteObjectGameQueueUser(userID);
+  }
+
+  allDeleteGameMatching(userID: string) {
+    this.eventsService.deleteNormalGameQueueUser(userID);
+    this.eventsService.deleteFastGameQueueUser(userID);
+    this.eventsService.deleteObjectGameQueueUser(userID);
+  }
+
+  async normalGameMatching(user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const readyUser = await this.eventsService.getReadyNormalGameUser();
+    if (!readyUser) {
+      this.eventsService.addNormalGameQueueUser(user.userID);
+      return ;
+    }
+    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+    // 게임 룸 만들기
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+    client.emit("startGame", '1234');
+    readyUserClient.emit("startGame", '1234');
+  }
+
+  async fastGameMatching(user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const readyUser = await this.eventsService.getReadyFastGameUser();
+    if (!readyUser) {
+      this.eventsService.addFastGameQueueUser(user.userID);
+      return ;
+    }
+    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+    // 게임 룸 만들기
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+    client.emit("startGame", '1234');
+    readyUserClient.emit("startGame", '1234');
+  }
+
+  async objectGameMatching(user: User) {
+    const client = this.eventsService.getClient(user.userID);
+    const readyUser = await this.eventsService.getReadyObjectGameUser();
+    if (!readyUser) {
+      this.eventsService.addObjectGameQueueUser(user.userID);
+      return ;
+    }
+    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+    // 게임 룸 만들기
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+    client.emit("startGame", '1234');
+    readyUserClient.emit("startGame", '1234');
+  }
+
 }

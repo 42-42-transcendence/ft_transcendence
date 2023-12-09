@@ -7,6 +7,7 @@ import { ChatModule } from 'src/chat/chat.module';
 import { EventsService } from './events.service';
 import { UserModule } from 'src/user/user.module';
 import { RelationModule } from 'src/relation/relation.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RelationModule } from 'src/relation/relation.module';
     ChatModule,
     RelationModule,
     AuthModule,
+    NotificationModule,
   ],
   providers: [EventsGateway, EventsService],
   exports: [EventsGateway]

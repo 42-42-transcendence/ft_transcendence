@@ -23,6 +23,7 @@ services:
             POSTGRES_USER: ts
             POSTGRES_DB: ts
             PG_DATA: /var/lib/postgresql/data
+            TZ: 'Asia/Seoul'
         ports:
             - 5432:5432
         volumes:

@@ -12,11 +12,13 @@ export class Relation {
 
   @ManyToOne(() => User, (user) => user.subjectRelations, {
     onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
-  subjectUser: Promise<User>;
+  subjectUser: User;
 
   @ManyToOne(() => User, (user) => user.objectRelations, {
     onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
-  objectUser: Promise<User>;
+  objectUser: User;
 }

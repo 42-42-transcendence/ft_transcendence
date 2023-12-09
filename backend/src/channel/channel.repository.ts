@@ -1,10 +1,11 @@
 import { DataSource, Repository } from "typeorm";
 import { Channel } from "./entities/channel.entity";
 import { ChannelDto } from "./dto/channel.dto";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { faker } from "@faker-js/faker";
 import { ChannelTypeEnum } from "./enums/channelType.enum";
 import { ChannelMember } from "src/channel-member/entities/channel-member.entity";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {
@@ -16,14 +17,31 @@ export class ChannelRepository extends Repository<Channel> {
 		return (await this.find());
 	}
 
+	async getPublicChannels(): Promise<Channel[]> {
+		const channels = await this
+			.createQueryBuilder('channel')
+			.where('channel.type = :type', { type: ChannelTypeEnum.PUBLIC })
+			.getMany();
+
+		return (channels);
+	}
+
 	async createChannel(createChannelDto: ChannelDto): Promise<Channel> {
-		const { title, password, type } = createChannelDto;
+		const title = createChannelDto.title;
+		var password: string = '';
+		if (createChannelDto.password !== '') {
+			password = await bcrypt.hash(createChannelDto.password, 10);
+		}
+
+		const existedChannel = await this.findOneBy({ title });
+		if (existedChannel) {
+			throw new BadRequestException(`${title}채널이 이미 존재합니다.`);
+		}
 
 		const channel = this.create({
 			title,
-			total: 1,
 			password,
-			type
+			type: createChannelDto.type
 		});
 
 		await this.save(channel);
@@ -79,4 +97,5 @@ export class ChannelRepository extends Repository<Channel> {
 		const updateChannel = await this.save(channel);
 		return (updateChannel);
 	}
+
 }

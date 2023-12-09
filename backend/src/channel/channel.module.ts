@@ -10,6 +10,7 @@ import { EventsModule } from 'src/events/events.module';
 import { ChatModule } from 'src/chat/chat.module';
 import { UserModule } from 'src/user/user.module';
 import { RelationModule } from 'src/relation/relation.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RelationModule } from 'src/relation/relation.module';
     AuthModule,
     UserModule,
     RelationModule,
+    NotificationModule,
     forwardRef(() => EventsModule),
   ],
   controllers: [ChannelController],

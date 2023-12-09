@@ -14,6 +14,8 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
+import { NotificationModule } from './notification/notification.module';
+import { OtpModule } from './otp/otp.module';
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
@@ -32,6 +34,8 @@ import { MulterModule } from '@nestjs/platform-express';
     UserAchievementModule,
     AuthModule,
     EventsModule,
+    NotificationModule,
+    OtpModule,
     MulterModule.register({
       dest: '../assets/images',
     }),

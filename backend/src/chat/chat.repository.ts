@@ -14,20 +14,32 @@ export class ChatRepository extends Repository<Chat> {
 		super(Chat, dataSource.createEntityManager());
 	}
 
-	async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
-		const { content, chatType, user, channel } = createChatMessageDto;
+	async getAllChats(): Promise<Chat[]> {
+		return (await this.find());
+	}
 
+	async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
 		const chat = this.create({
-			content,
-			chatType,
+			content: createChatMessageDto.content,
+			chatType: createChatMessageDto.chatType,
+			userNickname: createChatMessageDto.userNickname,
+			user: createChatMessageDto.user,
+			channel: createChatMessageDto.channel,
+		});
+
+		const result = await this.save(chat);
+		return (result);
+	}
+
+	createMuteMessage(user: User, channel: Channel): Chat {
+		const message = this.create({
+			content: `${user.nickname}님은 현재 뮤트상태입니다.`,
+			chatType: ChatType.SYSTEM,
 			userNickname: user.nickname,
 			user,
 			channel
 		})
-
-		const result = await this.save(chat);
-
-		return (result);
+		return (message);
 	}
 
 	async createChatDummy(channel: Channel, user: User) {

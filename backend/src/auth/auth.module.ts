@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -24,13 +24,13 @@ import { AchievementRepository } from 'src/achievement/achievement.repository';
         signOptions: { expiresIn: 3600 * 24 },
       }),
     }),
+    forwardRef(() => UserModule),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     AuthRepository,
     JwtStrategy,
-    UserRepository,
     UserAchievementRepository,
     AchievementRepository,
   ],

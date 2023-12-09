@@ -20,6 +20,6 @@ import { UserService } from 'src/user/user.service';
     NotificationModule
   ],
   controllers: [GameController],
-  providers: [GameService, GameGateway, GameEngine, UserService],
+  providers: [GameService, GameGateway, GameEngine],
 })
 export class GameModule {}

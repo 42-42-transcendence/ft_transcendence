@@ -51,7 +51,6 @@ const ProtectedRouter = () => {
   if (tokenIsValidated === null || isLoading) {
     return <h1 style={{ textAlign: 'center' }}>...Loading...</h1>;
   }
-
   if (tokenIsValidated === true && userState.id !== '') {
     return (
       <SocketContextProvider>
@@ -59,7 +58,6 @@ const ProtectedRouter = () => {
       </SocketContextProvider>
     );
   }
-
   return <Navigate to="/login" />;
 };
 export default ProtectedRouter;

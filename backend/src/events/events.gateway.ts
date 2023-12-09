@@ -23,12 +23,11 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { SocketException } from './socket.exception';
 import { UserStatus } from 'src/user/enums/user-status.enum';
-import { Notification } from 'src/notification/entities/notification.entity';
-
 
 
 @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
+  namespace: '',
   cors: {
     origin: 'http://localhost:3000',
   },

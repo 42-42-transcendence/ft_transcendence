@@ -1,127 +1,99 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Interval, Timeout } from '@nestjs/schedule';
 import { vec2 } from 'gl-matrix';
-import { normalize } from 'path';
-import { GameData, Paddle, Ball } from "./dto/in-game.dto";
+import { gamedata, sendGameData } from "./dto/in-game.dto";
+import { Ball } from "./dto/Ball";
 import { GameModeEnum } from './enums/gameMode.enum';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
+import { Paddle } from './dto/Paddle';
+import { GameObject } from './dto/GameObject';
+import { ItemManager } from './dto/ItemManager';
+import PhysicsEngine from './dto/PhysicsEngine';
+import { GameManager } from './dto/GameManager';
 
-const data = new GameData();
+
 
 @Injectable()
 export class GameEngine {
-	constructor(
-		@Inject(forwardRef(() => GameGateway)) private gameGateway: GameGateway,
-		@Inject(forwardRef(() => GameService)) private gameservice: GameService
-	) {}
-
+	constructor(@Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
+				@Inject(forwardRef(() => GameService)) private gameservice: GameService) {}
+    private lastTime: number;
+    public delta: number = 0;
+    
+    async updateGame(delta: number): Promise<void> {
+	// if (data.mode === 'object') {
+	// 	/* 아이템 생성 */
+	// 	ItemManager.getInstance().createItem();
+	// 	/* 아이템 업데이트 */
+	// 	ItemManager.getInstance().updateItems(delta);
+	// }
+	/* 공 위치 업데이트 */
+	PhysicsEngine.GuaranteeConflict(gamedata.ball, delta);
+	/* 게임 종료 조건 확인 */
+	// AIManager.getInstance().GuaranteeConflict(gamedata.ball.clone(), 10000);
+	// AIManager.getInstance().testPlayer1(); // 테스트용
+	/* player 패들 이동 */
+	gamedata.paddle[0].updatePosition(delta);
+	gamedata.paddle[1].updatePosition(delta);
+	if (GameManager.isMatchConcluded()) {
+		/* 임시 초기화, 게임 종료 조건 추가 */
+		GameManager.endGame();
+	}
+    }
+    
+    // This method will be called every 20ms
+    @Interval(20)
     async startGameLoop(gameId: string): Promise<void> {
-        setInterval(async () => {
-          await this.updateGame(gameId);
-          const gameData = this.gameservice.getGameData(gameId);
-          this.gameGateway.server.to(gameId).emit("updateGame", gameData);
-        }, 20);
+        const timeStamp = new Date().getTime();
+        this.delta = (timeStamp - this.lastTime) / 1000.0;
+    
+        await this.updateGame(this.delta);
+        const gameData = this.gameservice.getGameData(gameId);
+        sendGameData.height[0] = gamedata.paddle[0].height;
+        sendGameData.height[1] = gamedata.paddle[1].height;
+        sendGameData.paddlePos[0] = gamedata.paddle[0].position;
+        sendGameData.paddlePos[1] = gamedata.paddle[1].position;
+        sendGameData.ballPos = gamedata.ball.position;
+
+        this.gameGateway.emitGameData(gameId, gameData, sendGameData);
+    
+        this.lastTime = timeStamp;
     }
 
-	private async updateGame(gameId: string): Promise<void> {
-		const gamedata = this.gameservice.gameIdToGameData.get(gameId);
+    getDelta(): number {
+        return this.delta;
+    }
 
-		const checkBallPaddleCollision = (ballPos: vec2, paddle: Paddle) =>{
-			const radius = data.ball.radius;
-			const paddleHeightHalf = paddle.height / 2.0;
-			const paddleWidthHalf = paddle.width / 2.0;
-			let paddleTop = paddle.position[1] + paddleHeightHalf;
-			let paddleBottom = paddle.position[1] - paddleHeightHalf;
-			let paddleLeft = paddle.position[0] - paddleWidthHalf;
-			let paddleRight = paddle.position[0] + paddleWidthHalf;
+//     static GuaranteeConflict(object: GameObject, delta: number) {
+//         const collisionProcesses = [
+//             {
+//                 checkCollision: () => object.checkWithPaddleCollision(delta),
+//                 handleCollision: (collisionResult: CollisionResult) => object.handleWithPaddleCollision(collisionResult.pos)
+//             },
+//             {
+//                 checkCollision: () => object.checkWithWallCollision(delta),
+//                 handleCollision: (collisionResult: CollisionResult) => object.handleWithWallCollision(collisionResult.pos)
+//             }
+//         ];
 
-			const BallTop = ballPos[1] + radius;
-			const BallBottom = ballPos[1] - radius;
-			const BallLeft = ballPos[0] - radius;
-			const BallRight = ballPos[0] + radius;
-
-			return (BallTop > paddleBottom && BallBottom < paddleTop && BallLeft < paddleRight && BallRight > paddleLeft);
-		};
-
-		const handleBallPaddleCollision = () =>{
-			const ball = data.ball;
-			const paddle = data.paddle;
-
-			for (let i = 0; i < 2; i++) {
-				if (checkBallPaddleCollision(ball.position, paddle[i])) {
-					let normalReflect = vec2.fromValues(i == 0 ? 1 : -1, 0); // 왼쪽 패들이면 1, 오른쪽 패들이면 -1
-					normalReflect[1] = (ball.position[1] - paddle[i].position[1]) / paddle[i].height * 3.0;
-					// if (i === 0 && BallLeft < paddle[i].position[0] || i === 1 && BallRight > paddle[i].position[0])
-					//     normalReflect[0] *= -1;
-					vec2.normalize(ball.direction, normalReflect);
-				}
-			}
-		}
-
-		const handleBallWallCollision = () => {
-			const ball = data.ball;
-			if (ball.position[1] + ball.radius > 1.0 || ball.position[1] - ball.radius < -1.0) {
-				ball.direction[1] *= -1; // 위, 아래 벽에 닿을 경우 공의 반사를 구현 (정반사)
-			}
-		}
-
-		const collisionGuarantee = (ball: Ball, delta: number) => {
-			for (let i = 0; i < 2; i++) {
-				const dir = i === 0 ? 1 : -1;
-				const x1 = ball.position[0];
-				const y1 = ball.position[1];
-				const x2 = data.paddle[i].position[0];
-				const y2 = data.paddle[i].position[1];
-				const wh = data.paddle[i].width / 2.0;
-				const hh = data.paddle[i].height / 2.0;
-				const dx = ball.direction[0] * ball.velocity;
-				const dy= ball.direction[1] * ball.velocity;
-
-				const t = (x2 - x1 + (wh * dir) - hh) / dx;
-				const k = y2 - y1 - dy * t;
-
-				/* 충돌이 없다면 */
-				if ((k < 0 || k > hh * 2) && t > delta) {
-					updateBallPosition(delta);
-					return;
-				}
-				/* 충돌이 있다면 */
-				updateBallPosition(t);
-				const restAfterCollision = delta - t;
-				handleBallPaddleCollision();
-				updateBallPosition(restAfterCollision);
-			}
-		}
-
-		const calculateBallPosition = (ball: Ball, delta: number) : vec2 => {
-			let tempVec2 = vec2.create();
-			vec2.add(tempVec2, ball.position, vec2.scale(tempVec2, ball.direction, ball.velocity * delta));
-			return tempVec2;
-		}
-
-		const updateBallPosition = (delta: number) => {
-			data.ball.position = calculateBallPosition(data.ball, delta);
-		}
-
-		const updatePaddlePosition = (delta: number) => {
-			const paddle = data.paddle;
-			/* 현재 player1의 패들 위치만 고려 */
-			if (data.keyPress.up) {
-				paddle[0].position[1] += paddle[0].paddleSpeed * delta;
-			} else if (data.keyPress.down) {
-				paddle[0].position[1] -= paddle[0].paddleSpeed * delta;
-			} else {
-				paddle[0].position[1] += 0;
-			}
-
-			/* 패들 위치 제한 */
-			if (paddle[0].position[1] - paddle[0].height / 2.0 < -1.0) {
-				paddle[0].position[1] = -1.0 + paddle[0].height / 2.0;
-			}
-			if (paddle[0].position[1] + paddle[0].height / 2.0 > 1.0)
-				paddle[0].position[1] = 1.0 - paddle[0].height / 2.0;
-		}
-
-		this.gameGateway.emitGameUpdate(gameId, gamedata);
-	}
+//         for (const process of collisionProcesses) {
+//             const collisionResult = process.checkCollision();
+//             if (collisionResult !== undefined) {
+//                 object.move(collisionResult.p);
+//                 if (process.handleCollision(collisionResult))
+//                     return;
+//                 const restAfterCollision = delta - collisionResult.p;
+//                 object.move(0.0000001);
+//                 this.GuaranteeConflict(object, restAfterCollision);
+//                 return;
+//             }
+//         }
+//         object.move(delta);
+//     }
 }
+
+// interface CollisionResult {
+//     p: number;
+//     pos: any;
+// }

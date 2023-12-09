@@ -9,6 +9,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { EventsModule } from 'src/events/events.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { GameEngine } from './game.engine';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { GameEngine } from './game.engine';
     NotificationModule
   ],
   controllers: [GameController],
-  providers: [GameService, GameGateway, GameEngine],
+  providers: [GameService, GameGateway, GameEngine, UserService],
 })
 export class GameModule {}

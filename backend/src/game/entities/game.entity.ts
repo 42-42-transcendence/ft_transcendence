@@ -12,7 +12,7 @@ export class Game {
   @ApiProperty({
     description: '게임 이름',
     example: "User1's game",
-    type: 'string'
+    required: true,
   })
   @Column({ nullable: false })
   title: string;
@@ -70,7 +70,7 @@ export class Game {
     example: 'Ladder',
     required: true,
   })
-  @Column({ type: 'enum', enum: ['Ladder', 'Private'] })
+  @Column({ type: 'enum', enum: [GameTypeEnum.LADDER, GameTypeEnum.PRIVATE] })
   gameType: GameTypeEnum;
 
   @ApiProperty({
@@ -78,7 +78,7 @@ export class Game {
     example: 'Normal',
     required: true,
   })
-  @Column({ type: 'enum', enum: ['normal', 'speed', 'object'], default: 'normal' })
+  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT, GameModeEnum.FAST], default: GameModeEnum.NORMAL })
   gameMode: GameModeEnum;
 
   @ApiProperty({

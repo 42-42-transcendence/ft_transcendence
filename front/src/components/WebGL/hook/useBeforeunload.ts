@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
+import { useSocket } from "../context/SocketContext";
 import data from '../interface/gameData';
 
 const useBeforeunload = () => {
+    const { socket } = useSocket();
     useEffect(() => {
         const handler = (event: BeforeUnloadEvent) => {
             cancelAnimationFrame(data.requestId);
-            console.log('게임 접속 종료');
+            socket?.disconnect();
         };
         window.addEventListener('beforeunload', handler);
         return () => {

@@ -1,14 +1,18 @@
 import { useEffect } from 'react';
 import data from '../interface/gameData';
 import {GameManager} from "../class/GameManager";
-
-const handler = () => {
-    cancelAnimationFrame(data.requestId);
-    GameManager.cleanupWebGL();
-    data.isFirstRender = true;
-};
+import { useSocket } from '../context/SocketContext';
 
 const usePopstate = () => {
+    const { socket } = useSocket();
+
+    const handler = () => {
+        cancelAnimationFrame(data.requestId);
+        GameManager.cleanupWebGL();
+        data.isFirstRender = true;
+        socket?.disconnect();
+    };
+
     useEffect(() => {
         window.addEventListener('popstate', handler);
         return () => {

@@ -140,7 +140,6 @@ export abstract class GameObject {
     }
 
     public clampWithWall(pos: CanvasPosition) {
-        const precision = 2;
         const min = -1.0 + this.radius * 1.1;
         const max = 1.0 - this.radius * 1.1;
         const x = this.clamp(this.position[0], min, max);

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserAchievementDto } from './dto/create-user-achievement.dto';
+import { UserAchievementDto } from './dto/user-achievement.dto';
 import { UpdateUserAchievementDto } from './dto/update-user-achievement.dto';
 
 @Injectable()
 export class UserAchievementService {
-  create(createUserAchievementDto: CreateUserAchievementDto) {
+  create(createUserAchievementDto: UserAchievementDto) {
     return 'This action adds a new userAchievement';
   }
 

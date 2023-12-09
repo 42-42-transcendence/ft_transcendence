@@ -4,13 +4,11 @@ import { RelationTypeEnum } from '../enums/relation-type.enum';
 
 @Entity()
 export class Relation {
-
   @PrimaryGeneratedColumn('uuid')
   relationID: string;
 
   @Column()
   relationType: RelationTypeEnum;
-
 
   @ManyToOne(() => User, (user) => user.subjectRelations, {
     onDelete: 'CASCADE',

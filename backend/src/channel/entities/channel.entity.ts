@@ -21,8 +21,7 @@ export class Channel {
     type: 'string'
   })
   @Column({
-    nullable: false,
-    unique: true
+    nullable: false
   })
   title: string;
 

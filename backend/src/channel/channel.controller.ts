@@ -87,6 +87,11 @@ export class ChannelController {
     @Body() createChannelDto: ChannelDto
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
+
+    if (await this.channelService.getChannelByTitleFromNotDM(createChannelDto.title)) {
+      throw new BadRequestException(`${createChannelDto.title} 채널은 이미 존재합니다.`);
+    }
+
     const channel = await this.channelService.createChannel(createChannelDto);
     const role = ChannelMemberRole.OWNER;
 
@@ -554,6 +559,12 @@ export class ChannelController {
     if (user.nickname > invitedUser.nickname) {
       title = `${invitedUser.nickname}-${user.nickname} DM`;
     }
+    const existedChannel = await this.channelService.getChannelByTitleFromDM(title);
+
+    if (existedChannel) {
+      return ({ channelID: existedChannel.channelID });
+    }
+
     const channel = await this.channelService.createChannel({
       title,
       password: '',

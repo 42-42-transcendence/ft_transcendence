@@ -71,23 +71,22 @@ const requestOAuth = async (
 
     const authData = await authResponse.json();
 
-    // const otpResponse = await fetch(`http://localhost:3001/api/otp`, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: 'Bearer ' + authData.jwtToken,
-    //   },
-    // });
+    const otpResponse = await fetch(`http://localhost:3001/api/otp`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + authData.jwtToken,
+      },
+    });
 
-    // if (!otpResponse.ok) {
-    //   throw new Error('OTP Failed');
-    // }
-    // const otpData = await otpResponse.json();
+    if (!otpResponse.ok) {
+      throw new Error('OTP Failed');
+    }
+    const otpData = await otpResponse.json();
 
     return {
       ...authData,
-      otpIsActivated: false,
-      // otpIsActivated: otpData.isActive,
+      otpIsActivated: otpData.isActive,
     };
   } catch (e) {
     if (typeof e === 'string') return e;

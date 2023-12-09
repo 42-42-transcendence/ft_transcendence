@@ -38,14 +38,14 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 
       // 확인차 출력
       newSocket.on('connect', () => {
-        console.log('connected socket');
+        console.log('connected context');
         newSocket.emit('notification', (notifications: Notification[]) => {
           dispatch(notificationActions.setNotification(notifications));
         });
       });
 
       newSocket.on('disconnect', (reason: string) => {
-        console.log('disconnected socket');
+        console.log('disconnected context');
 
         if (reason === 'io server disconnect') {
           newSocket.connect();
@@ -60,9 +60,6 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         navigate('/login', { state: { message: message } });
       });
 
-      /** sangmiha
-       * 여기서 필요한 데이터 서버에서 받아서 사용하시면 될 겁니다.
-       */
       newSocket.on('startGame', (gameID: string) => {
         navigate(`/game/${gameID}`);
       });

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ToggleRadioButton from '../../UI/ToggleRadioButton';
 import styles from '../../styles/GameSelect.module.css';
 
-const modeList = ['normal', 'fast', 'object'];
+const modeList = ['normal', 'AI', 'object'];
 
 type GameModeSelectionListProps = {
   setEnteredMode: (mode: string) => void;

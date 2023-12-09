@@ -1,55 +1,55 @@
 import data from "../interface/gameData";
-import {Item} from "./Item";
 import {vec2} from "gl-matrix";
-import PhysicsEngine from "./PhysicsEngine";
+import {ItemManager} from "./ItemManager";
 
 export enum CanvasPosition {
-    TopRight,
-    BottomRight,
-    TopLeft,
-    BottomLeft
+    Top,
+    Bottom,
+    Right,
+    Left,
 }
 
 export class GameManager {
-    static lastItemCreationTime: number = Date.now();
-    static scoreUpdate(player: string) {
-        const idx = player === 'player1' ? 0 : 1;
-        ++data.scores[idx];
-        data.scoreRef[idx]!.innerText = String(data.scores[idx]);
-        this.resetBallPosition();
-    }
-
-    static createItem() {
-        const currentTime = Date.now();
-        if (currentTime - this.lastItemCreationTime >= 1000 && data.items.length < 5) {
-            const newItem = this.createRandomItem();
-            data.items.push(newItem);
-            this.lastItemCreationTime = currentTime;
-        }
-    }
-
-    static checkOverLine(ballPos: vec2) : string {
-        const radius = data.ball.radius;
-
-        if (ballPos[0] + radius > 1.0 || ballPos[0] - radius < -1.0) {
-            console.log("점수 획득"); // 디버깅
-            PhysicsEngine._paddlePos = null;
-            return ballPos[0] + radius > 1.0 ? 'player1' : 'player2';
-        }
-        return '';
-    }
-
-    static createRandomItem() {
-        let randomX = Math.random();
-        if (randomX < 0.5) {
-            randomX = randomX * 0.6 - 0.5;
+    /* the playerSide 0 = leftPlayer and 1 is the other player */
+    static scoreUpdate(playerSide: number | null) {
+        if (playerSide === 0 || playerSide === 1) {
+            ++data.scores[playerSide];
+            data.scoreRef[playerSide]!.innerText = String(data.scores[playerSide]);
+            this.resetBallPosition();
         } else {
-            randomX = randomX * 0.6 + 0.2;
+            data.scoreRef[0]!.innerText = String(data.scores[0]);
+            data.scoreRef[1]!.innerText = String(data.scores[1]);
         }
-        let randomY = Math.random() - 0.5;
-        const direction = vec2.normalize(vec2.create(), vec2.fromValues(randomX, randomY));
+    }
 
-        return new Item(direction);
+    static cleanupWebGL() {
+        const gl = data.gl as WebGLRenderingContext;
+
+        if (data.paddleBuffer) {
+            gl.deleteBuffer(data.paddleBuffer);
+            data.paddleBuffer = null;
+        }
+        if (data.ballBuffer) {
+            gl.deleteBuffer(data.ballBuffer);
+            data.ballBuffer = null;
+        }
+        if (data.lineBuffer) {
+            gl.deleteBuffer(data.lineBuffer);
+            data.lineBuffer = null;
+        }
+
+        if (data.program) {
+            data.program.forEach(program => {
+                if (program) {
+                    gl.deleteProgram(program);
+                    program = null;
+                }
+            });
+        }
+
+        ItemManager.getInstance().clearItems();
+        // WebGL 컨텍스트 해제
+        gl.getExtension('WEBGL_lose_context')?.loseContext();
     }
 
     static resetBallPosition() {
@@ -57,18 +57,24 @@ export class GameManager {
         for (let i = 0; i < 2; i++)
             ball.position[i] = 0;
         ball.direction = vec2.fromValues(1.0, 0);
+        ball.factor = 1.0;
     }
 
-    static resetGame() {
-        const ball = data.ball;
-        for (let i = 0; i < 2; i++) {
-            ball.position[i] = 0;
-            data.scores[i] = 0;
-            data.scoreRef[i]!.innerText = String(data.scores[i]);
-        }
-        ball.direction = vec2.fromValues(1.0, 0);
+    static endGame() {
+        // const ball = data.ball;
+        /* 테스트용 초기화 코드 */
+        // for (let i = 0; i < 2; i++) {
+        //     ball.position[i] = 0;
+        //     data.scores[i] = 0;
+        //     data.scoreRef[i]!.innerText = String(data.scores[i]);
+        // }
+        // ball.direction = vec2.fromValues(1.0, 0);
+
+        /* 게임 종료 */
+        console.log('게임 종료');
+        window.dispatchEvent(new CustomEvent('gameEnd', {}));
     }
     static isMatchConcluded() {
-        return data.scores[0] === 5 || data.scores[1] === 5
+        return data.scores[0] === 5 || data.scores[1] === 5;
     }
 }

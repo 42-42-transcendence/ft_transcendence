@@ -30,8 +30,13 @@ const OAuth = () => {
           if (typeof ret === 'string') {
             return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
           } else if (ret.isFirst) {
-            dispatch(authActions.setAuthToken(ret.jwtToken));
-            return <Navigate to="/setting-profile" replace={true} />;
+            return (
+              <Navigate
+                to="/setting-profile"
+                replace={true}
+                state={{ jwtToken: ret.jwtToken }}
+              />
+            );
           } else if (ret.otpIsActivated) {
             return (
               <Navigate
@@ -71,22 +76,23 @@ const requestOAuth = async (
 
     const authData = await authResponse.json();
 
-    const otpResponse = await fetch(`http://localhost:3001/api/otp`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + authData.jwtToken,
-      },
-    });
+    // const otpResponse = await fetch(`http://localhost:3001/api/otp`, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Bearer ' + authData.jwtToken,
+    //   },
+    // });
 
-    if (!otpResponse.ok) {
-      throw new Error('OTP Failed');
-    }
-    const otpData = await otpResponse.json();
+    // if (!otpResponse.ok) {
+    //   throw new Error('OTP Failed');
+    // }
+    // const otpData = await otpResponse.json();
 
     return {
       ...authData,
-      otpIsActivated: otpData.isActive,
+      // otpIsActivated: otpData.isActive,
+      otpIsActivated: false,
     };
   } catch (e) {
     if (typeof e === 'string') return e;

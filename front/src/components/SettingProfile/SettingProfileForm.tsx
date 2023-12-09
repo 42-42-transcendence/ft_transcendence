@@ -4,15 +4,22 @@ import AvatarImage from '../../UI/AvatarImage';
 import { useEffect, useState } from 'react';
 import { SERVER_URL } from '../../App';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { actions as authActions } from '../../store/Auth/auth';
 import useRequest from '../../http/useRequest';
 import loadingImage from '../../assets/loading.gif';
 
-const InitProfileForm = () => {
+type Props = {
+  jwtToken: string;
+};
+
+const SettingProfileForm = ({ jwtToken }: Props) => {
   const [enteredAvatarFile, setEnteredAvatarFile] = useState<File | null>(null);
   const [enteredName, setEnteredName] = useState<string>('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const { isLoading, error, request } = useRequest();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (error) {
@@ -60,6 +67,7 @@ const InitProfileForm = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + jwtToken,
         },
         body: JSON.stringify({ userID: enteredName }),
       }
@@ -75,10 +83,14 @@ const InitProfileForm = () => {
       {
         method: 'PUT',
         body: formData,
+        headers: {
+          Authorization: 'Bearer ' + jwtToken,
+        },
       }
     );
     if (responseFile === null) return;
 
+    dispatch(authActions.setAuthToken(jwtToken));
     navigate('/');
   };
 
@@ -120,4 +132,4 @@ const InitProfileForm = () => {
   );
 };
 
-export default InitProfileForm;
+export default SettingProfileForm;

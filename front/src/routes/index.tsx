@@ -18,7 +18,7 @@ import Otp from './Otp';
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    // element: <ProtectedRouter />,
+    element: <ProtectedRouter />,
     children: [
       {
         path: '/',
@@ -54,10 +54,6 @@ const router = createBrowserRouter([
         path: '/game/:gameID',
         element: <GamePage />,
       },
-      {
-        path: '/setting-profile',
-        element: <SettingProfilePage />,
-      },
     ],
   },
   {
@@ -72,6 +68,10 @@ const router = createBrowserRouter([
   {
     path: '/otp',
     element: <Otp />,
+  },
+  {
+    path: '/setting-profile',
+    element: <SettingProfilePage />,
   },
 ]);
 

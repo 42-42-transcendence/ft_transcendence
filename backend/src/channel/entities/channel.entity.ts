@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ChannelMember } from '../../channel-member/entities/channel-member.entity';
 import { ChannelTypeEnum } from '../enums/channelType.enum';
 import { Chat } from '../../chat/entities/chat.entity';
-import { ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Channel {

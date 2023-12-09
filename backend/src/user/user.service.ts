@@ -33,9 +33,9 @@ export class UserService {
 	async getUserByNicknameWithException(nickname: string): Promise<User> {
 		const user = await this.userRepository.getUserByNickname(nickname);
 
-	if (!user) {
-		throw new NotFoundException(`${nickname}을 가진 유저를 찾을 수 없습니다.`);
-	}
+		if (!user) {
+			throw new NotFoundException(`${nickname}을 가진 유저를 찾을 수 없습니다.`);
+		}
 
 		return (user);
 	}

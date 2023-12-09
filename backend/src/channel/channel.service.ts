@@ -38,10 +38,9 @@ export class ChannelService {
   async getChannelByIdWithException(channelID: string): Promise<Channel> {
     const channel = await this.channelRepository.getChannelById(channelID);
 
-    if (!channel)
-      throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
+    if (!channel) throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${channelID}`);
 
-    return (channel);
+    return channel;
   }
 
   async deleteChannelById(channelID: string): Promise<void> {
@@ -57,7 +56,7 @@ export class ChannelService {
   }
 
   async updateChannelInfo(channel: Channel, updateChannelDto: ChannelDto): Promise<Channel> {
-    return (await this.channelRepository.updateChannelInfo(channel, updateChannelDto));
+    return await this.channelRepository.updateChannelInfo(channel, updateChannelDto);
   }
 
   async enterUserToChannel(channel: Channel): Promise<Channel> {

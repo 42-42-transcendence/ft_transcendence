@@ -4,10 +4,14 @@ import { GameService } from "./game.service";
 // import { GameObjectsDto } from "./dto/game-data.dto";
 import { InGameDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
-import { GameData } from "./dto/in-game.dto";
+import { GameData } from "./enums/gameData";
+import { gamedata, sendGameData} from "./dto/in-game.dto";
 import { GameModeEnum } from './enums/gameMode.enum';
 import { forwardRef, Inject } from '@nestjs/common';
 import { GameTypeEnum } from './enums/gameType.enum';
+import { GameEngine } from './game.engine';
+import { Ball } from './dto/Ball';
+import { vec2 } from 'gl-matrix';
 
 
 @WebSocketGateway({
@@ -19,7 +23,8 @@ import { GameTypeEnum } from './enums/gameType.enum';
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server : Server;
 
-  constructor(@Inject(forwardRef(() => GameService)) private readonly gameService: GameService) {}
+  	constructor(@Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine,
+				@Inject(forwardRef(() => GameService)) private gameService: GameService) {}
 
   afterInit() {}
 
@@ -94,19 +99,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
   }
 
-  @SubscribeMessage('reconnect') // 재접속 구현 안 할 수도 
-  reconnectGame (@ConnectedSocket() client: Socket) : void {
-      const queue = this.gameService.getQueue(client.id);
-      if (queue) {
-          const GameData : GameData = this.gameService.getGameData(queue.gameId);
-          if (GameData) {
-              client.join(queue.gameId);
-              this.server.to(queue.gameId).emit("updateGame", GameData);
-          }
-      }
-      else
-          client.emit("notReconnected");
-  }
+//   @SubscribeMessage('reconnect') // 재접속 구현 안 할 수도 
+//   reconnectGame (@ConnectedSocket() client: Socket) : void {
+//       const queue = this.gameService.getQueue(client.id);
+//       if (queue) {
+//           const GameData : GameData = this.gameService.getGameData(queue.gameId);
+//           if (GameData) {
+//               client.join(queue.gameId);
+//               this.server.to(queue.gameId).emit("updateGame", GameData);
+//           }
+//       }
+//       else
+//           client.emit("notReconnected");
+//   }
 
   @SubscribeMessage('update')
   async emitGameUpdate(gameId: string, gameData: GameData): Promise<void> {
@@ -133,17 +138,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('start')
   async startGame(@ConnectedSocket() client: Socket, @MessageBody() mode: string): Promise<void> {
     const dto : GameOptionDto = {
-        player1: null,
-        player2: null,
+        player1: client.id,
+        player2: "",
+        player1score: 0,
+        player2score: 0,
         gametype: GameTypeEnum.LADDER,
         gamemode: mode,
         isInGame: false,
     }
-    const gameId = await this.gameService.startGame(client.id, null, dto);
+    gamedata.ball = new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02);
+    console.log("client id: ", client.id);
+    const gameId = await this.gameService.startGame(client.id, dto);
     if (gameId) {
         client.join(gameId);
-        this.server.to(gameId).emit('gameStarted');
-        console.log("game started");
+        if (this.gameService.isPlayer(client.id))
+            this.server.to(gameId).emit('gameStarted', gamedata);
+        console.log("game id: ", gameId);
     }
   }
 
@@ -195,66 +205,88 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
   }
 
-  @SubscribeMessage('KeyRelease')
-  onKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
-      const queue = this.gameService.getQueue(client.id);
-      if (queue) {
-          if (queue.isFirst)
-              dto.paddle[0].delta = 0;
-          else
-              dto.paddle[1].delta = 0;
-          this.server.to(queue.gameId).emit("updateGame", dto);
-          this.gameService.setGameData(queue.gameId, dto);
-      }
+  emitGameData(gameId: string, gameData: GameData, sendGameData) {
+    const player1 = gamedata.players.player1;
+    const player2 = gamedata.players.player2;
+
+    // Implement the logic to emit updates to the players using WebSockets
+    this.server.to(player1).emit("updateGame", sendGameData);
+    this.server.to(player2).emit("updateGame", sendGameData);
   }
+
+  @SubscribeMessage('KeyRelease')
+  onKeyRelease(@ConnectedSocket() client: Socket) : void {
+    const leftPaddle = gamedata.paddle[0];
+    const rightPaddle = gamedata.paddle[1];
+    const queue = this.gameService.getQueue(client.id);
+    const delta = this.gameEngine.getDelta();
+
+    if (queue) {
+        if (queue.isFirst){
+            leftPaddle.keyPress.up = false;
+            leftPaddle.keyPress.down = false;
+            leftPaddle.updatePosition(delta);
+        } else{
+            rightPaddle.keyPress.up = false;
+            rightPaddle.keyPress.down = false;
+            rightPaddle.updatePosition(delta);
+        }
+    }
+    this.emitGameData(queue.gameId, gamedata, sendGameData);
+}
 
   @SubscribeMessage('UpKey')
-  UpKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
-    const leftPaddle = dto.paddle[0];
-    const rightPaddle = dto.paddle[1];
-    const queue = this.gameService.getQueue(client.id);
-    // 키 입력 로직 어떻게...
-    if (queue) {
-        if (queue.isFirst)
-            leftPaddle.paddleSpeed = -leftPaddle.delta;
-        else
-            rightPaddle.paddleSpeed = -rightPaddle.delta;
-            this.server.to(queue.gameId).emit("updateGame", dto);
-            this.gameService.setGameData(queue.gameId, dto);
+  UpKeyPressed(@ConnectedSocket() client: Socket) : void {
+        const leftPaddle = gamedata.paddle[0];
+        const rightPaddle = gamedata.paddle[1];
+        const queue = this.gameService.getQueue(client.id);
+        const delta = this.gameEngine.getDelta();
+
+        if (queue) {
+            if (queue.isFirst){
+                leftPaddle.keyPress.up = true;
+                leftPaddle.updatePosition(delta);
+            } else{
+                rightPaddle.keyPress.up = true;
+                rightPaddle.updatePosition(delta);
+            }
+        }
+        this.emitGameData(queue.gameId, gamedata, sendGameData);
     }
-    console.log("up");
-  }
 
   @SubscribeMessage('DownKey')
-  DownKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() dto : GameData) : void {
-    const leftPaddle = dto.paddle[0];
-    const rightPaddle = dto.paddle[1];
-    const queue = this.gameService.getQueue(client.id);
-    // 키 입력 로직 어떻게...
-    if (queue) {
-        if (queue.isFirst)
-            leftPaddle.paddleSpeed = -leftPaddle.delta;
-        else
-            rightPaddle.paddleSpeed = -rightPaddle.delta;
-            this.server.to(queue.gameId).emit("updateGame", dto);
-            this.gameService.setGameData(queue.gameId, dto);
-    }
-    console.log("down");
-  }
+  DownKeyPressed(@ConnectedSocket() client: Socket) : void {
+        const leftPaddle = gamedata.paddle[0];
+        const rightPaddle = gamedata.paddle[1];
+        const queue = this.gameService.getQueue(client.id);
+        const delta = this.gameEngine.getDelta();
 
-//   @SubscribeMessage('end')
-//   async gameEnd(@ConnectedSocket() client: Socket, @MessageBody() dto : GameInfoDto) : Promise<void> {
-//       const gameId = this.gameService.getPlayerGameId(client.id);
-//       if (gameId) {
-//           this.gameService.deletePlayer(client.id);
-//           const isEnded = await this.gameService.endOfGame(client.id, dto, gameId);
-//           if (isEnded) {
-//               this.server.to(gameId).emit('finished');
-//           }
-//           client.leave(gameId);
-//       }
-//       this.server.emit('userUpdate');
-//   }
+        if (queue) {
+            if (queue.isFirst){
+                leftPaddle.keyPress.down = true;
+                leftPaddle.updatePosition(delta);
+            } else{
+                rightPaddle.keyPress.down = true;
+                rightPaddle.updatePosition(delta);
+            }
+        }
+        this.emitGameData(queue.gameId, gamedata, sendGameData);
+    }
+
+  @SubscribeMessage('end')
+  async gameEnd(@ConnectedSocket() client: Socket) : Promise<void> {
+      const gameId = this.gameService.getPlayerGameId(client.id);
+      if (gameId) {
+          this.gameService.deletePlayer(client.id);
+          const isEnded = await this.gameService.endOfGame(client.id, gamedata, gameId);
+          if (isEnded) {
+              this.server.to(gameId).emit('endGame');
+              this.server.to(gameId).emit('scoreUpdate', gamedata.scores);
+          }
+          client.leave(gameId);
+      }
+      this.emitGameData(gameId, gamedata, sendGameData);
+  }
 
 //   @SubscribeMessage('exit')
 //   leaveGame(@ConnectedSocket() client: Socket, @MessageBody() player : string) : void {

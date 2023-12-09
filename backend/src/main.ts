@@ -3,11 +3,14 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SocketIoAdapter } from './adapters/socket-io.adapter';
 import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.useWebSocketAdapter(new SocketIoAdapter(app));
+  app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()

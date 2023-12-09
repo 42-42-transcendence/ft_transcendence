@@ -50,7 +50,7 @@ export class UserRepository extends Repository<User> {
 			nickname: faker.person.firstName(),
 		});
 
-		const result = this.save(dummy);
+		const result = await this.save(dummy);
 		return (result);
 	}
 

@@ -14,15 +14,15 @@ export class UserService {
 
 
 	async getJoinChannels(userID: string): Promise<ChannelMember[]> {
-		return (this.userRepository.getJoinChannels(userID));
+		return (await this.userRepository.getJoinChannels(userID));
 	}
 
 	async getUserByNickname(nickname: string): Promise<User> {
-		return (this.userRepository.getUserByNickname(nickname));
+		return (await this.userRepository.getUserByNickname(nickname));
 	}
 
 	async getUserByNicknameWithException(nickname: string): Promise<User> {
-		const user = this.userRepository.getUserByNickname(nickname);
+		const user = await this.userRepository.getUserByNickname(nickname);
 
 		if (!user) {
 			throw new NotFoundException(`${nickname}을 가진 유저를 찾을 수 없습니다.`);
@@ -32,7 +32,7 @@ export class UserService {
 	}
 
 	async getUserByNicknameWithWsException(nickname: string): Promise<User> {
-		const user = this.userRepository.getUserByNickname(nickname);
+		const user = await this.userRepository.getUserByNickname(nickname);
 
 		if (!user) {
 			throw new SocketException('NotFound', `${nickname}을 가진 유저를 찾을 수 없습니다.`);
@@ -42,11 +42,11 @@ export class UserService {
 	}
 
 	async getUserById(userID: string): Promise<User> {
-		return (this.userRepository.getUserById(userID));
+		return (await this.userRepository.getUserById(userID));
 	}
 
 	async getUserByIdWithException(userID: string): Promise<User> {
-		const user = this.userRepository.getUserById(userID);
+		const user = await this.userRepository.getUserById(userID);
 
 		if (!user) {
 			throw new NotFoundException(`${userID}를 찾을 수 없습니다.`);
@@ -56,7 +56,7 @@ export class UserService {
 	}
 
 	async getUserByIdWithWsException(userID: string): Promise<User> {
-		const user = this.userRepository.getUserById(userID);
+		const user = await this.userRepository.getUserById(userID);
 
 		if (!user) {
 			throw new SocketException('NotFound', `${userID}을 가진 유저를 찾을 수 없습니다.`);
@@ -66,27 +66,27 @@ export class UserService {
 	}
 
 	async createUserDummy(): Promise<User> {
-		return (this.userRepository.createUserDummy());
+		return (await this.userRepository.createUserDummy());
 	}
 
 	async getAllUsers(): Promise<User[]> {
-		return (this.userRepository.getAllUsers());
+		return (await this.userRepository.getAllUsers());
 	}
 
 	async updateUserStatus(user: User, status: UserStatus): Promise<User> {
-		return (this.userRepository.updateUserStatus(user, status));
+		return (await this.userRepository.updateUserStatus(user, status));
 	}
 
 	async saveOtpAuthSecret(user: User, secret: string): Promise<User> {
-		return (this.userRepository.saveOtpAuthSecret(user, secret));
+		return (await this.userRepository.saveOtpAuthSecret(user, secret));
 	}
 
 	async turnOnOtp(user: User): Promise<User> {
-		return (this.userRepository.turnOnOtp(user));
+		return (await this.userRepository.turnOnOtp(user));
 	}
 
 	async removeOtpAuthSecret(user: User): Promise<User> {
-		return (this.userRepository.removeOtpAuthSecret(user));
+		return (await this.userRepository.removeOtpAuthSecret(user));
 	}
 
 }

@@ -23,10 +23,17 @@ import { AchievementRepository } from 'src/achievement/achievement.repository';
         secret: process.env.JWT_SECRET,
         signOptions: { expiresIn: 3600 * 24 },
       }),
-    })
+    }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtStrategy, UserRepository, UserAchievementRepository, AchievementRepository],
+  providers: [
+    AuthService,
+    AuthRepository,
+    JwtStrategy,
+    UserRepository,
+    UserAchievementRepository,
+    AchievementRepository,
+  ],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

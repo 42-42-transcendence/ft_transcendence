@@ -119,7 +119,7 @@ export class AuthService {
     const user = await auth.user;
 
     if (!user) {
-      return null;
+      throw new NotFoundException(`해당 토큰의 유저를 찾을수 없습니다.`);
     }
     return user;
   }

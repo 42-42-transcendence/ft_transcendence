@@ -70,7 +70,6 @@ export class UserService {
   async createUserDummy(): Promise<User> {
     return this.userRepository.createUserDummy();
   }
-
   async createUser(nickname: string): Promise<User> {
     return await this.userRepository.createUser(nickname);
   }
@@ -104,11 +103,6 @@ export class UserService {
     const ret = { message: 'file saved' };
     return ret;
   }
-
-  async relationAuthUser(user: User, auth: Auth) {
-    return await this.authrepository.relationAuthUser(auth, user);
-  }
-
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.getAllUsers();
   }

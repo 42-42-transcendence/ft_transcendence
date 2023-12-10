@@ -1,5 +1,7 @@
-import { Inject, UseFilters, forwardRef } from '@nestjs/common';
+import { Inject, UseFilters, UsePipes, ValidationPipe, forwardRef } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -23,6 +25,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { SocketException } from './socket.exception';
 import { UserStatus } from 'src/user/enums/user-status.enum';
+import { SendMessageDto } from './dto/send-message.dto';
 
 
 @UseFilters(new SocketExceptionFilter())
@@ -135,7 +138,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
 
   @SubscribeMessage('sendMessage')
-  async sendMessage(client: Socket, data: any) {
+  @UsePipes(new ValidationPipe())
+  async sendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: SendMessageDto
+  ) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await this.authService.getUserByAuthWithWsException(auth);
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);

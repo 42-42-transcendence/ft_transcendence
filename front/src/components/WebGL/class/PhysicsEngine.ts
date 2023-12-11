@@ -12,13 +12,13 @@ class PhysicsEngine {
                 checkCollision: () => object.checkWithPaddleCollision(delta),
                 handleCollision: (collisionResult: CollisionResult) => object.handleWithPaddleCollision(collisionResult.pos),
                 CheckObjectInside: () => object.objectInsidePaddle(data.paddle[0]) || object.objectInsidePaddle(data.paddle[1]),
-                clamp: (collisionResult: CollisionResult) => object.clampWithPaddle(collisionResult.pos),
+                clamp: () => object.clampWithPaddle(),
             },
             {
                 checkCollision: () => object.checkWithWallCollision(delta),
                 handleCollision: (collisionResult: CollisionResult) => object.handleWithWallCollision(collisionResult.pos),
                 CheckObjectInside: () => object.objectOutsideCanvas(),
-                clamp: (collisionResult: CollisionResult) => object.clampWithWall(collisionResult.pos),
+                clamp: () => object.clampWithWall(),
             }
         ];
 
@@ -30,7 +30,7 @@ class PhysicsEngine {
                     return;
                 // object.position =
                 if (process.CheckObjectInside()) {
-                    process.clamp(collisionResult);
+                    process.clamp();
                 }
                 const restAfterCollision = delta - collisionResult.p;
                 this.GuaranteeConflict(object, restAfterCollision, depth + 1);
@@ -38,6 +38,12 @@ class PhysicsEngine {
             }
         }
         object.move(delta);
+        if (object.objectOutsideCanvas()) {
+            object.clampWithWall();
+        }
+        if (object.objectInsidePaddle(data.paddle[0]) || object.objectInsidePaddle(data.paddle[1])) {
+            object.clampWithPaddle();
+        }
     }
 }
 

@@ -134,12 +134,12 @@ export abstract class GameObject {
         return minCollisionResult.p !== Number.MAX_VALUE ? minCollisionResult : undefined;
     }
 
-    public clampWithPaddle(pos: PaddlePos) {
-        const paddle = data.paddle;
+    public clampWithPaddle() {
         this.move(0.0001);
     }
 
-    public clampWithWall(pos: CanvasPosition) {
+    public clampWithWall() {
+        console.log("clampWithWall");
         const min = -1.0 + this.radius * 1.1;
         const max = 1.0 - this.radius * 1.1;
         const x = this.clamp(this.position[0], min, max);
@@ -152,12 +152,12 @@ export abstract class GameObject {
     }
 
     public handleWithWallCollision(side: CanvasPosition) {
-        console.error("handleWithWallCollision is not implemented");
+        console.error("handleWithWallCollision is not implemented" + side);
         return false;
     }
 
     public handleWithPaddleCollision(paddlePos: PaddlePos) {
-        console.error("handleWithPaddleCollision is not implemented");
+        console.error("handleWithPaddleCollision is not implemented" + paddlePos);
         return false;
     }
 

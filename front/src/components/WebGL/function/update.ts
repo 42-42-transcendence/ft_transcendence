@@ -1,7 +1,6 @@
 import data from '../interface/gameData';
 import PhysicsEngine from "../class/PhysicsEngine";
 import { GameManager } from "../class/GameManager";
-import { ItemManager} from "../class/ItemManager";
 import { AIManager } from "../class/AIManager";
 
 function update(delta: number) {

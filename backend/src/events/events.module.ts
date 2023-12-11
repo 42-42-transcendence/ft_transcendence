@@ -14,10 +14,10 @@ import { GameService } from 'src/game/game.service';
 @Module({
   imports: [
     forwardRef(() => ChannelModule),
+    forwardRef(() => RelationModule),
     UserModule,
     ChannelMemberModule,
     ChatModule,
-    RelationModule,
     AuthModule,
     forwardRef(() => GameModule),
     NotificationModule,

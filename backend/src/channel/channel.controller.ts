@@ -320,6 +320,10 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}은 스태프 부여 권한이 없습니다.`);
     }
 
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 스태프로 설정할 수 없습니다.`);
+    }
+  
     if (!objectUserRole) {
       throw new BadRequestException(`${newStaffUser.nickname}님은 채널에 존재하지 않습니다.`);
     }
@@ -386,6 +390,10 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}님은 강퇴권한이 없습니다.`);
     }
 
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 강퇴시킬 수 없습니다.`);
+    }
+
     if (!objectUserRole || (objectUserRole.role === ChannelMemberRole.INVITE)) {
       throw new BadRequestException(`${kickedUser.nickname}님은 채널에 존재하지 않습니다.`);
     }
@@ -441,7 +449,11 @@ export class ChannelController {
 
     if (subjectUserRole.role !== ChannelMemberRole.OWNER
         && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
-      throw new BadRequestException(`${user.nickname}님은 강퇴권한이 없습니다.`);
+      throw new BadRequestException(`${user.nickname}님은 영구 추방 권한이 없습니다.`);
+    }
+
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 영구 추방 시킬 수 없습니다..`);
     }
 
     if (!objectUserRole || (objectUserRole.role === ChannelMemberRole.INVITE)) {
@@ -508,6 +520,10 @@ export class ChannelController {
       throw new BadRequestException(`${user.nickname}님은 초대권한이 없습니다.`);
     }
 
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 초대할 수 없습니다.`);
+    }
+
     if (objectUserRole) {
       if (objectUserRole.role === ChannelMemberRole.INVITE) {
         throw new BadRequestException(`${invitedUser.nickname}님은 이미 초대를 보냈습니다.`);
@@ -552,6 +568,9 @@ export class ChannelController {
     @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신에 대한 DM을 만들 수 없습니다.`);
+    }
     const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
     var title: string = `${user.nickname}-${invitedUser.nickname} DM`;
 
@@ -601,6 +620,9 @@ export class ChannelController {
     @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 블락 할 수 없습니다.`);
+    }
     const channel = await this.channelService.getChannelByIdWithException(channelID);
     const blockedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const relation = await this.relationService.getRelationByUsers(user, blockedUser);
@@ -651,6 +673,10 @@ export class ChannelController {
       if (subjectUserRole.role !== ChannelMemberRole.OWNER
           && subjectUserRole.role !== ChannelMemberRole.STAFF ) {
         throw new BadRequestException(`${user.nickname}님은 뮤트권한이 없습니다.`);
+      }
+
+      if (user.nickname === targetUser) {
+        throw new BadRequestException(`자신을 뮤트 할 수 없습니다.`);
       }
 
       if (!objectUserRole

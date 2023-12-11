@@ -18,10 +18,10 @@ import { AuthRepository } from 'src/auth/auth.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
-    RelationModule,
-    UserAchievementModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => RelationModule),
+    TypeOrmModule.forFeature([User]),
+    UserAchievementModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository, UserAchievementRepository, AchievementRepository, AuthRepository],

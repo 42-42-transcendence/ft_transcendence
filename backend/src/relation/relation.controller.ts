@@ -38,6 +38,9 @@ export class RelationController {
 
     const insertSocials = relations.map(async relation => {
       const objectUser = await this.relationService.getObjectUserByRelation(relation);
+      if (!objectUser) {
+        return ;
+      }
       const social = {
         nickname: objectUser.nickname,
         image: objectUser.avatar,

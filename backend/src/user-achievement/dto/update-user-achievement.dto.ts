@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateUserAchievementDto } from './create-user-achievement.dto';
+import { UserAchievementDto } from './user-achievement.dto';
 
-export class UpdateUserAchievementDto extends PartialType(CreateUserAchievementDto) {}
+export class UpdateUserAchievementDto extends PartialType(UserAchievementDto) {}

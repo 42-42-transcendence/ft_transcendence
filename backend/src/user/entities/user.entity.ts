@@ -11,21 +11,23 @@ import { Notification } from 'src/notification/entities/notification.entity';
 
 @Entity()
 export class User {
-
+  getRelationByUsers() {
+    throw new Error('Method not implemented.');
+  }
   @ApiProperty({
-		description: 'User ID',
-		example: '550e8400-e29b-41d4-a716-446655440000',
-		type: 'string',
-	})
+    description: 'User ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    type: 'string',
+  })
   @PrimaryGeneratedColumn('uuid')
   userID: string;
 
   @ApiProperty({
-		description: '닉네임',
-		example: 'doohkim',
-		type: 'string',
-    uniqueItems: true
-	})
+    description: '닉네임',
+    example: 'vdoohkimv',
+    type: 'string',
+    uniqueItems: true,
+  })
   @Column({
     nullable: false,
     unique: true,
@@ -34,9 +36,60 @@ export class User {
 
   @Column({
     nullable: false,
-    default: UserStatus.ONLINE
+    default: UserStatus.ONLINE,
   })
   status: UserStatus;
+
+  @ApiProperty({
+    description: '프로필 이미지',
+    example: '..//images/kobe.jpg',
+    required: true,
+  })
+  @Column({
+    nullable: true,
+    default: 'default_image',
+  })
+  avatar: string;
+
+  @ApiProperty({
+    description: '승리 횟수',
+    example: '0',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  win: number;
+
+  @ApiProperty({
+    description: '패배 횟수',
+    example: '0',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  lose: number;
+
+  @ApiProperty({
+    description: '랭크 점수',
+    example: '1000',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 1000,
+  })
+  point: number;
+
+  @ApiProperty({
+    description: '도전과제',
+    example: '[{it, title, description}]',
+  })
+  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
+  userAchievements: UserAchievement[];
 
   @Column({ nullable: true })
   otpAuthSecret: string;
@@ -59,10 +112,7 @@ export class User {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete'
   })
-  auth: Auth;
-
-  // @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
-  // userAchievements: UserAchievement[];
+  auth: Promise<Auth>;
 
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.user, {
     cascade: true

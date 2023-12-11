@@ -20,10 +20,10 @@ import { isAwaitKeyword } from 'typescript';
 
 
 @WebSocketGateway({
-cors: {
-    namespace: "game",
-    origin: 'http://localhost:3000',
-  }
+    namespace: 'game',
+    cors: {
+        origin: 'http://localhost:3000',
+    }
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server : Server;

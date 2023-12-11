@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserAchievementService } from './user-achievement.service';
-import { CreateUserAchievementDto } from './dto/create-user-achievement.dto';
+import { UserAchievementDto } from './dto/user-achievement.dto';
 import { UpdateUserAchievementDto } from './dto/update-user-achievement.dto';
 
 @Controller('user-achievement')
@@ -8,7 +8,7 @@ export class UserAchievementController {
   constructor(private readonly userAchievementService: UserAchievementService) {}
 
   @Post()
-  create(@Body() createUserAchievementDto: CreateUserAchievementDto) {
+  create(@Body() createUserAchievementDto: UserAchievementDto) {
     return this.userAchievementService.create(createUserAchievementDto);
   }
 

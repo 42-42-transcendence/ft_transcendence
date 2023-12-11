@@ -1,5 +1,7 @@
-import { Inject, UseFilters, forwardRef } from '@nestjs/common';
+import { Inject, UseFilters, UsePipes, ValidationPipe, forwardRef } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -29,11 +31,12 @@ import { race } from 'rxjs';
 import { GameOptionDto } from 'src/game/dto/in-game.dto';
 import { read } from 'fs';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
-
+import { SendMessageDto } from './dto/send-message.dto';
 
 
 @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
+  namespace: '',
   cors: {
     origin: 'http://localhost:3000',
   },
@@ -141,7 +144,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
 
   @SubscribeMessage('sendMessage')
-  async sendMessage(client: Socket, data: any) {
+  @UsePipes(new ValidationPipe())
+  async sendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: SendMessageDto
+  ) {
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await this.authService.getUserByAuthWithWsException(auth);
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);

@@ -87,7 +87,7 @@ const Profile = () => {
     if (enteredAvatarFile !== null)
       formData.append('avatar', enteredAvatarFile);
     const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/user/setup`,
+      `${SERVER_URL}/api/user/setup/avatar`,
       {
         method: 'PATCH',
         headers: {

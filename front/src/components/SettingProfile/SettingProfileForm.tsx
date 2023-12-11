@@ -62,7 +62,7 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
     setFeedbackMessage('');
 
     const responseName = await request<{ message: string }>(
-      `${SERVER_URL}/api/user/setup`,
+      `${SERVER_URL}/api/user/setup/nickname`,
       {
         method: 'PUT',
         headers: {
@@ -75,11 +75,12 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
     if (responseName === null) return;
 
     const formData = new FormData();
-    if (enteredAvatarFile !== null)
+    if (enteredAvatarFile !== null) {
       formData.append('avatar', enteredAvatarFile);
+    }
 
     const responseFile = await request<{ message: string }>(
-      `${SERVER_URL}/api/user/setup`,
+      `${SERVER_URL}/api/user/setup/avatar`,
       {
         method: 'PUT',
         body: formData,

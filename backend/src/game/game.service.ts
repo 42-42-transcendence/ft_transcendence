@@ -3,8 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Game } from "./entities/game.entity";;
 import { UserService } from "../user/user.service";
-import { InGameDto } from "./dto/in-game.dto";
-import { GameInfoDto } from "./dto/in-game.dto";
+import { GameInfoDto, InGameDto } from "./dto/in-game.dto";
+// import { GameInfoDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 // import { GameObjectsDto } from "./dto/game-data.dto";
 import { User } from 'src/user/entities/user.entity';
@@ -13,8 +13,12 @@ import { GameTypeEnum } from './enums/gameType.enum';
 import { GameGateway } from './game.gateway';
 import { GameEngine} from './game.engine';
 import { GameData } from './enums/gameData';
+import { UserStatus } from 'src/user/enums/user-status.enum';
+import { EventsService } from 'src/events/events.service';
+import { dot } from 'node:test/reporters';
+import { glMatrix } from 'gl-matrix';
 
-interface Queue {
+interface Pair {
     gameId : string;
     isFirst : boolean;
 }
@@ -22,117 +26,117 @@ interface Queue {
 @Injectable()
 export class GameService {
     constructor(@InjectRepository(Game) private gameRepository : Repository<Game>,
-                private userService : UserService, 
+                private userService : UserService,
                 @Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
                 @Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine) {}
 
-    private playerToGameId = new Map<string, Queue>();
+    private playerToGameId = new Map<string, Pair>();
     private gameIdToGameOption = new Map<string, GameOptionDto>();
     gameIdToGameData = new Map<string, GameData>();
 
     /* ------------------- Game Methods ----------------------- */
-    async newGame (clientId : string, gameOptions : GameOptionDto ) : Promise<string> {
-        const gameId = clientId;
-        if (!gameId)
+    async newGame (userId1 : string, gameOptions : GameOptionDto ) : Promise<string> {
+        const user = await this.userService.getUserById(userId1);
+        if (!user) {
+            console.log("user1 unavailable")
             return null;
-        const user = await this.userService.createUserDummy(); //user 로 대체
-        if (!user)
-            return null;
+        }
+        // 올바른 유저 정보 확인
         console.log(user.nickname);
         console.log(user.userID);
-        const game = await this.gameRepository.save({title: user.nickname+"'s game", player1 : user.nickname, player2 : null, gameType: GameTypeEnum.LADDER});
-        this.playerToGameId.set(clientId, {gameId : game.id, isFirst : true});    
-        this.gameIdToGameOption.set(game.id, gameOptions);
-        const newgamedata : InGameDto = {
-            displayName : "player1",
-            gameId : game.id,
-            player1 : game.player1,
-            player2 : "",
-        }
-        this.gameGateway.server.to(gameId).emit("created", newgamedata);
-        return game.id;
+        //
+        const game = await this.gameRepository.save({title: user.nickname+"'s game", player1 : user.userID, player2 : null, gameType: gameOptions.gametype, gameMode: gameOptions.gamemode});
+        this.playerToGameId.set(userId1, {gameId : game.gameID, isFirst : true});    
+        this.gameIdToGameOption.set(game.gameID, gameOptions);
+        return game.gameID;
     }
 
-    async startGame(clientId1: string, gameOptions: GameOptionDto): Promise<string> {
-        const existingQueue = this.findQueueWithoutPlayer2();
-
-        if (!this.isPlayer(clientId1) && !existingQueue) {
-            const gameId = await this.newGame(clientId1, gameOptions);
-            if (!gameId) {
-                console.log("newGame Fail");
-                return null;
-            }
-            return gameId;
-        }
-    
-        let gameId: string;
-    
-        if (existingQueue) {
-            gameId = existingQueue.gameId;
-        } else {
-            const queue = this.getQueue(clientId1);
-            if (queue) {
-                gameId = queue.gameId;
-            } else {
-                console.log("Player not in queue");
-                return null;
-            }
-        }
-        const game : Game = await this.findGameById(gameId);
-        const ingamedata : InGameDto = {
-            displayName : "player2",
-            gameId : gameId,
-            player1 : game.player1,
-            player2 : "asasasas",
-        }
-        const gameOption = await this.joinGame(clientId1, ingamedata);
-        if (!gameOption) {
-            console.log("joinGame Fail");
-            return null;
-        }
-        console.log("ready to run engine");
-        this.gameEngine.startGameLoop(gameId);
-
-        return (gameId);
-    }
-      
-    findQueueWithoutPlayer2(): Queue | undefined {
-        for (const queue of this.playerToGameId.values()) {
-            if (queue && !this.getGameOptions(queue.gameId).player2) {
-                return queue;
-            }
-        }
-        return undefined;
-    }
-      
-    async joinGame (clientId : string, dto : InGameDto) : Promise<GameOptionDto> {
+          
+    async joinGame (userId2 : string, dto : InGameDto) : Promise<GameOptionDto> {
         const gameOption : GameOptionDto = this.getGameOptions(dto.gameId);
-        if (!gameOption || gameOption.isInGame) {
-            console.log("non-existent game");
+        if (!gameOption || gameOption.isActive) {
+            console.log("attempting to join non-existent game");
             return null;
         }
-        await this.setplayer2(dto.gameId, dto.displayName);
-        gameOption.player2 = dto.displayName;
-        gameOption.isInGame = true;
+        await this.setplayer2(dto.gameId, gameOption.player2);
+        gameOption.isActive = true;
         this.gameIdToGameOption.set(dto.gameId, gameOption);
-        // this.userService.changeStatus(gameOption.player1, dto.gameId);
-        // this.userService.changeStatus(dto.displayName, dto.gameId);
-        this.playerToGameId.set(clientId, {gameId : dto.gameId, isFirst : false});
-        this.gameGateway.server.to(clientId).emit("joined", dto);
-
+        this.playerToGameId.set(userId2, {gameId : dto.gameId, isFirst : false});
         return gameOption;
     }
 
     async setplayer2(gameId : string, player2 : string) : Promise<void> {
         const game : Game = await this.findGameById(gameId);
-        const user = await this.userService.createUserDummy();
-        if (user)
-            game.player2 = user.nickname;
+        const user = await this.userService.getUserById(player2);
+        if (!user) {
+            console.log("user2 unavailable")
+            return null;
+        }
+        game.player2 = user.userID;
+        // user2 참가 확인
         console.log(user.nickname);
         console.log(user.userID);
+        //
         await this.gameRepository.save(game);
     }
 
+    // async startGame(clientId1: string, gameOptions: GameOptionDto): Promise<string> {
+    //     const existingPair = this.findPairWithoutPlayer2();
+
+    //     if (!this.isPlayer(clientId1) && !existingPair) {
+    //         const gameId = await this.newGame(clientId1, gameOptions);
+    //         if (!gameId) {
+    //             console.log("newGame Fail");
+    //             return null;
+    //         }
+    //         return gameId;
+    //     }
+    
+    //     let gameId: string;
+    
+    //     if (existingPair) {
+    //         gameId = existingPair.gameId;
+    //     } else {
+    //         const Pair = this.getPair(clientId1);
+    //         if (Pair) {
+    //             gameId = Pair.gameId;
+    //         } else {
+    //             console.log("Player not in Pair");
+    //             return null;
+    //         }
+    //     }
+    //     const game : Game = await this.findGameById(gameId);
+    //     const ingamedata : InGameDto = {
+    //         displayName : "player2",
+    //         gameId : gameId,
+    //         player1 : game.player1,
+    //         player2 : "asasasas",
+    //     }
+    //     const gameOption = await this.joinGame(clientId1, ingamedata);
+    //     if (!gameOption) {
+    //         console.log("joinGame Fail");
+    //         return null;
+    //     }
+    //     console.log("ready to run engine");
+    //     this.startGameEngine(gameId);
+
+    //     return (gameId);
+    // }
+      
+    startGameEngine(gameId: string){
+        this.gameEngine.startGameLoop(gameId);
+    }
+
+    // findPairWithoutPlayer2(): Pair | undefined {
+    //     for (const Pair of this.playerToGameId.values()) {
+    //         if (Pair && !this.getGameOptions(Pair.gameId).player2) {
+    //             return Pair;
+    //         }
+    //     }
+    //     return undefined;
+    // }
+
+    // 재접속 구현 X
     reconnectToGame (clientId : string, playerName : string) : string {
         for (const [gameId, GameData] of this.gameIdToGameData) {
             if (GameData.players.player1 === playerName) {
@@ -148,9 +152,9 @@ export class GameService {
     }
 
     initGameData(clientid: string, dto: GameData) : void {
-        const queue = this.getQueue(clientid);
-        if (queue) {
-            this.setGameData(queue.gameId, dto)
+        const Pair = this.getPair(clientid);
+        if (Pair) {
+            this.setGameData(Pair.gameId, dto)
             this.gameGateway.server.emit('userUpdate');
         }
     }
@@ -167,10 +171,9 @@ export class GameService {
         this.gameIdToGameData.delete(gameId);
     }
     
-
-    isInGame(gameId : string) : boolean {
+    isActive(gameId : string) : boolean {
         if (this.gameIdToGameOption.has(gameId))
-            return this.gameIdToGameOption.get(gameId).isInGame;
+            return this.gameIdToGameOption.get(gameId).isActive;
         return false;
     }
 
@@ -184,28 +187,28 @@ export class GameService {
         return games;
     }
 
-    getGamesToJoin() : GameInfoDto[] {
-        const games: GameInfoDto[] = [];
-        for (const [gameId, matchData] of this.gameIdToGameOption.entries()) {
-            if (!matchData.isInGame) {
-                games.push({player1 : matchData.player1, player2 : matchData.player2, gameId : gameId, player1score: matchData.player1score, player2score: matchData.player2score});
-            }
-        }
-        return games;
-    }
+    // getGamesToJoin() : GameInfoDto[] {
+    //     const games: GameInfoDto[] = [];
+    //     for (const [gameId, matchData] of this.gameIdToGameOption.entries()) {
+    //         if (!matchData.isActive) {
+    //             games.push({player1 : matchData.player1, player2 : matchData.player2, gameId : gameId, player1score: matchData.player1score, player2score: matchData.player2score});
+    //         }
+    //     }
+    //     return games;
+    // }
 
-    async endOfGame(clientId : string, dto: GameData, gameId : string) : Promise<boolean> {
+    async endOfGame(dto: GameData, gameId : string) : Promise<boolean> {
         if (!this.gameIdToGameOption.has(gameId))
             return false;
-        // await this.finalScore(dto, gameId);
-        // this.sendScoreToUser(dto, gameId);
+        await this.finalScore(dto, gameId);
+        this.sendScoreToUser(dto, gameId);
         this.deleteGameOption(gameId);
         this.deleteGameData(gameId);
         return true;
     }
 
     // async leaveGame (clientId : string, playerName : string, gameId : string) : Promise<void> {
-    //     await this.recordTechnicalLoose(gameId, playerName);
+    //     await this.recordTechnicalLoss(gameId, playerName);
     //     this.deleteGameOption(gameId);
     //     this.deleteGameData(gameId);
     // }
@@ -217,7 +220,7 @@ export class GameService {
     }
 
     async findGameById(gameId : string) : Promise<Game> {
-      const game = await this.gameRepository.findOneBy({id: gameId});
+      const game = await this.gameRepository.findOneBy({gameID: gameId});
 
       if (!game)
         throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${gameId}`);
@@ -225,13 +228,13 @@ export class GameService {
       return (game);
     }
 
-    async finalScore(dto : GameInfoDto, gameId : string) {
+    async finalScore(dto : GameData, gameId : string) {
         const game : Game = await this.findGameById(gameId);
         if (game) {
-            game.player1Score = dto.player1score;
-            game.player2Score = dto.player2score;
-            // this.userService.changeStatus(game.player1, "online");
-            // this.userService.changeStatus(game.player2, "online");
+            game.player1Score = dto.scores[0];
+            game.player2Score = dto.scores[1];
+            this.userService.updateUserStatus((await this.userService.getUserById(game.player1)), UserStatus.ONLINE);
+            this.userService.updateUserStatus((await this.userService.getUserById(game.player2)), UserStatus.ONLINE);
             game.finished = true;
             if (Number(game.player1Score) > Number(game.player2Score))
                 game.winner = game.player1;
@@ -249,30 +252,30 @@ export class GameService {
         throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${gameId}`);
     }
 
-    // async recordTechnicalLoose (gameId : string, playerName : string) : Promise <boolean> {
-    //     const game : Game = await this.findGameById(gameId);
-    //     if (game && game.finished === false) {
-    //         const matchData = this.gameIdToGameOption.get(gameId);
-    //         this.userService.changeStatus(game.player1, "online");
-    //         this.userService.changeStatus(game.player2, "online");
-    //         game.finished = true;
-    //         if (game.player1 === playerName) {
-    //             game.player2Score = 11; // 패배 조건 추후 수정
-    //             game.winner = game.player2;
-    //             this.userService.loseGame(matchData.player1, gameId);
-    //             this.userService.winGame(matchData.player2, gameId);
-    //         }
-    //         else {
-    //             game.player1Score = 11;
-    //             game.winner = game.player1; // 패배 조건 추후 수정
-    //             this.userService.loseGame(matchData.player2, gameId);
-    //             this.userService.winGame(matchData.player1, gameId);
-    //         }
-    //         await this.gameRepository.save(game);
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    async recordTechnicalLoss (gameId : string, playerName : string) : Promise <boolean> {
+        const game : Game = await this.findGameById(gameId);
+        if (game && game.finished === false) {
+            const matchData = this.gameIdToGameOption.get(gameId);
+            this.userService.updateUserStatus((await this.userService.getUserById(game.player1)), UserStatus.ONLINE);
+            this.userService.updateUserStatus((await this.userService.getUserById(game.player2)), UserStatus.ONLINE);
+            game.finished = true;
+            if (game.player1 === playerName) {
+                game.player2Score = 11; // 패배 조건 추후 수정
+                game.winner = game.player2;
+                // this.userService.loseGame(matchData.player1, gameId);
+                // this.userService.winGame(matchData.player2, gameId);
+            }
+            else {
+                game.player1Score = 11;
+                game.winner = game.player1; // 패배 조건 추후 수정
+                // this.userService.loseGame(matchData.player2, gameId);
+                // this.userService.winGame(matchData.player1, gameId);
+            }
+            await this.gameRepository.save(game);
+            return true;
+        }
+        return false;
+    }
 
     deletePlayer(clientId : string) : void {
         this.playerToGameId.delete(clientId);
@@ -287,7 +290,7 @@ export class GameService {
         return gameId ? gameId.gameId : null;
     }
 
-    getQueue(clientId : string) : Queue {
+    getPair(clientId : string) : Pair {
         return this.playerToGameId.get(clientId);
     }
 
@@ -295,28 +298,48 @@ export class GameService {
         return this.gameIdToGameOption.get(gameId);
     }
 
-    // sendScoreToUser(dto : GameInfoDto, gameId : string) : void {
-    //     const matchData = this.gameIdToGameOption.get(gameId);
-    //     if (matchData) {
-    //         if (dto.player1score === dto.player2score) {
-    //             // this.userService.draw(matchData.player1, gameId);
-    //             // this.userService.draw(matchData.player2, gameId);
-    //         }
-    //         else if (Number(dto.player1Score) < Number(dto.player2Score)) {
-    //             this.userService.loseGame(matchData.player1, gameId);
-    //             this.userService.winGame(matchData.player2, gameId);
-    //         }
-    //         else {
-    //             this.userService.winGame(matchData.player1, gameId);
-    //             this.userService.loseGame(matchData.player2, gameId);
-    //         }
-    //         this.deleteGameData(gameId);
+    sendScoreToUser(dto : GameData, gameId : string) : void {
+        const matchData = this.gameIdToGameOption.get(gameId);
+        if (matchData) {
+            if (Number(dto.scores[0]) < Number(dto.scores[1])) {
+                // this.userService.loseGame(matchData.player1, gameId);
+                // this.userService.winGame(matchData.player2, gameId);
+            }
+            else {
+                // this.userService.winGame(matchData.player1, gameId);
+                // this.userService.loseGame(matchData.player2, gameId);
+            }
+            this.deleteGameData(gameId);
+        }
+    }
+
+    // async wonGame(displayname : string, matchId : string) : Promise<void> {
+    //     const user = await this.userRepository.findOneBy({displayName: displayname});
+    //     if (user) {
+    //         user.matchHistory.push(matchId);
+    //         user.wins += 1;
+    //         user.score += 3;
+    //         if (user.status != "offline")
+    //             user.status = "online";
+    //         await this.userRepository.save(user);
     //     }
     // }
 
-    async cancelGame(clientId : string, gameId : string) : Promise<void> {
+    // async lostGame(displayname : string, matchId : string) : Promise<void> {
+    //     const user = await this.userRepository.findOneBy({displayName: displayname});
+    //     if (user) {
+    //         user.matchHistory.push(matchId);
+    //         user.losses += 1;
+    //         if (user.status != "offline")
+    //             user.status = "online";
+    //         await this.userRepository.save(user);
+    //     }
+    // }
+
+    async cancelGame(userId : string, gameId : string) : Promise<void> {
+        this.deletePlayer(userId);
         this.deleteGameOption(gameId);
-        this.deletePlayer(clientId);
+        this.deleteGameData(gameId);
         await this.gameRepository.delete(gameId);
     }
 }

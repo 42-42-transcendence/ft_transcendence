@@ -8,6 +8,8 @@ import { EventsService } from './events.service';
 import { UserModule } from 'src/user/user.module';
 import { RelationModule } from 'src/relation/relation.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { GameModule } from 'src/game/game.module';
+import { GameService } from 'src/game/game.service';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { NotificationModule } from 'src/notification/notification.module';
     ChatModule,
     RelationModule,
     AuthModule,
+    forwardRef(() => GameModule),
     NotificationModule,
   ],
   providers: [EventsGateway, EventsService],

@@ -1,14 +1,22 @@
 import {vec2} from "gl-matrix";
+import { isJsxChild } from "typescript";
 import { gamedata } from "./in-game.dto";
 
 export class GameManager {
     /* the playerSide 0 = leftPlayer and 1 is the other player */
+    static isChanged: boolean = false;
+
+    static setflag(value: boolean) {
+        this.isChanged = value;
+    }
+
     static scoreUpdate(playerSide: number) {
         if (playerSide === 0 || playerSide === 1) {
             ++gamedata.scores[playerSide];
             // gamedata.scoreRef[playerSide]!.innerText = String(gamedata.scores[playerSide]); //
             this.resetBallPosition();
         }
+        this.setflag(true);
     }
 
     static resetBallPosition() {

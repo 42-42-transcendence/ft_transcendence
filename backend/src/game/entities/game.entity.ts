@@ -7,7 +7,7 @@ import { ApiProperty} from '@nestjs/swagger';
 @Entity()
 export class Game {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  gameID: string;
 
   @ApiProperty({
     description: '게임 이름',
@@ -46,7 +46,7 @@ export class Game {
     example: 101,
     required: true,
   })
-  @Column({nullable : true})
+  @Column({nullable : true, default: null })
   winner : string;
 
   @ApiProperty({
@@ -78,7 +78,7 @@ export class Game {
     example: 'Normal',
     required: true,
   })
-  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT, GameModeEnum.FAST], default: GameModeEnum.NORMAL })
+  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT, GameModeEnum.FAST] })
   gameMode: GameModeEnum;
 
   @ApiProperty({

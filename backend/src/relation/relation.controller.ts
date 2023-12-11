@@ -31,7 +31,7 @@ export class RelationController {
   @Get()
   async getSocialsByUser(
     @GetAuth() auth: Auth,
-  ): Promise<{ socials: SocialDto[] }> {
+  ): Promise<SocialDto[]> {
     const user = await auth.user;
     const relations = await this.relationService.getRelationsByUser(user);
     let socials: SocialDto[] = [];
@@ -48,7 +48,7 @@ export class RelationController {
     });
     await Promise.all(insertSocials);
 
-    return ({ socials });
+    return (socials);
   }
 
 

@@ -68,6 +68,9 @@ export class RelationController {
     @Param('targetUserID') targetUser: string,
   ):Promise<{ message: string }> {
     const user = await auth.user;
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 친구로 추가할 수 없습니다.`);
+    }
     const addFriendUser = await this.userService.getUserByNicknameWithException(targetUser);
     const relation = await this.relationService.getRelationByUsers(user, addFriendUser);
 
@@ -109,6 +112,9 @@ export class RelationController {
     @Param('targetUserID') targetUser: string,
   ):Promise<{ message: string }> {
     const user = await auth.user;
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 친구 삭제할 수 없습니다.`);
+    }
     const deleteFriendUser = await this.userService.getUserByNicknameWithException(targetUser);
     const relation = await this.relationService.getRelationByUsers(user, deleteFriendUser);
 
@@ -135,6 +141,9 @@ export class RelationController {
     @Param('targetUserID') targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
+    if (user.nickname === targetUser) {
+      throw new BadRequestException(`자신을 블락할 수 없습니다.`);
+    }
     const blockedUser = await this.userService.getUserByNicknameWithException(targetUser);
     const relation = await this.relationService.getRelationByUsers(user, blockedUser);
 

@@ -63,12 +63,12 @@ export class RelationRepository extends Repository<Relation> {
   }
 
   async getObjectUserByRelation(relation: Relation): Promise<User> {
-    const objectUser = await this
+    const result = await this
       .createQueryBuilder('relation')
       .leftJoinAndSelect('relation.objectUser', 'objectUser')
       .where('relation.relationID = :relationID', { relationID: relation.relationID })
       .getOne();
 
-    return (relation.objectUser);
+    return (result.objectUser);
   }
 }

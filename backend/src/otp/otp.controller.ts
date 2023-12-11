@@ -28,6 +28,9 @@ export class OtpController {
     @GetAuth() auth: Auth,
   ): Promise<{ isActive: boolean }> {
     const user = await auth.user;
+    if (!user) {
+      return ({ isActive: false });
+    }
     const isActive = user.isActiveOtp;
 
     return ({ isActive });

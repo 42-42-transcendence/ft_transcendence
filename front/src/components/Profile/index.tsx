@@ -83,6 +83,7 @@ const Profile = () => {
       setFeedbackMessage('이미지 파일 크기는 최대 3MB입니다.');
       return;
     }
+    setFeedbackMessage('');
 
     const formData = new FormData();
     if (enteredAvatarFile !== null)
@@ -97,7 +98,6 @@ const Profile = () => {
 
     if (ret !== null) {
       fetchProfile();
-      setFeedbackMessage(ret.message);
     }
   };
 

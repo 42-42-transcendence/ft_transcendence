@@ -12,10 +12,10 @@ import { NotificationModule } from 'src/notification/notification.module';
 @Module({
   imports: [
     forwardRef(() => ChannelModule),
+    forwardRef(() => RelationModule),
     UserModule,
     ChannelMemberModule,
     ChatModule,
-    RelationModule,
     AuthModule,
     NotificationModule,
   ],

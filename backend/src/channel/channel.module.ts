@@ -14,14 +14,14 @@ import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
+    forwardRef(() => EventsModule),
+    forwardRef(() => RelationModule),
     TypeOrmModule.forFeature([Channel]),
     ChannelMemberModule,
     ChatModule,
     AuthModule,
     UserModule,
-    RelationModule,
     NotificationModule,
-    forwardRef(() => EventsModule),
   ],
   controllers: [ChannelController],
   providers: [

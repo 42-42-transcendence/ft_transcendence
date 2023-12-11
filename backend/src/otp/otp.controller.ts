@@ -6,6 +6,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { Response } from 'express';
+import { OtpCodeValidationPipe } from './pipes/otp-code-validation.pipe';
 
 @ApiTags('OTP')
 @Controller('api/otp')
@@ -69,7 +70,7 @@ export class OtpController {
   @Post('validate')
   async validateOtpCode(
     @GetAuth() auth: Auth,
-    @Body('otp') otpCode: string,
+    @Body('otp', OtpCodeValidationPipe) otpCode: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const isValidate = this.otpService.validateOtpCode(otpCode, user);
@@ -94,7 +95,7 @@ export class OtpController {
   @Post('login')
   async loginOtpCode(
     @GetAuth() auth: Auth,
-    @Body('otp') otpCode: string,
+    @Body('otp', OtpCodeValidationPipe) otpCode: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const isValidate = this.otpService.validateOtpCode(otpCode, user);

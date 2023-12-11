@@ -1,4 +1,4 @@
-import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
+import { BadRequestException, PipeTransform } from "@nestjs/common";
 import { isBoolean } from "class-validator";
 
 export class BooleanValidationPipe implements PipeTransform {

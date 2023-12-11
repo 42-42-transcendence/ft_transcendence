@@ -17,7 +17,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UerinfoUserDto } from './dto/userinfo-user.dto';
+import { UserinfoUserDto } from './dto/userinfo-user.dto';
 import { UserprofileUserDto } from './dto/userprofile-user.dto';
 
 import { AuthGuard } from '@nestjs/passport';
@@ -53,8 +53,20 @@ export class UserController {
     return this.userService.getJoinChannels(userID);
   }
 
+  // @ApiOperation({
+  //   summary: '유저의 현재 접속한 전체 채널 조회',
+  // })
+  // @ApiOkResponse({
+  //   description: '성공',
+  //   type: [ChannelMember],
+  // })
+  // @Get('dashboard/:targetUserID')
+  // async getDashboards(@Param('id') userID: string): Promise<ChannelMember[]> {
+  //   return this.userService.getJoinChannels(userID);
+  // }
+
   @ApiOperation({
-    summary: '유저 생성',
+    summary: '유저 이미지 초기 설정',
   })
   @ApiOkResponse({
     description: '성공',
@@ -74,7 +86,7 @@ export class UserController {
   //이미지 요청 response 필요
 
   @ApiOperation({
-    summary: '유저 생성',
+    summary: '유저 이미지 편집',
   })
   @ApiOkResponse({
     description: '성공',
@@ -93,7 +105,7 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: '유저 생성',
+    summary: '유저 닉네임 설정, 유저 생성',
   })
   @ApiOkResponse({
     description: '성공',
@@ -125,28 +137,60 @@ export class UserController {
     const userprofile = await this.userService.getUserProfile(createdUserd);
     return userprofile;
   }
-
+  
   @ApiOperation({
     summary: '채팅창 모달에서 유저 정보 보기',
   })
   @ApiOkResponse({
     description: '성공',
-    type: UerinfoUserDto,
+    type: UserinfoUserDto,
   })
-  @Get('user/:userid')
-  async getUserInfo(@Param('userid') UserID, @GetAuth() auth: Auth): Promise<UerinfoUserDto> {
-    const createdUser = await this.userService.getUserByNickname(UserID);
-    const firstuser = await auth.user;
-    let relation = (await this.RelationService.getRelationByUsersWithException(firstuser, createdUser)).relationType;
+  @Get('/:targetUserID')
+  async getUserInfo(@Param('targetUserID') UserID, @GetAuth() auth: Auth): Promise<UserinfoUserDto> {
+    const targetuser = await this.userService.getUserByNicknameWithException(UserID);
+    const currentuser = await auth.user;
+    const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
+    let tmptype;
     if (relation == null) {
-      relation = RelationTypeEnum.UNKNOWN;
+      tmptype = RelationTypeEnum.UNKNOWN;
+    }
+    else {
+      tmptype = relation.relationType;
     }
     const userinfo = {
-      nickname: createdUser.nickname,
-      image: createdUser.avatar,
-      status: createdUser.status,
-      relation: relation,
+      nickname: targetuser.nickname,
+      image: targetuser.avatar,
+      status: targetuser.status,
+      relation: tmptype,
     };
     return userinfo;
   }
+
+  // @ApiOperation({
+  //   summary: '소셜 목록',
+  // })
+  // @ApiOkResponse({
+  //   description: '성공',
+  //   type: UserinfoUserDto,
+  // })
+  // @Get('/:targetUserID')
+  // async getUserInfo(@Param('targetUserID') UserID, @GetAuth() auth: Auth): Promise<UserinfoUserDto> {
+  //   const targetuser = await this.userService.getUserByNicknameWithException(UserID);
+  //   const currentuser = await auth.user;
+  //   const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
+  //   let tmptype;
+  //   if (relation == null) {
+  //     tmptype = RelationTypeEnum.UNKNOWN;
+  //   }
+  //   else {
+  //     tmptype = relation.relationType;
+  //   }
+  //   const userinfo = {
+  //     nickname: targetuser.nickname,
+  //     image: targetuser.avatar,
+  //     status: targetuser.status,
+  //     relation: tmptype,
+  //   };
+  //   return userinfo;
+  // }
 }

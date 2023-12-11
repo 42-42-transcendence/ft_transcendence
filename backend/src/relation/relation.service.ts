@@ -26,6 +26,14 @@ export class RelationService {
     return relation;
   }
 
+  async getRelationByUsersWithunknown(subjectUser: User, objectUser: User): Promise<Relation> {
+    const relation = await this.getRelationByUsers(subjectUser, objectUser);
+
+    if (!relation) return null;
+
+    return relation;
+  }
+
   async isBlockRelation(subjectUser: User, objectUser: User): Promise<RelationTypeEnum> {
     const relation = await this.getRelationByUsers(subjectUser, objectUser);
 

@@ -90,9 +90,6 @@ const Profile = () => {
       `${SERVER_URL}/api/user/setup/avatar`,
       {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
         body: formData,
       }
     );

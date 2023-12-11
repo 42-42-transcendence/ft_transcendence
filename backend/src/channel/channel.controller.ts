@@ -10,13 +10,14 @@ import { ChannelMemberService } from 'src/channel-member/channel-member.service'
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 import { ChannelTypeEnum } from './enums/channelType.enum';
 import { EventsGateway } from 'src/events/events.gateway';
-import { ChatService } from 'src/chat/chat.service';
 import { UserService } from 'src/user/user.service';
 import { RelationService } from 'src/relation/relation.service';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
-import { NotificationService } from 'src/notification/notification.service';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import * as bcrypt from 'bcrypt';
+import { ChannelPasswordValidationPipe } from './pipes/channel-password-validation.pipe';
+import { TargetUserValidationPipe } from './pipes/target-user-validation.pipe';
+import { BooleanValidationPipe } from './pipes/boolean-validation.pipe';
 
 @ApiTags('CHANNEL')
 @Controller('api/channel')
@@ -25,10 +26,8 @@ export class ChannelController {
   constructor(
     private channelService: ChannelService,
     private channelMemberService: ChannelMemberService,
-    private chatService: ChatService,
     private userService: UserService,
     private relationService: RelationService,
-    private notificationService: NotificationService,
     @Inject(forwardRef(() => EventsGateway))
     private eventsGateway: EventsGateway,
   ) {}
@@ -87,6 +86,11 @@ export class ChannelController {
     @Body() createChannelDto: ChannelDto
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
+
+    if (await this.channelService.getChannelByTitleFromNotDM(createChannelDto.title)) {
+      throw new BadRequestException(`${createChannelDto.title} 채널은 이미 존재합니다.`);
+    }
+
     const channel = await this.channelService.createChannel(createChannelDto);
     const role = ChannelMemberRole.OWNER;
 
@@ -131,8 +135,8 @@ export class ChannelController {
   async checkJoinChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('password') password: string,
-    @Body('isRedirected') isRedirected: boolean
+    @Body('password', ChannelPasswordValidationPipe) password: string,
+    @Body('isRedirected', BooleanValidationPipe) isRedirected: boolean
   ): Promise<{ isAuthenticated: boolean }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
@@ -300,7 +304,7 @@ export class ChannelController {
   async assignToChannelStaff(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
@@ -365,7 +369,7 @@ export class ChannelController {
   async kickUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
@@ -423,7 +427,7 @@ export class ChannelController {
   async banUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
@@ -487,7 +491,7 @@ export class ChannelController {
   async inviteToChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
@@ -545,7 +549,7 @@ export class ChannelController {
   @Post('DM')
   async createDirectMessage(
     @GetAuth() auth: Auth,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ channelID: string }> {
     const user = await auth.user;
     const invitedUser = await this.userService.getUserByNicknameWithException(targetUser);
@@ -554,6 +558,12 @@ export class ChannelController {
     if (user.nickname > invitedUser.nickname) {
       title = `${invitedUser.nickname}-${user.nickname} DM`;
     }
+    const existedChannel = await this.channelService.getChannelByTitleFromDM(title);
+
+    if (existedChannel) {
+      return ({ channelID: existedChannel.channelID });
+    }
+
     const channel = await this.channelService.createChannel({
       title,
       password: '',
@@ -588,7 +598,7 @@ export class ChannelController {
   async blockUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
   ): Promise<{ message: string }> {
     const user = await auth.user;
     const channel = await this.channelService.getChannelByIdWithException(channelID);
@@ -626,7 +636,7 @@ export class ChannelController {
   async muteUserFromChannel(
     @GetAuth() auth: Auth,
     @Param('id') channelID: string,
-    @Body('targetUserID') targetUser: string,
+    @Body('targetUserID', TargetUserValidationPipe) targetUser: string,
     ): Promise<{ message: string }> {
       const user = await auth.user;
       const channel = await this.channelService.getChannelByIdWithException(channelID);

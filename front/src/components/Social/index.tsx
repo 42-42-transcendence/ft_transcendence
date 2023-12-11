@@ -70,7 +70,10 @@ const Social = () => {
         <AddFriendModal onRefreshHandler={refreshUsersHandler} />
       )}
       {showUserDetail && (
-        <UserDetailModal targetUserID={activatedUserID as string} />
+        <UserDetailModal
+          targetUserID={activatedUserID as string}
+          refreshSocialUser={refreshUsersHandler}
+        />
       )}
     </div>
   );

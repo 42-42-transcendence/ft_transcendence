@@ -17,9 +17,14 @@ type Props = {
     targetRole: Role | null;
     targetIsMuted: boolean | null;
   };
+  refreshSocialUser?: () => void;
 };
 
-const UserDetailModal = ({ targetUserID, channelState }: Props) => {
+const UserDetailModal = ({
+  targetUserID,
+  channelState,
+  refreshSocialUser,
+}: Props) => {
   const navigate = useNavigate();
   const closeModalHandler = useCloseModal();
   const { isLoading, error, request } = useRequest();
@@ -106,6 +111,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
 
     if (ret !== null) {
       closeModalHandler();
+      if (refreshSocialUser) refreshSocialUser();
     }
   };
 
@@ -134,6 +140,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
 
     if (ret !== null) {
       closeModalHandler();
+      if (refreshSocialUser) refreshSocialUser();
     }
   };
 

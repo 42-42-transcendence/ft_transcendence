@@ -1,7 +1,6 @@
 import data from '../interface/gameData';
 import PhysicsEngine from "../class/PhysicsEngine";
 import { GameManager } from "../class/GameManager";
-import { ItemManager} from "../class/ItemManager";
 import { AIManager } from "../class/AIManager";
 
 function update(delta: number) {
@@ -15,7 +14,7 @@ function update(delta: number) {
 	PhysicsEngine.GuaranteeConflict(data.ball, delta);
 	/* 게임 종료 조건 확인 */
 	AIManager.getInstance().GuaranteeConflict(data.ball.clone(), 10000);
-	AIManager.getInstance().testPlayer1(); // 테스트용
+	// AIManager.getInstance().testPlayer1(); // 테스트용
 	/* player 패들 이동 */
 	data.paddle[0].updatePosition(delta);
 	data.paddle[1].updatePosition(delta);

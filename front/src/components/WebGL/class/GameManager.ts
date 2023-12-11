@@ -63,16 +63,15 @@ export class GameManager {
     static endGame() {
         const ball = data.ball;
         /* 테스트용 초기화 코드 */
-        for (let i = 0; i < 2; i++) {
-            ball.position[i] = 0;
-            data.scores[i] = 0;
-            data.scoreRef[i]!.innerText = String(data.scores[i]);
-        }
-        ball.direction = vec2.fromValues(1.0, 0);
+        // for (let i = 0; i < 2; i++) {
+        //     ball.position[i] = 0;
+        //     data.scores[i] = 0;
+        //     data.scoreRef[i]!.innerText = String(data.scores[i]);
+        // }
+        // ball.direction = vec2.fromValues(1.0, 0);
 
         /* 게임 종료 */
-        // console.log('게임 종료');
-        // window.dispatchEvent(new CustomEvent('gameEnd', {}));
+        window.dispatchEvent(new CustomEvent('gameEnd', {}));
     }
     static isMatchConcluded() {
         return data.scores[0] === 5 || data.scores[1] === 5;

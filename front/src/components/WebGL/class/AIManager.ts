@@ -18,17 +18,13 @@ export class AIManager {
             const paddleY = data.paddle[0].position[1];
             const paddleHeightHalf = data.paddle[0].height / 2;
 
-            let switcher = true;
-
-            if (switcher && paddleY + paddleHeightHalf >= topBoundary - 0.001) {
+            if (paddleY + paddleHeightHalf >= topBoundary - 0.001) {
                 data.paddle[0].keyPress.up = false;
                 data.paddle[0].keyPress.down = true;
-                switcher = false;
             }
             else if (paddleY - paddleHeightHalf <= bottomBoundary + 0.001) {
                 data.paddle[0].keyPress.up = true;
                 data.paddle[0].keyPress.down = false;
-                switcher = true;
             }
         };
         movePaddle();

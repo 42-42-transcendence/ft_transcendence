@@ -10,6 +10,7 @@ import usePopstate from "../components/WebGL/hook/usePopstate";
 import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
 import GameResultModal from "../components/Modal/GameResultModal";
 import useGameEvent from "../components/WebGL/hook/useGameEvent";
+import {SocketContextProvider} from "../components/WebGL/context/SocketContext";
 
 const GamePage = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -61,6 +62,7 @@ const GamePage = () => {
 
     return (
         <main>
+            <SocketContextProvider>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%'}}>
                 <div ref={profileRef1} style={{position: "absolute"}}> player1 </div>
                 <div ref={scoreRef1} style={{position: "absolute"}}> 0 </div>
@@ -74,6 +76,7 @@ const GamePage = () => {
                 <div ref={profileRef2} style={{position: "absolute"}}> player2 </div>
                 {gameResult && <GameResultModal result={gameResult as 'win' | 'lost'} />}
             </div>
+            </SocketContextProvider>
         </main>
     );
 };

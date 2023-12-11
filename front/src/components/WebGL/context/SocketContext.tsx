@@ -2,9 +2,10 @@ import {io, Socket} from 'socket.io-client';
 import {SERVER_URL} from "../../../App";
 import useAuthState from "../../../store/Auth/useAuthState";
 import {useDispatch} from "react-redux";
-import {createContext, useContext, useEffect, useState} from "react";
+import React, {createContext, useContext, useEffect, useState} from "react";
 import {actions as notificationActions, Notification} from "../../../store/Notification/notification";
 import data, {gameDataFromServer} from "../interface/gameData";
+import useUserState from "../../../store/User/useUserState";
 import {GameManager} from "../class/GameManager";
 
 type SocketContextType = {
@@ -18,6 +19,7 @@ type ChildProps = {
 };
 
 const SocketContextProvider = ({ children }: ChildProps) => {
+    const userState = useUserState();
     const authState = useAuthState();
     const dispatch = useDispatch();
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -27,6 +29,9 @@ const SocketContextProvider = ({ children }: ChildProps) => {
             const newSocket = io(SERVER_URL, {
                 auth: {
                     token: authState.token,
+                },
+                query: {
+                    userID: userState.id,
                 },
             });
 
@@ -78,9 +83,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 };
 
 const useSocket = () => {
-    const ctx = useContext(SocketContext);
-
-    return ctx;
+    return useContext(SocketContext);
 };
 
 export { SocketContextProvider, useSocket };

@@ -13,7 +13,7 @@ export class UserinfoUserDto {
   nickname: string;
   @ApiProperty({
     description: '프로필 이미지',
-    example: './User/byeonkim/images/kobe.jpg',
+    example: 'http://localhost:3001/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg', 
     required: true,
   })
   image: string;

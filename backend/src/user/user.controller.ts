@@ -165,32 +165,4 @@ export class UserController {
     };
     return userinfo;
   }
-
-  // @ApiOperation({
-  //   summary: '소셜 목록',
-  // })
-  // @ApiOkResponse({
-  //   description: '성공',
-  //   type: UserinfoUserDto,
-  // })
-  // @Get('/:targetUserID')
-  // async getUserInfo(@Param('targetUserID') UserID, @GetAuth() auth: Auth): Promise<UserinfoUserDto> {
-  //   const targetuser = await this.userService.getUserByNicknameWithException(UserID);
-  //   const currentuser = await auth.user;
-  //   const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
-  //   let tmptype;
-  //   if (relation == null) {
-  //     tmptype = RelationTypeEnum.UNKNOWN;
-  //   }
-  //   else {
-  //     tmptype = relation.relationType;
-  //   }
-  //   const userinfo = {
-  //     nickname: targetuser.nickname,
-  //     image: targetuser.avatar,
-  //     status: targetuser.status,
-  //     relation: tmptype,
-  //   };
-  //   return userinfo;
-  // }
 }

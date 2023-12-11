@@ -22,6 +22,7 @@ const GameMatchingModal = ({ mode }: Props) => {
 
   useEffect(() => {
     const startMatch = async () => {
+
       await request<{ message: string }>(
         `${SERVER_URL}/api/game/match/${mode}`,
         {

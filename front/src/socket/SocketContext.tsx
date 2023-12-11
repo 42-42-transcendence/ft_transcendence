@@ -1,11 +1,11 @@
-import { Socket, io } from 'socket.io-client';
-import { createContext, useContext, useEffect, useState } from 'react';
+import {io, Socket} from 'socket.io-client';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 import useAuthState from '../store/Auth/useAuthState';
-import { SERVER_URL } from '../App';
-import { useDispatch } from 'react-redux';
-import { actions as notificationActions } from '../store/Notification/notification';
-import type { Notification } from '../store/Notification/notification';
-import { useNavigate } from 'react-router-dom';
+import {SERVER_URL} from '../App';
+import {useDispatch} from 'react-redux';
+import type {Notification} from '../store/Notification/notification';
+import {actions as notificationActions} from '../store/Notification/notification';
+import {useNavigate} from 'react-router-dom';
 import useUserState from '../store/User/useUserState';
 
 type SocketContextType = {
@@ -60,8 +60,8 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         navigate('/login', { state: { message: message } });
       });
 
-      newSocket.on('startGame', (gameID: string) => {
-        navigate(`/game/${gameID}`);
+      newSocket.on('startGame', (gameID: string, playerID: string[], mode: string) => {
+        navigate(`/game/${gameID}`, { state: { mode, playerID } });
       });
 
       setSocket(newSocket);
@@ -83,10 +83,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 };
 
 const useSocket = () => {
-  const ctx = useContext(SocketContext);
-
-  return ctx;
+  return useContext(SocketContext);
 };
 
 export { SocketContextProvider, useSocket };
-export default SocketContext;

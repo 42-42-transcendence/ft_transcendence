@@ -38,6 +38,12 @@ class PhysicsEngine {
             }
         }
         object.move(delta);
+        if (object.objectOutsideCanvas()) {
+            object.clampWithWall(0);
+        }
+        if (object.objectInsidePaddle(data.paddle[0]) || object.objectInsidePaddle(data.paddle[1])) {
+            object.clampWithPaddle(0);
+        }
     }
 }
 

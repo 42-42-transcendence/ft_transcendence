@@ -24,6 +24,11 @@ import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { SocketException } from './socket.exception';
 import { UserStatus } from 'src/user/enums/user-status.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
+import { GameModeEnum } from 'src/game/enums/gameMode.enum';
+import { race } from 'rxjs';
+import { GameOptionDto } from 'src/game/dto/in-game.dto';
+import { read } from 'fs';
+import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 
 
 
@@ -256,7 +261,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   hasAlreadyGameMatching(user: User): boolean {
     if (this.eventsService.hasNormalGameQueueUser(user.userID)
-      || this.eventsService.hasFastGameQueueUser(user.userID)
       || this.eventsService.hasObjectGameQueueUser(user.userID)) {
         return (true);
     }
@@ -267,9 +271,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.eventsService.deleteNormalGameQueueUser(userID);
   }
 
-  deleteFastGameQueueUser(userID: string) {
-    this.eventsService.deleteFastGameQueueUser(userID);
-  }
+  // deleteFastGameQueueUser(userID: string) {
+  //   this.eventsService.deleteFastGameQueueUser(userID);
+  // }
 
   deleteObjectGameQueueUser(userID: string) {
     this.eventsService.deleteObjectGameQueueUser(userID);
@@ -277,11 +281,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   allDeleteGameMatching(userID: string) {
     this.eventsService.deleteNormalGameQueueUser(userID);
-    this.eventsService.deleteFastGameQueueUser(userID);
+    // this.eventsService.deleteFastGameQueueUser(userID);
     this.eventsService.deleteObjectGameQueueUser(userID);
   }
 
-  async normalGameMatching(user: User) {
+  async normalGameMatching(user: User, mode: GameModeEnum, type: GameTypeEnum) {
     const client = this.eventsService.getClient(user.userID);
     const readyUser = await this.eventsService.getReadyNormalGameUser();
     if (!readyUser) {
@@ -291,33 +295,51 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const readyUserClient = this.eventsService.getClient(readyUser.userID);
 
     // 게임 룸 만들기
-
-    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
-
-    client.emit("startGame", '1234');
-    readyUserClient.emit("startGame", '1234');
-  }
-
-  async fastGameMatching(user: User) {
-    const client = this.eventsService.getClient(user.userID);
-    const readyUser = await this.eventsService.getReadyFastGameUser();
-    if (!readyUser) {
-      this.eventsService.addFastGameQueueUser(user.userID);
-      return ;
+    const gameOptions: GameOptionDto = {
+      player1: user.userID,
+      player2: readyUser.userID,
+      player1score: 0,
+      player2score: 0,
+      gametype: type,
+      gamemode: mode,
+      isActive: false,
     }
-    const readyUserClient = this.eventsService.getClient(readyUser.userID);
+    // 유저 정상 접속 확인
+    console.log("userIDs: ", user.userID, " ", readyUser.userID);
 
-    // 게임 룸 만들기
-
-    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
-
-    client.emit("startGame", '1234');
-    readyUserClient.emit("startGame", '1234');
+    const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions);
+    if (gameID) {
+      client.join(gameID);
+      readyUserClient.join(gameID);
+      await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+      await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+    }
+    client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
+    readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
+    // 게임 정상 생성 확인
+    console.log("game ID: ", gameID);
   }
 
-  async objectGameMatching(user: User) {
+  // FAST 모드 삭제
+  // async fastGameMatching(user: User, mode: string) {
+  //   const client = this.eventsService.getClient(user.userID);
+  //   const readyUser = await this.eventsService.getReadyFastGameUser();
+  //   if (!readyUser) {
+  //     this.eventsService.addFastGameQueueUser(user.userID);
+  //     return ;
+  //   }
+  //   const readyUserClient = this.eventsService.getClient(readyUser.userID);
+
+  //   // 게임 룸 만들기
+
+  //   await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+  //   await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+
+  //   client.emit("startGame", '1234');
+  //   readyUserClient.emit("startGame", '1234');
+  // }
+
+  async objectGameMatching(user: User, mode: string, type: GameTypeEnum) {
     const client = this.eventsService.getClient(user.userID);
     const readyUser = await this.eventsService.getReadyObjectGameUser();
     if (!readyUser) {

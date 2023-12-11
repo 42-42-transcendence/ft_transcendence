@@ -8,9 +8,9 @@ import { Ball } from "./Ball";
 import { GameData } from "../enums/gameData";
 
 export class Players {
-    player1: string
+    player1: string //User.nickname
     player1Score: number
-    player2: string
+    player2: string //User.nickname
     player2Score: number
 }
 
@@ -20,7 +20,7 @@ export let gamedata: GameData = {
 	scores: [0, 0],
 	lastTime: 0,
 	mode: 'normal',
-    players: new Players,
+    players: {player1: "", player1Score: 0, player2: "", player2Score: 0},
 };
 
 export interface GameInfoDto {
@@ -36,9 +36,9 @@ export interface GameOptionDto {
     player1score: number,
     player2 : string,
     player2score: number,
-    gametype: GameTypeEnum;
-    gamemode: string;
-    isInGame : boolean;
+    gametype: GameTypeEnum,
+    gamemode: GameModeEnum,
+    isActive : boolean;
 }
 
 export interface InGameDto { 

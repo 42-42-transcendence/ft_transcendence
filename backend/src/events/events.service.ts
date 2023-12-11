@@ -8,6 +8,10 @@ import { ChannelMemberService } from 'src/channel-member/channel-member.service'
 import { ChannelMemberRole } from 'src/channel-member/enums/channel-member-role.enum';
 import { UserService } from 'src/user/user.service';
 import { UserStatus } from 'src/user/enums/user-status.enum';
+import { GameOptionDto, InGameDto } from 'src/game/dto/in-game.dto';
+import { GameModeEnum } from 'src/game/enums/gameMode.enum';
+import { GameTypeEnum } from 'src/game/enums/gameType.enum';
+import { GameService } from 'src/game/game.service';
 
 @Injectable()
 export class EventsService {
@@ -15,12 +19,13 @@ export class EventsService {
         private relationService: RelationService,
         private channelMemberService: ChannelMemberService,
         private userService: UserService,
+        private gameService: GameService,
     ) {}
 
     private clients: Map<string, Socket> = new Map();
 
     private normalGameQueue: string[] = [];
-    private fastGameQueue: string[] = [];
+    // private fastGameQueue: string[] = [];
     private objectGameQueue: string[] = [];
 
     addClient(userID: string, socket: Socket) {
@@ -45,9 +50,18 @@ export class EventsService {
 
     deleteNormalGameQueueUser(userID: string) {
         const index = this.normalGameQueue.indexOf(userID);
+        const client = this.getClient(userID);
+        const gameId = this.gameService.getPlayerGameId(userID);
 
         if (index !== -1) {
             this.normalGameQueue.splice(index, 1);
+            if (gameId && this.gameService.isActive(gameId))
+                client.leave(gameId);
+            else {
+                this.gameService.deletePlayer(userID);
+                this.gameService.deleteGameOption(gameId);
+                this.gameService.deleteGameData(gameId);
+            }
         }
     }
 
@@ -72,48 +86,55 @@ export class EventsService {
         return (undefined);
     }
 
-    addFastGameQueueUser(userID: string) {
-        this.fastGameQueue.push(userID);
-    }
+    // addFastGameQueueUser(userID: string) {
+    //     this.fastGameQueue.push(userID);
+    // }
 
-    deleteFastGameQueueUser(userID: string) {
-        const index = this.fastGameQueue.indexOf(userID);
+    // deleteFastGameQueueUser(userID: string) {
+    //     const index = this.fastGameQueue.indexOf(userID);
 
-        if (index !== -1) {
-            this.fastGameQueue.splice(index, 1);
-        }
-    }
+    //     if (index !== -1) {
+    //         this.fastGameQueue.splice(index, 1);
+    //     }
+    // }
 
-    hasFastGameQueueUser(userID: string): boolean  {
-        const index = this.fastGameQueue.indexOf(userID);
+    // hasFastGameQueueUser(userID: string): boolean  {
+    //     const index = this.fastGameQueue.indexOf(userID);
 
-        if (index === -1) {
-            return (false);
-        }
-        return (true);
-    }
+    //     if (index === -1) {
+    //         return (false);
+    //     }
+    //     return (true);
+    // }
 
-    async getReadyFastGameUser(): Promise<User> {
-        while (this.fastGameQueue.length > 0){
-            const user = await this.userService.getUserByIdWithWsException(
-                this.fastGameQueue.shift()
-            );
-            if (user.status === UserStatus.ONLINE) {
-                return (user);
-            }
-        }
-        return (undefined);
-    }
+    // async getReadyFastGameUser(): Promise<User> {
+    //     while (this.fastGameQueue.length > 0){
+    //         const user = await this.userService.getUserByIdWithWsException(
+    //             this.fastGameQueue.shift()
+    //         );
+    //         if (user.status === UserStatus.ONLINE) {
+    //             return (user);
+    //         }
+    //     }
+    //     return (undefined);
+    // }
 
     addObjectGameQueueUser(userID: string) {
         this.objectGameQueue.push(userID);
     }
 
     deleteObjectGameQueueUser(userID: string) {
-        const index = this.objectGameQueue.indexOf(userID);
+        const index = this.normalGameQueue.indexOf(userID);
+        const client = this.getClient(userID);
+        const gameId = this.gameService.getPlayerGameId(userID);
 
         if (index !== -1) {
             this.objectGameQueue.splice(index, 1);
+            if (gameId && this.gameService.isActive(gameId))
+                client.leave(gameId);
+            else {
+                this.gameService.cancelGame(userID, gameId);
+            }
         }
     }
 
@@ -137,7 +158,6 @@ export class EventsService {
         }
         return (undefined);
     }
-
 
 
     async createEventsMembers(members: ChannelMember[], user: User): Promise<EventsMemberDto[]> {
@@ -165,5 +185,46 @@ export class EventsService {
         await Promise.all(insertEventsMembers);
 
         return (eventsMembers);
+    }
+
+    /* ----------- GAME ------------- */
+
+    async g_newGame(userId1: string, dto: GameOptionDto): Promise <string> {
+        const gameID = await this.gameService.newGame(userId1, dto);
+        return (gameID);
+    }
+    
+    async g_joinGame(userId2: string, dto: InGameDto): Promise <GameOptionDto> {
+        const gameOption = await this.gameService.joinGame(userId2, dto);
+        return (gameOption);
+    }
+
+    async startGame(userId1: string, userId2: string, dto: GameOptionDto): Promise<string> {
+        const gameId = await this.g_newGame(userId1, dto);
+        if (!gameId){
+            console.log("newGame Fail");
+            this.gameService.deletePlayer(this.getClient(userId1).id);
+            this.gameService.deleteGameOption(gameId);
+            return null;
+        }
+
+        const inGameData: InGameDto = {
+            displayName: "",
+            gameId: gameId,
+            player1: (await this.userService.getUserById(userId1)).nickname,
+            player2: (await this.userService.getUserById(userId2)).nickname,
+        }
+        const gameOption = await this.g_joinGame(userId1, inGameData);
+        if (!gameOption) {
+            console.log("joinGame Fail");
+            this.gameService.deletePlayer(this.getClient(userId1).id);
+            this.gameService.deleteGameOption(gameId);
+            return null;
+        }
+        console.log("ready to run engine!");
+        this.gameService.startGameEngine(gameId);
+
+        return (gameId);
+        
     }
 }

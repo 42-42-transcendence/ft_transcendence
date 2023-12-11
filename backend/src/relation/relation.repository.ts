@@ -51,4 +51,24 @@ export class RelationRepository extends Repository<Relation> {
 
     return relation;
   }
+
+  async getRelationsByUser(subjectUser: User): Promise<Relation[]> {
+    const relations = await this
+      .createQueryBuilder('relation')
+      .leftJoinAndSelect('relation.subjectUser', 'subjectUser')
+      .where('subjectUser.userID = :subjectUserID', { subjectUserID: subjectUser.userID })
+      .getMany();
+    
+    return (relations);
+  }
+
+  async getObjectUserByRelation(relation: Relation): Promise<User> {
+    const objectUser = await this
+      .createQueryBuilder('relation')
+      .leftJoinAndSelect('relation.objectUser', 'objectUser')
+      .where('relation.relationID = :relationID', { relationID: relation.relationID })
+      .getOne();
+
+    return (relation.objectUser);
+  }
 }

@@ -8,6 +8,7 @@ import { RelationTypeEnum } from './enums/relation-type.enum';
 import { EventsGateway } from 'src/events/events.gateway';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SocialDto } from './dto/social.dto';
 
 @ApiTags('RELATION')
 @Controller('api/relation')
@@ -18,6 +19,37 @@ export class RelationController {
     private userService: UserService,
     private eventsGateway: EventsGateway,
   ) {}
+
+
+  @ApiOperation({
+    summary: '현재 사람들간의 관계들을 반환한다'
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: [SocialDto]
+  })
+  @Get()
+  async getSocialsByUser(
+    @GetAuth() auth: Auth,
+  ): Promise<{ socials: SocialDto[] }> {
+    const user = await auth.user;
+    const relations = await this.relationService.getRelationsByUser(user);
+    let socials: SocialDto[] = [];
+
+    const insertSocials = relations.map(async relation => {
+      const objectUser = await this.relationService.getObjectUserByRelation(relation);
+      const social = {
+        nickname: objectUser.nickname,
+        image: objectUser.avatar,
+        status: objectUser.status,
+        relation: relation.relationType,
+      }
+      socials.push(social);
+    });
+    await Promise.all(insertSocials);
+
+    return ({ socials });
+  }
 
 
   @ApiOperation({

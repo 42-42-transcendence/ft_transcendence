@@ -51,4 +51,12 @@ export class RelationService {
 
     this.relationRepository.deleteRelation(relation.relationID);
   }
+
+  async getRelationsByUser(subjectUser: User): Promise<Relation[]> {
+    return (await this.relationRepository.getRelationsByUser(subjectUser));
+  }
+
+  async getObjectUserByRelation(relation: Relation): Promise<User> {
+    return (await this.relationRepository.getObjectUserByRelation(relation));
+  }
 }

@@ -126,11 +126,9 @@ export class UserRepository extends Repository<User> {
 
   async getAchivements(user: User): Promise<User> {
     //도전과제 생성됐는지 검사
-    let achlist;
     if (!user.userAchievements || user.userAchievements.length === 0) {
-      achlist = await this.setAchievement(user);
+      user.userAchievements = await this.setAchievement(user);
     }
-    user.userAchievements = achlist;
     if (user.win >= 1 || user.lose >= 1) await this.succesachievement(user, Achievements.FIRSTGAME);
     if (user.win >= 1) await this.succesachievement(user, Achievements.FIRSTWIN);
     return user;

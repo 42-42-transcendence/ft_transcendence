@@ -155,7 +155,7 @@ export class EventsService {
             const eventsMember = {
                 userID: memberUser.userID,
                 nickname: memberUser.nickname,
-                image: '',
+                image: memberUser.avatar,
                 relation: relationType,
                 role: member.role,
                 isMuted: member.isMuted

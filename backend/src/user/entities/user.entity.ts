@@ -42,12 +42,11 @@ export class User {
 
   @ApiProperty({
     description: '프로필 이미지',
-    example: '..//images/kobe.jpg',
-    required: true,
+    example: 'http://localhost:3001/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg',
   })
   @Column({
-    nullable: true,
-    default: 'default_image',
+    nullable: false,
+    default: 'http://localhost:3001/assets/profiles/default.jpeg',
   })
   avatar: string;
 
@@ -58,7 +57,7 @@ export class User {
   })
   @Column({
     nullable: false,
-    default: 0,
+    default: 20,
   })
   win: number;
 
@@ -72,6 +71,50 @@ export class User {
     default: 0,
   })
   lose: number;
+
+  @ApiProperty({
+    description: '래더 승리 횟수',
+    example: '0',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  ladderwin: number;
+
+  @ApiProperty({
+    description: '래더 패배 횟수',
+    example: '0',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  ladderlose: number;
+
+  @ApiProperty({
+    description: '래더 승리 횟수',
+    example: '0',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  friendlywin: number;
+
+  @ApiProperty({
+    description: '래더 패배 횟수',
+    example: '0',
+    required: true,
+  })
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  friendlylose: number;
 
   @ApiProperty({
     description: '랭크 점수',

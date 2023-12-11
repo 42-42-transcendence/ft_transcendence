@@ -68,7 +68,7 @@ export class UserRepository extends Repository<User> {
   }
 
   async setUserAvatar(user: User, extension: string): Promise<void> {
-    user.avatar = await `http://localhost:3001/assets/profiles/${(await user.auth).intraUID}.${extension}`;
+    user.avatar = await `http://localhost:3001/assets/profiles/${(await user.userID)}.${extension}`;
     await this.save(user);
   }
 

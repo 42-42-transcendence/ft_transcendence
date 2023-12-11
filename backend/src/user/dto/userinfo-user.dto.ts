@@ -3,7 +3,7 @@ import { UserAchievement } from 'src/user-achievement/entities/user-achievement.
 import { UserStatus } from '../enums/user-status.enum';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 
-export class UerinfoUserDto {
+export class UserinfoUserDto {
   @ApiProperty({
     description: '닉네임',
     example: 'vdoohkimv',
@@ -13,7 +13,7 @@ export class UerinfoUserDto {
   nickname: string;
   @ApiProperty({
     description: '프로필 이미지',
-    example: './User/byeonkim/images/kobe.jpg',
+    example: 'http://localhost:3001/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg', 
     required: true,
   })
   image: string;

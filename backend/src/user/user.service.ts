@@ -13,6 +13,9 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { UserAchievementModule } from 'src/user-achievement/user-achievement.module';
 import { SocketException } from 'src/events/socket.exception';
+import { UserAchievementlistDto } from 'src/user-achievement/dto/user-ahievement-list.dto';
+import { Achievement } from 'src/achievement/entities/achievement.entity';
+import { Achievements, achievements } from 'src/achievement/achievement';
 
 @Injectable()
 export class UserService {
@@ -123,12 +126,40 @@ export class UserService {
 		return ret;
 	}
 
-  	async getUserProfile(user: User): Promise<UserprofileUserDto> {
-    	return this.userRepository.getUserProfile(user);
+  	async getUserProfile(user: User, achievementslist:UserAchievementlistDto[]): Promise<UserprofileUserDto> {
+		const userinfo: UserprofileUserDto = {
+		nickname: user.nickname,
+		image: user.avatar,
+		winCount: user.win,
+		loseCount: user.lose,
+		ladderPoint: user.point,
+		achievements: achievementslist,
+		};
+		return userinfo;
   	}
 
-  	async getAchievements(User: User): Promise<User> {
-    	return this.userRepository.getAchivements(User);
+  	async getAchievements(user: User): Promise<UserAchievementlistDto[]> {
+		const retlist: UserAchievementlistDto[] = [];
+		const cham: boolean[] =[true, false, false, false, false, false, false, false, false, false];
+    	if (user.win >= 1 || user.lose >= 1) cham[1] = true;
+    	if (user.win >= 1) cham[2] = true;
+		if (user.win >= 11) cham[3] = true;
+    	if (user.win >= 12) cham[4] = true;
+		if (user.win >= 13) cham[5] = true;
+    	if (user.win >= 14) cham[6] = true;
+		if (user.win >= 15) cham[7] = true;
+    	if (user.win >= 16) cham[8] = true;
+		if (user.win >= 17) cham[9] = true;
+		for (let i = 0; i < 10; i ++){
+			retlist.push({
+				id: achievements[i].id,
+				title: achievements[i].name,
+				description: achievements[i].description,
+				isAchieved: cham[i]
+			})
+		}
+		return retlist;
+		// return this.userRepository.getAchivements(User);
   	}
 
   	async changeStatus(nickname: string, status: UserStatus) {

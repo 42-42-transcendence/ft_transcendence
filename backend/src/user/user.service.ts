@@ -1,5 +1,5 @@
 /* eslint-disable object-property-newline */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { User } from './entities/user.entity';
@@ -94,9 +94,12 @@ export class UserService {
 		// user 객체가 이미 있으면, 그냥 return?
 		// image size, image 확장자 검사 한 번 더
 		// nickname 중복검사
+		if (userID.length < 4 && userID.length > 8) {
+			throw new BadRequestException(`닉네임이 너무 짧습니다.`);
+		}
 		const user = await this.userRepository.getUserByNickname(userID);
 		if (user) {
-		throw new NotFoundException(`${userID}를 가진 유저가 이미 있습니다.`);
+		throw new BadRequestException(`${userID}를 가진 유저가 이미 있습니다.`);
 		}
 		const createdUser = await this.userRepository.createUser(userID);
 		await this.authrepository.relationAuthUser(auth, createdUser);
@@ -105,10 +108,18 @@ export class UserService {
 		return ret;
 	}
   
-	async createImageUser(file: Express.Multer.File, auth: Auth): Promise<{ message: string }> {
+	async setupImageUser(file: Express.Multer.File, auth: Auth): Promise<{ message: string }> {
 		console.log(file);
-		const authuid = auth.intraUID; // image size, image 확장자 검사 한 번 더 필요
+		if (file.size > 3000000){
+			throw new BadRequestException(`파일 크기가 10MB를 넘습니다.`);
+		}
+		console.log((await auth.user).nickname);
+		const authuid = (await auth.user).userID; // image size, image 확장자 검사 한 번 더 필요
 		const extension = file.originalname.split('.').pop();
+		if (extension != 'jpeg' && extension != 'png' && extension != 'jpg' && extension != 'gif'){
+			console.log('-----------asdfas-df-asdf-asdf-asdf-a-sdf-asdf-----------asdf-adsf-ads-f-adsf-asdf-zvxc-cxz-v-vzcx-zxvc-zxcv-zxvc-sdfa----');
+			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg)`);
+		}
 		const filePath = path.join(__dirname, `../../assets/profiles/${authuid}.${extension}`);
 		await fs.writeFile(filePath, file.buffer);
 		await this.userRepository.setUserAvatar(await auth.user, extension);

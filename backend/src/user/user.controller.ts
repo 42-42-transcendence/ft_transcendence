@@ -61,21 +61,55 @@ export class UserController {
     type: User,
   })
   @UseInterceptors(FileInterceptor('avatar'))
-  @Put('setup')
-  async createUser(
-    @Body('userID') userID: string,
+  @Put('setup/avatar')
+  async setupavatarUser(
     @GetAuth() auth: Auth,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<{ message: string }> {
     if (file) {
-      return await this.userService.createImageUser(file, auth);
-    } else if (userID) {
+      return await this.userService.setupImageUser(file, auth);
+    }
+    else return { message: 'null image' };
+  }
+  //이미지 요청 response 필요
+
+  @ApiOperation({
+    summary: '유저 생성',
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: User,
+  })
+  @UseInterceptors(FileInterceptor('avatar'))
+  @Patch('setup/avatar')
+  async patchavatarUser(
+    @GetAuth() auth: Auth,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ message: string }> {
+    if (file) {
+      return await this.userService.setupImageUser(file, auth);
+    }
+    else return { message: 'null image' };
+  }
+
+  @ApiOperation({
+    summary: '유저 생성',
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: User,
+  })
+  @Put('setup/nickname')
+  async setupnicknameUser(
+    @Body('userID') userID: string,
+    @GetAuth() auth: Auth,
+  ): Promise<{ message: string }> {
+     if (userID) {
       console.log('------------------------- userID -------------------------');
       // 닉네임 업데이트 요청인 경우
       return await this.userService.createNicknameUser(userID, auth);
-    } else return { message: 'null image' };
+    } else return { message: 'wrong nickname' };
   }
-  //이미지 요청 response 필요
 
   @ApiOperation({
     summary: '유저 프로필 보기',

@@ -7,12 +7,14 @@ import { SERVER_URL } from '../../App';
 import useUserState from '../../store/User/useUserState';
 import useRequest from '../../http/useRequest';
 import { useEffect, useState } from 'react';
+import BackdropOverlay from '../../UI/BackdropOverlay';
 
 type Props = {
   onOpenQRCodeModal: (qrCodeURL: string) => void;
+  onClose: () => void;
 };
 
-const UserDropdown = ({ onOpenQRCodeModal }: Props) => {
+const UserDropdown = ({ onOpenQRCodeModal, onClose }: Props) => {
   const userState = useUserState();
   const [otpIsActivated, setOtpIsActivated] = useState<boolean | null>(null);
 
@@ -39,12 +41,14 @@ const UserDropdown = ({ onOpenQRCodeModal }: Props) => {
 
   const navigateHandler = () => {
     navigate(`/profile/${userState.id}`);
+    onClose();
   };
 
   const logoutHandler = () => {
     dispatch(authActions.clearAuth());
     dispatch(userActions.clearUser());
     navigate('/login');
+    onClose();
   };
 
   const activateOtpHandler = async () => {
@@ -59,37 +63,42 @@ const UserDropdown = ({ onOpenQRCodeModal }: Props) => {
     if (ret !== null) {
       onOpenQRCodeModal(ret.url);
     }
+    onClose();
   };
 
   const deactivateOtpHandler = async () => {
     await request<{ message: string }>(`${SERVER_URL}/api/otp`, {
       method: 'DELETE',
     });
+    onClose();
   };
 
   if (otpIsActivated === null || error) return <></>;
   return (
-    <ul className={styles.dropdown}>
-      <li className={styles['dropdown-list']}>
-        <button onClick={navigateHandler}>내 프로필</button>
-      </li>
-      <li className={styles['dropdown-list']}>
-        {isLoading && <></>}
-        {!otpIsActivated && (
-          <button onClick={activateOtpHandler} disabled={isLoading}>
-            2차 인증 켜기
-          </button>
-        )}
-        {otpIsActivated && (
-          <button onClick={deactivateOtpHandler} disabled={isLoading}>
-            2차 인증 끄기
-          </button>
-        )}
-      </li>
-      <li className={styles['dropdown-list']}>
-        <button onClick={logoutHandler}>로그아웃</button>
-      </li>
-    </ul>
+    <>
+      <BackdropOverlay onClose={onClose} />
+      <ul className={styles.dropdown}>
+        <li className={styles['dropdown-list']}>
+          <button onClick={navigateHandler}>내 프로필</button>
+        </li>
+        <li className={styles['dropdown-list']}>
+          {isLoading && <></>}
+          {!otpIsActivated && (
+            <button onClick={activateOtpHandler} disabled={isLoading}>
+              2차 인증 켜기
+            </button>
+          )}
+          {otpIsActivated && (
+            <button onClick={deactivateOtpHandler} disabled={isLoading}>
+              2차 인증 끄기
+            </button>
+          )}
+        </li>
+        <li className={styles['dropdown-list']}>
+          <button onClick={logoutHandler}>로그아웃</button>
+        </li>
+      </ul>
+    </>
   );
 };
 export default UserDropdown;

@@ -62,7 +62,7 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
     setFeedbackMessage('');
 
     const responseName = await request<{ message: string }>(
-      `${SERVER_URL}/api/user/setup/nickname`,
+      `${SERVER_URL}/api/user/setup`,
       {
         method: 'PUT',
         headers: {
@@ -80,7 +80,7 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
     }
 
     const responseFile = await request<{ message: string }>(
-      `${SERVER_URL}/api/user/setup/avatar`,
+      `${SERVER_URL}/api/user/setup`,
       {
         method: 'PUT',
         body: formData,

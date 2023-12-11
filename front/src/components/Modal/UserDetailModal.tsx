@@ -26,23 +26,18 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const params = useParams();
   const userState = useUserState();
 
-  const [userInfo, setUserInfo] = useState<User | null>({
-    nickname: 'heryu',
-    image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-    relation: 'friend',
-    status: 'online',
-  });
+  const [userInfo, setUserInfo] = useState<User | null>(null);
 
-  // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     const ret = await request<User>(`${SERVER_URL}/api/user`, {
-  //       method: 'GET',
-  //     });
-  //     setUserInfo(ret);
-  //   };
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const ret = await request<User>(`${SERVER_URL}/api/user`, {
+        method: 'GET',
+      });
+      setUserInfo(ret);
+    };
 
-  //   fetchUserInfo();
-  // }, [request]);
+    fetchUserInfo();
+  }, [request]);
 
   const profileHandler = () => {
     closeModalHandler();

@@ -74,7 +74,7 @@ const Otp = () => {
           id="otp"
           className={styles['otp-input']}
           maxLength={6}
-          placeholder="공백 없이 입력"
+          placeholder="공백 없이 6자 입력"
           value={enteredOtp}
           onChange={changeOtpHandler}
         />

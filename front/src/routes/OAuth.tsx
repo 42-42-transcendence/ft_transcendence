@@ -71,9 +71,8 @@ const requestOAuth = async (
     });
 
     if (!authResponse.ok) {
-      throw new Error('Login Failed');
+      throw new Error('OAuth Failed');
     }
-
     const authData = await authResponse.json();
 
     const otpResponse = await fetch(`http://localhost:3001/api/otp`, {

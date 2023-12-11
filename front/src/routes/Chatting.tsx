@@ -83,7 +83,7 @@ const ChattingPage = () => {
   if (error) {
     return (
       <>
-        <h1>!!!ERROR!!!</h1>
+        <h1>접근할 수 없습니다.</h1>
         <p>{error}</p>
         <BackLink title="채널목록보기" redirect="/channels" />
       </>

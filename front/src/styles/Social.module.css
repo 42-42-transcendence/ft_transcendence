@@ -94,7 +94,8 @@
 .icons {
   position: absolute;
   top: -32px;
-  left: 180px;
+  left: 60px;
+  transform: translateX(-50%);
   display: flex;
   gap: 12px;
 }

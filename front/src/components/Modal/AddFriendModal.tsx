@@ -35,7 +35,7 @@ const AddFriendModal = () => {
     setFeedbackMessage('');
 
     const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/friend/${enteredNickname}`,
+      `${SERVER_URL}/api/relation/friend/${enteredNickname}`,
       {
         method: 'GET',
       }

@@ -10,6 +10,7 @@ import AchievementDetailModal from '../Modal/AchievementDetailModal';
 import useRequest from '../../http/useRequest';
 import { useParams } from 'react-router-dom';
 import { SERVER_URL } from '../../App';
+import editIcon from '../../assets/edit-icon.svg';
 
 export type Achievement = {
   id: string;
@@ -122,6 +123,13 @@ const Profile = () => {
               onChange={avatarChangeHandler}
               hidden={true}
             />
+            <div className={styles['edit-icon-wrapper']}>
+              <img
+                className={styles['edit-icon']}
+                src={editIcon}
+                alt="avatar edit icon"
+              />
+            </div>
           </label>
           <button
             className={styles['avatar-patch-button']}

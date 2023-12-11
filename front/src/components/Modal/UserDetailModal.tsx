@@ -26,23 +26,21 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
   const params = useParams();
   const userState = useUserState();
 
-  const [userInfo, setUserInfo] = useState<User | null>({
-    nickname: 'heryu',
-    image: 'https://avatars.githubusercontent.com/u/49449452?v=4',
-    relation: 'friend',
-    status: 'online',
-  });
+  const [userInfo, setUserInfo] = useState<User | null>(null);
 
-  // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     const ret = await request<User>(`${SERVER_URL}/api/user`, {
-  //       method: 'GET',
-  //     });
-  //     setUserInfo(ret);
-  //   };
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const ret = await request<User>(
+        `${SERVER_URL}/api/user/${targetUserID}`,
+        {
+          method: 'GET',
+        }
+      );
+      setUserInfo(ret);
+    };
 
-  //   fetchUserInfo();
-  // }, [request]);
+    fetchUserInfo();
+  }, [request, targetUserID]);
 
   const profileHandler = () => {
     closeModalHandler();
@@ -91,7 +89,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
 
   const addFriendHandler = async () => {
     const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/friend/${targetUserID}`,
+      `${SERVER_URL}/api/relation/friend/${targetUserID}`,
       { method: 'GET' }
     );
 
@@ -102,7 +100,7 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
 
   const deleteFriendHandler = async () => {
     const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/friend/${targetUserID}`,
+      `${SERVER_URL}/api/relation/friend/${targetUserID}`,
       { method: 'DELETE' }
     );
 
@@ -113,17 +111,26 @@ const UserDetailModal = ({ targetUserID, channelState }: Props) => {
 
   const blockHandler = async () => {
     const channelID = params.channelID;
-    const url = channelID
-      ? `${SERVER_URL}/api/channel/${params.channelID}/block`
-      : `${SERVER_URL}/api/user/block`;
-
-    const ret = await request<{ message: string }>(url, {
-      method: 'POST',
-      body: JSON.stringify({ targetUserID: targetUserID }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    let ret = null;
+    if (channelID) {
+      ret = await request<{ message: string }>(
+        `${SERVER_URL}/api/channel/${params.channelID}/block`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ targetUserID: targetUserID }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    } else {
+      ret = await request<{ message: string }>(
+        `${SERVER_URL}/api/relation/block/${targetUserID}`,
+        {
+          method: 'GET',
+        }
+      );
+    }
 
     if (ret !== null) {
       closeModalHandler();

@@ -7,6 +7,9 @@ import userIcon from '../../assets/user-icon.svg';
 import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
 import useNotificationState from '../../store/Notification/useNotificationState';
+import QRCodeModal from '../Modal/QRCodeModal';
+import useModalState from '../../store/Modal/useModalState';
+import useOpenModal from '../../store/Modal/useOpenModal';
 
 const IconList = () => {
   const [showNotificationDropdown, setShowNotificationDropdown] =
@@ -15,39 +18,41 @@ const IconList = () => {
 
   const { notifications } = useNotificationState();
 
+  const showQRCode = useModalState('showQRCode');
+  const openQRCodeModal = useOpenModal('showQRCode');
+  const [qrCodeURL, setQRCodeURL] = useState<string>('');
+
   const filteredNotifications = notifications.filter(
     (notification) => notification.notiType !== 'game'
   );
   const notificationCount = filteredNotifications.length;
 
-  const toggleShowNotificationHandler = () => {
-    setShowNotificationDropdown((prev) => !prev);
+  const openNotificationDropdownHandler = () => {
+    setShowNotificationDropdown(true);
   };
 
-  const offNotificationDropDownHandler = () => {
-    setTimeout(() => {
-      setShowNotificationDropdown(false);
-    }, 150);
+  const closeNotificationDropdownHandler = () => {
+    setShowNotificationDropdown(false);
   };
 
-  const toggleShowUserDropdownHandler = () => {
-    setShowUserDropdown((prev) => !prev);
+  const openUserDropdownHandler = () => {
+    setShowUserDropdown(true);
   };
 
-  const offUserDropDownHandler = () => {
-    setTimeout(() => {
-      setShowUserDropdown(false);
-    }, 150);
+  const closeUserDropdownHandler = () => {
+    setShowUserDropdown(false);
+  };
+
+  const openQRCodeHandler = (qrCodeURL: string) => {
+    setQRCodeURL(qrCodeURL);
+    openQRCodeModal();
   };
 
   return (
     <ul className={styles.icon_list}>
-      <li
-        onBlur={offNotificationDropDownHandler}
-        className={`${styles.icon_item}`}
-      >
+      <li className={`${styles.icon_item}`}>
         <button
-          onClick={toggleShowNotificationHandler}
+          onClick={openNotificationDropdownHandler}
           className={styles.toggle}
         >
           <img src={notificationIcon} alt="notification icon" />
@@ -56,17 +61,23 @@ const IconList = () => {
           <small className={styles.new}>{notificationCount}</small>
         )}
         {showNotificationDropdown && (
-          <NotificationDropdown notifications={filteredNotifications} />
+          <NotificationDropdown
+            notifications={filteredNotifications}
+            onClose={closeNotificationDropdownHandler}
+          />
         )}
       </li>
-      <li onBlur={offUserDropDownHandler} className={styles.icon_item}>
-        <button
-          onClick={toggleShowUserDropdownHandler}
-          className={styles.toggle}
-        >
+      <li className={styles.icon_item}>
+        <button onClick={openUserDropdownHandler} className={styles.toggle}>
           <img src={userIcon} alt="user icon" />
         </button>
-        {showUserDropdown && <UserDropdown />}
+        {showUserDropdown && (
+          <UserDropdown
+            onOpenQRCodeModal={openQRCodeHandler}
+            onClose={closeUserDropdownHandler}
+          />
+        )}
+        {showQRCode && <QRCodeModal qrCodeURL={qrCodeURL} />}
       </li>
     </ul>
   );

@@ -30,7 +30,7 @@ const Social = () => {
   const [activatedUserID, setActivatedUserID] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
-    const ret = await request<User[]>(`${SERVER_URL}/api/social`, {
+    const ret = await request<User[]>(`${SERVER_URL}/api/relation`, {
       method: 'GET',
     });
 
@@ -66,7 +66,9 @@ const Social = () => {
         error={error}
       />
       <SocialIconList onRefreshHandler={refreshUsersHandler} />
-      {showAddFriend && <AddFriendModal />}
+      {showAddFriend && (
+        <AddFriendModal onRefreshHandler={refreshUsersHandler} />
+      )}
       {showUserDetail && (
         <UserDetailModal targetUserID={activatedUserID as string} />
       )}

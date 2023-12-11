@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { SocketContextProvider } from '../socket/SocketContext';
 import { useEffect, useState } from 'react';
 import useRequest from '../http/useRequest';
@@ -14,7 +14,6 @@ const ProtectedRouter = () => {
     null
   );
   const userState = useUserState();
-  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,17 +28,20 @@ const ProtectedRouter = () => {
         setTokenIsValidated(true);
       } else {
         setTokenIsValidated(false);
+        return;
       }
 
-      const userResponse = await request<{ nickname: string }>(
+      const nickcnameResponse = await request<{ nickname: string }>(
         `${SERVER_URL}/api/auth/nickname`,
         {
           method: 'GET',
         }
       );
 
-      if (userResponse !== null) {
-        dispatch(userActions.setUserID(userResponse.nickname));
+      if (nickcnameResponse !== null) {
+        dispatch(userActions.setUserID(nickcnameResponse.nickname));
+      } else {
+        return;
       }
     };
 
@@ -49,17 +51,12 @@ const ProtectedRouter = () => {
   if (tokenIsValidated === null || isLoading) {
     return <h1 style={{ textAlign: 'center' }}>...Loading...</h1>;
   }
-  if (tokenIsValidated === true) {
-    if (location.pathname === '/setting-profile') {
-      return <Outlet />;
-    }
-    if (userState.id !== '') {
-      return (
-        <SocketContextProvider>
-          <Outlet />
-        </SocketContextProvider>
-      );
-    }
+  if (tokenIsValidated === true && userState.id !== '') {
+    return (
+      <SocketContextProvider>
+        <Outlet />
+      </SocketContextProvider>
+    );
   }
   return <Navigate to="/login" />;
 };

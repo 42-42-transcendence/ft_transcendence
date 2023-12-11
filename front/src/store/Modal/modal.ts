@@ -13,6 +13,7 @@ type ModalState = {
   showUserDetail: boolean;
   showConfirm: boolean;
   showMessage: boolean;
+  showQRCode: boolean;
 };
 
 const initialState: ModalState = {
@@ -28,6 +29,7 @@ const initialState: ModalState = {
   showUserDetail: false,
   showConfirm: false,
   showMessage: false,
+  showQRCode: false,
 };
 
 const modalSlice = createSlice({

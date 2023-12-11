@@ -5,7 +5,10 @@ import styles from '../../styles/Modal.module.css';
 import useRequest from '../../http/useRequest';
 import { SERVER_URL } from '../../App';
 
-const AddFriendModal = () => {
+type Props = {
+  onRefreshHandler: () => void;
+};
+const AddFriendModal = ({ onRefreshHandler }: Props) => {
   const [enteredNickname, setEnteredNickName] = useState<string>('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [successModalMessage, setSuccessModalMessage] = useState<string>('');
@@ -35,7 +38,7 @@ const AddFriendModal = () => {
     setFeedbackMessage('');
 
     const ret = await request<{ message: string }>(
-      `${SERVER_URL}/api/friend/${enteredNickname}`,
+      `${SERVER_URL}/api/relation/friend/${enteredNickname}`,
       {
         method: 'GET',
       }
@@ -43,6 +46,7 @@ const AddFriendModal = () => {
 
     if (ret !== null) {
       setSuccessModalMessage('요청에 성공하였습니다.');
+      onRefreshHandler();
       setTimeout(() => {
         closeModalHandler();
       }, 1000);

@@ -19,15 +19,19 @@ const useRequest = () => {
   }, [closeModal, navigate]);
 
   const request = useCallback(
-    async <T>(url: string, options: RequestInit): Promise<T | null> => {
+    async <T>(
+      url: string,
+      options: RequestInit,
+      isFile?: boolean
+    ): Promise<T | null> => {
       setIsLoading(true);
       setError('');
       try {
         const response = await fetch(url, {
           ...options,
           headers: {
-            ...options.headers,
             Authorization: 'Bearer ' + authState.token,
+            ...options.headers,
           },
         });
 
@@ -43,6 +47,11 @@ const useRequest = () => {
           } else {
             throw new Error(error.message);
           }
+        }
+
+        if (isFile) {
+          const blob = await response.blob();
+          return { url: URL.createObjectURL(blob) } as T;
         }
         return await response.json();
       } catch (e) {

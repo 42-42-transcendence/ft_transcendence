@@ -1,10 +1,7 @@
 import { createPortal } from 'react-dom';
 
 import styles from '../styles/Modal.module.css';
-
-type BackdropOverlayProps = {
-  onClose?: () => void;
-};
+import BackdropOverlay from './BackdropOverlay';
 
 type ModalOverlayProps = {
   children: React.ReactNode;
@@ -15,13 +12,7 @@ type Props = {
   onClose?: () => void;
 };
 
-const overlayModalElement = document.getElementById(
-  'overlay-modal'
-) as HTMLElement;
-
-const BackdropOverlay = ({ onClose }: BackdropOverlayProps) => {
-  return <div className={styles.backdrop} onClick={onClose}></div>;
-};
+const overlayModalElement = document.getElementById('overlay') as HTMLElement;
 
 const ModalOverlay = ({ children }: ModalOverlayProps) => {
   return <div className={styles.modal}>{children}</div>;
@@ -30,7 +21,7 @@ const ModalOverlay = ({ children }: ModalOverlayProps) => {
 const Modal = ({ children, onClose }: Props) => {
   return (
     <>
-      {createPortal(<BackdropOverlay onClose={onClose} />, overlayModalElement)}
+      <BackdropOverlay onClose={onClose} />
       {createPortal(
         <ModalOverlay>{children}</ModalOverlay>,
         overlayModalElement

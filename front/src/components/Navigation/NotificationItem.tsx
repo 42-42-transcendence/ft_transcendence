@@ -11,9 +11,16 @@ type Props = {
   notiType: NotificationType;
   message: string;
   channelID?: string;
+  onClose: () => void;
 };
 
-const NotificationItem = ({ id, notiType, message, channelID }: Props) => {
+const NotificationItem = ({
+  id,
+  notiType,
+  message,
+  channelID,
+  onClose,
+}: Props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { request } = useRequest();
@@ -39,6 +46,7 @@ const NotificationItem = ({ id, notiType, message, channelID }: Props) => {
           state: { redirect: true },
         });
     }
+    onClose();
   };
 
   return (

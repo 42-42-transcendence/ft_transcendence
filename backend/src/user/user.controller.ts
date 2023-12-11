@@ -133,8 +133,8 @@ export class UserController {
   @Get('profile/:targetUserID')
   async getUserProfile(@Param('targetUserID') nickname): Promise<UserprofileUserDto> {
     const createdUser = await this.userService.getUserByNickname(nickname);
-    const createdUserd = await this.userService.getAchievements(createdUser);
-    const userprofile = await this.userService.getUserProfile(createdUserd);
+    const achievementslist = await this.userService.getAchievements(createdUser);
+    const userprofile = await this.userService.getUserProfile(createdUser, achievementslist);
     return userprofile;
   }
   

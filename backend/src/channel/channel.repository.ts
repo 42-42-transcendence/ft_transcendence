@@ -33,11 +33,6 @@ export class ChannelRepository extends Repository<Channel> {
 			password = await bcrypt.hash(createChannelDto.password, 10);
 		}
 
-		const existedChannel = await this.findOneBy({ title });
-		if (existedChannel) {
-			throw new BadRequestException(`${title}채널이 이미 존재합니다.`);
-		}
-
 		const channel = this.create({
 			title,
 			password,
@@ -45,6 +40,26 @@ export class ChannelRepository extends Repository<Channel> {
 		});
 
 		await this.save(channel);
+		return (channel);
+	}
+	
+	async getChannelByTitleFromDM(title: string): Promise<Channel> {
+		const channel = await this
+			.createQueryBuilder('channel')
+			.where('channel.type = :type', { type: ChannelTypeEnum.DM })
+			.andWhere('channel.title = :title', { title })
+			.getOne();
+
+		return (channel);
+	}
+
+	async getChannelByTitleFromNotDM(title: string): Promise<Channel> {
+		const channel = await this
+			.createQueryBuilder('channel')
+			.where('channel.type != :type', { type: ChannelTypeEnum.DM })
+			.andWhere('channel.title = :title', { title })
+			.getOne();
+
 		return (channel);
 	}
 

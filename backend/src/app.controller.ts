@@ -20,6 +20,7 @@ export class AppController implements OnModuleInit{
     private userachievementService: UserAchievementService,
   ) {}
 
+  // 추후 없앨 것
   async onModuleInit() {
     if ((await this.channelService.getAllChannels()).length === 0) {
       for (let idx = 0; idx < 3; idx++) {

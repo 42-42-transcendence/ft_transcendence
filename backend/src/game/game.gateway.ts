@@ -15,9 +15,10 @@ import { vec2 } from 'gl-matrix';
 
 
 @WebSocketGateway({
-cors: {
-    origin: process.env.FRONT_URL
-  }
+    namespace: 'game',
+    cors: {
+        origin: 'http://localhost:3000',
+    }
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server : Server;

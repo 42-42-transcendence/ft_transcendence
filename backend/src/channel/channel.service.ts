@@ -23,6 +23,14 @@ export class ChannelService {
     return (await this.channelRepository.createChannel(createChannelDto));
   }
 
+  async getChannelByTitleFromDM(title: string): Promise<Channel> {
+		return (await this.channelRepository.getChannelByTitleFromDM(title));
+	}
+
+	async getChannelByTitleFromNotDM(title: string): Promise<Channel> {
+		return (await this.channelRepository.getChannelByTitleFromNotDM(title));
+	}
+
   async getChannelById(channelID: string): Promise<Channel> {
     return (await this.channelRepository.getChannelById(channelID));
   }
@@ -46,8 +54,6 @@ export class ChannelService {
   async getJoinChannelMembers(channelID: string): Promise<ChannelMember[]> {
     return (await this.channelRepository.getJoinChannelMembers(channelID));
   }
-
-  async joinChannel(user: User, channelID: string) {}
 
   async updateChannelInfo(channel: Channel, updateChannelDto: ChannelDto): Promise<Channel> {
     return await this.channelRepository.updateChannelInfo(channel, updateChannelDto);

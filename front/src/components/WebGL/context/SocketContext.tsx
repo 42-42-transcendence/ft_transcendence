@@ -3,7 +3,6 @@ import {SERVER_URL} from "../../../App";
 import useAuthState from "../../../store/Auth/useAuthState";
 import {useDispatch} from "react-redux";
 import React, {createContext, useContext, useEffect, useState} from "react";
-import {actions as notificationActions, Notification} from "../../../store/Notification/notification";
 import data, {gameDataFromServer} from "../interface/gameData";
 import useUserState from "../../../store/User/useUserState";
 import {GameManager} from "../class/GameManager";
@@ -26,21 +25,13 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 
     useEffect(() => {
         if (!socket) {
-            const newSocket = io(SERVER_URL, {
+            const newSocket = io(SERVER_URL + "/game", {
                 auth: {
                     token: authState.token,
                 },
                 query: {
                     userID: userState.id,
                 },
-            });
-
-            // 확인차 출력
-            newSocket.on('connect', () => {
-                console.log('connected context');
-                newSocket.emit('notification', (notifications: Notification[]) => {
-                    dispatch(notificationActions.setNotification(notifications));
-                });
             });
 
             newSocket.on('updateGame', (gameData: any) => {
@@ -52,6 +43,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 gameDataFromServer.paddlePos[1][1] = gameData.paddlePos[1][1];
                 gameDataFromServer.ballPos[0] = gameData.ballPos[0];
                 gameDataFromServer.ballPos[1] = gameData.ballPos[1];
+                gameDataFromServer.itemsPos = gameData.itemsPos;
             });
 
             newSocket.on('endGame', () => {

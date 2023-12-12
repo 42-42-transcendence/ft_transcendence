@@ -61,7 +61,7 @@ export class GameManager {
     }
 
     static endGame() {
-        const ball = data.ball;
+        // const ball = data.ball;
         /* 테스트용 초기화 코드 */
         // for (let i = 0; i < 2; i++) {
         //     ball.position[i] = 0;

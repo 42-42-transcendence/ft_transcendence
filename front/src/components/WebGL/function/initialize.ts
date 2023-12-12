@@ -1,7 +1,9 @@
 import data from '../interface/gameData';
+import {ItemManager} from "../class/ItemManager";
 import {Paddle} from '../class/Paddle';
 import {vec2} from 'gl-matrix';
 import {Ball} from '../class/Ball';
+import {Item} from "../class/Item";
 
 function initialize(state: any) {
 	if (data.canvasRef === null) return;
@@ -22,7 +24,6 @@ function initialize(state: any) {
 		data.profileRef[0].innerHTML = state.player[0];
 		data.profileRef[1].innerHTML = state.player[1];
 		data.mode = state.gameMode;
-		data.forTestSocket = state.socket;
 	}
 
 	data.lastTime = performance.now();
@@ -37,6 +38,18 @@ function initialize(state: any) {
 		data.ball.velocity = 1.5;
 		data.paddle[0].speed = 1.0;
 		data.paddle[1].speed = 1.0;
+	}
+
+	if (data.mode !== 'AI') {
+		for (let i = 0; i < 5; i++) {
+			const position = vec2.fromValues(0.0, 0.0);
+			const direction = vec2.fromValues(1.0, 0.0);
+			const velocity = 1.0;
+			const radius = 0.01;
+
+			const newItem = new Item(position, direction, velocity, radius);
+			ItemManager.getInstance().items.push(newItem);
+		}
 	}
 }
 

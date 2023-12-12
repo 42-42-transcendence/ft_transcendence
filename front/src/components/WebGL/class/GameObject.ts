@@ -139,7 +139,6 @@ export abstract class GameObject {
     }
 
     public clampWithWall() {
-        console.log("clampWithWall");
         const min = -1.0 + this.radius * 1.1;
         const max = 1.0 - this.radius * 1.1;
         const x = this.clamp(this.position[0], min, max);

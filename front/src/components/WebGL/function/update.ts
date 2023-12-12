@@ -19,7 +19,6 @@ function update(delta: number) {
 	data.paddle[0].updatePosition(delta);
 	data.paddle[1].updatePosition(delta);
 	if (GameManager.isMatchConcluded()) {
-		/* 임시 초기화, 게임 종료 조건 추가 */
 		GameManager.endGame();
 	}
 }

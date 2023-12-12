@@ -5,7 +5,7 @@ import data from '../interface/gameData';
 const useBeforeunload = () => {
     const { socket } = useSocket();
     useEffect(() => {
-        const handler = (event: BeforeUnloadEvent) => {
+        const handler = () => {
             cancelAnimationFrame(data.requestId);
             socket?.disconnect();
         };

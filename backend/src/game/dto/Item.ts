@@ -1,4 +1,4 @@
-import { gamedata } from "./in-game.dto";
+import { GameDataDto } from "./in-game.dto";
 import { PaddlePos } from "../enums/gameEnums";
 import { CanvasPosition } from "../enums/gameEnums";
 import { GameObject } from "./GameObject";
@@ -24,7 +24,7 @@ export class Item extends GameObject {
         }
     }
 
-    public handleWithPaddleCollision(paddlePos: PaddlePos) {
+    public handleWithPaddleCollision(paddlePos: PaddlePos, gamedata: GameDataDto) {
         if (paddlePos < 3) {
             this.applyItemEffectToPaddle(gamedata.paddle[0]);
         } else {

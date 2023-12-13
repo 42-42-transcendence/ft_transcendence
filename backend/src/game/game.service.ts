@@ -8,15 +8,8 @@ import { GameDataDto, GameInfoDto, InGameDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 // import { GameObjectsDto } from "./dto/game-data.dto";
 import { User } from 'src/user/entities/user.entity';
-import { GameModeEnum } from './enums/gameMode.enum';
-import { GameTypeEnum } from './enums/gameType.enum';
-import { GameGateway } from './game.gateway';
 import { GameEngine} from './game.engine';
 import { UserStatus } from 'src/user/enums/user-status.enum';
-import { EventsService } from 'src/events/events.service';
-import { dot } from 'node:test/reporters';
-import { glMatrix } from 'gl-matrix';
-import { mainModule } from 'process';
 import { UserRepository } from 'src/user/user.repository';
 
 interface Pair {

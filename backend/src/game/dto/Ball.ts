@@ -3,21 +3,21 @@ import { PaddlePos } from "../enums/gameEnums";
 import { GameObject } from "./GameObject";
 import { CanvasPosition } from "../enums/gameEnums";
 import { GameManager } from "./GameManager";
-import { gamedata } from "./in-game.dto";
+import { GameDataDto } from "./in-game.dto";
 
 export class Ball extends GameObject{
-    public handleWithWallCollision(side: CanvasPosition) {
+    public handleWithWallCollision(side: CanvasPosition, gamedata: GameDataDto) {
         if (side < 2) {
             this.direction[1] *= -1;
             return false;
         }
         if (side === CanvasPosition.Right)
-            GameManager.scoreUpdate(0);
+            GameManager.scoreUpdate(0, gamedata);
         else
-            GameManager.scoreUpdate(1);
+            GameManager.scoreUpdate(1, gamedata);
         return true;
     }
-    public handleWithPaddleCollision(paddlePos: PaddlePos) {
+    public handleWithPaddleCollision(paddlePos: PaddlePos, gamedata: GameDataDto) {
         let paddle, normalReflect;
         if (paddlePos < 3) {
             paddle = gamedata.paddle[0];

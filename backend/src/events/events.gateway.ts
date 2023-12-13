@@ -28,10 +28,13 @@ import { UserStatus } from 'src/user/enums/user-status.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
 import { GameModeEnum } from 'src/game/enums/gameMode.enum';
 import { race } from 'rxjs';
-import { GameOptionDto } from 'src/game/dto/in-game.dto';
+import { GameDataDto, GameOptionDto } from 'src/game/dto/in-game.dto';
 import { read } from 'fs';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 import { SendMessageDto } from './dto/send-message.dto';
+import { Paddle } from 'src/game/dto/Paddle';
+import { Ball } from 'src/game/dto/Ball';
+import { vec2 } from 'gl-matrix';
 
 
 @UseFilters(new SocketExceptionFilter())
@@ -311,18 +314,26 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       gamemode: mode,
       isActive: false,
     }
-    // 유저 정상 접속 확인
-    console.log("userIDs: ", user.userID, " ", readyUser.userID);
 
-    const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions);
+    const gamedata: GameDataDto = {
+      paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02),
+      scores: [0, 0],
+      lastTime: 0,
+      mode: 'normal',
+      delta: 0,
+    }
+    // 유저 정상 접속 확인
+    console.log("userIDs: %s, %s", user.userID, readyUser.userID);
+
+    const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
     if (gameID) {
-      client.join(gameID);
-      readyUserClient.join(gameID);
       await this.userService.updateUserStatus(user, UserStatus.PLAYING);
       await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
     }
     client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
     readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
+    
     // 게임 정상 생성 확인
     console.log("game ID: ", gameID);
   }

@@ -115,6 +115,12 @@ export class GameController {
     return ({ message: `${user.nickname}님이 성공적으로 게임을 수락하셨습니다.` });
   }
 
+
+  @ApiOperation({ summary: '게임 매칭 진입' })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Get('match/:mode')
   @UseGuards(AuthGuard())
   async startGameMatching(
@@ -144,6 +150,12 @@ export class GameController {
     return ({ message: `성공적으로 매칭에 들어갔습니다.` });
   }
 
+
+  @ApiOperation({ summary: '게임 매칭 취소' })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
   @Delete('match/:mode')
   @UseGuards(AuthGuard())
   async cancelGameMatching(
@@ -167,4 +179,39 @@ export class GameController {
 
     return ({ message: `성공적으로 매칭을 취소했습니다.` });
   }
+
+  @ApiOperation({ summary: 'AI모드를 플레이 중인 유저 status를 변경한다' })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Get('인게임/요청')
+  @UseGuards(AuthGuard())
+  async changeAIUserStatus(
+    @GetAuth() auth: Auth,
+  ):Promise<{ message: string }> {
+    const user = await auth.user;
+
+    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+
+    return ({ message: `AI모드 유저 상태를 PLAYING으로 변경`})
+  }
+
+  @ApiOperation({ summary: 'AI 모드를 종료한 유저의 status를 변경한다' })
+  @ApiOkResponse({
+    description: '성공',
+    type: Promise<{ message: string }>
+  })
+  @Get('인게임/요청')
+  @UseGuards(AuthGuard())
+  async changeAIUserStatusExit(
+    @GetAuth() auth: Auth,
+  ):Promise<{ message: string }> {
+    const user = await auth.user;
+
+    await this.userService.updateUserStatus(user, UserStatus.ONLINE);
+
+    return ({ message: `AI모드 종료 후 유저 상태를 ONLINE으로 변경`})
+  }
 }
+

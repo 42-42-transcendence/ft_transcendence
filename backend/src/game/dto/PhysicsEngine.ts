@@ -1,24 +1,26 @@
 import { GameObject } from "./GameObject";
-import { gamedata, sendGameData } from "./in-game.dto";
+import { GameDataDto } from "./in-game.dto";
+import { Paddle } from "./Paddle";
 
 class PhysicsEngine {
-    static GuaranteeConflict(object: GameObject, delta: number, depth: number = 0) {
+    static GuaranteeConflict(object: GameObject, data: GameDataDto, delta: number, depth: number = 0) {
         if (depth > 30) {
             console.log("depth over 30");
-        }
+            return ;
+        } //
 
         const collisionProcesses = [
             {
-                checkCollision: () => object.checkWithPaddleCollision(delta),
-                handleCollision: (collisionResult: CollisionResult) => object.handleWithPaddleCollision(collisionResult.pos),
-                CheckObjectInside: () => object.objectInsidePaddle(gamedata.paddle[0]) || object.objectInsidePaddle(gamedata.paddle[1]),
-                clamp: (collisionResult: CollisionResult) => object.clampWithPaddle(collisionResult.pos),
+                checkCollision: () => object.checkWithPaddleCollision(delta, data),
+                handleCollision: (collisionResult: CollisionResult) => object.handleWithPaddleCollision(collisionResult.pos, data),
+                CheckObjectInside: () => object.objectInsidePaddle(data.paddle[0]) || object.objectInsidePaddle(data.paddle[1]),
+                clamp: () => object.clampWithPaddle(),
             },
             {
                 checkCollision: () => object.checkWithWallCollision(delta),
-                handleCollision: (collisionResult: CollisionResult) => object.handleWithWallCollision(collisionResult.pos),
+                handleCollision: (collisionResult: CollisionResult) => object.handleWithWallCollision(collisionResult.pos, data),
                 CheckObjectInside: () => object.objectOutsideCanvas(),
-                clamp: (collisionResult: CollisionResult) => object.clampWithWall(collisionResult.pos),
+                clamp: () => object.clampWithWall(),
             }
         ];
 
@@ -30,14 +32,20 @@ class PhysicsEngine {
                     return;
                 // object.position =
                 if (process.CheckObjectInside()) {
-                    process.clamp(collisionResult);
+                    process.clamp();
                 }
                 const restAfterCollision = delta - collisionResult.p;
-                this.GuaranteeConflict(object, restAfterCollision, depth + 1);
+                this.GuaranteeConflict(object, data, restAfterCollision, depth + 1);
                 return;
             }
         }
         object.move(delta);
+        if (object.objectOutsideCanvas()) {
+            object.clampWithWall();
+        }
+        if (object.objectInsidePaddle(data.paddle[0]) || object.objectInsidePaddle(data.paddle[1])) {
+            object.clampWithPaddle();
+        }
     }
 }
 

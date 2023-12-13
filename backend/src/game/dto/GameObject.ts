@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { gamedata } from "./in-game.dto";
-import { BallCorner, CanvasPosition, ObjectCorner, PaddlePos } from "../enums/gameEnums";
+import { CanvasPosition, ObjectCorner, PaddlePos } from "../enums/gameEnums";
+import { GameDataDto } from "./in-game.dto";
 import { Paddle } from "./Paddle";
 
 export abstract class GameObject {
@@ -64,7 +64,7 @@ export abstract class GameObject {
         return (q >= 0 && q <= l) && p < delta && p > 0;
     }
 
-    public checkWithPaddleCollision(delta: number) {
+    public checkWithPaddleCollision(delta: number, gamedata: GameDataDto) {
         const cornerPaddleArray = [
             { corner: ObjectCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
             { corner: ObjectCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
@@ -77,7 +77,7 @@ export abstract class GameObject {
 
             for (const pos of paddlePos) {
                 const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
-                const { c, d, r } = this.makePaddlePosition(pos);
+                const { c, d, r } = this.makePaddlePosition(pos, gamedata);
                 const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
 
                 if (this.checkCollision(p, q, r, delta)) {
@@ -114,13 +114,12 @@ export abstract class GameObject {
         return minCollisionResult.p !== Number.MAX_VALUE ? minCollisionResult : undefined;
     }
 
-    public clampWithPaddle(pos: PaddlePos) {
-        const paddle = gamedata.paddle;
+    public clampWithPaddle() {
         this.move(0.0001);
     }
 
-    public clampWithWall(pos: CanvasPosition) {
-        const precision = 2;
+    public clampWithWall() {
+        console.log("clampWithWall");
         const min = -1.0 + this.radius * 1.1;
         const max = 1.0 - this.radius * 1.1;
         const x = this.clamp(this.position[0], min, max);
@@ -132,17 +131,17 @@ export abstract class GameObject {
         return Math.min(Math.max(value, min), max);
     }
 
-    public handleWithWallCollision(side: CanvasPosition) {
-        console.error("handleWithWallCollision is not implemented");
+    public handleWithWallCollision(side: CanvasPosition, gamedata: GameDataDto) {
+        console.error("handleWithWallCollision is not implemented" + side);
         return false;
     }
 
-    public handleWithPaddleCollision(paddlePos: PaddlePos) {
-        console.error("handleWithPaddleCollision is not implemented");
+    public handleWithPaddleCollision(paddlePos: PaddlePos, gamedata: GameDataDto) {
+        console.error("handleWithPaddleCollision is not implemented" + paddlePos);
         return false;
     }
 
-    protected makePaddlePosition(paddlePos: PaddlePos) : {c: vec2, d: vec2, r: number} {
+    protected makePaddlePosition(paddlePos: PaddlePos, gamedata: GameDataDto) : {c: vec2, d: vec2, r: number} {
         const paddle = gamedata.paddle;
         let c = vec2.create();
         let d = vec2.create();
@@ -183,7 +182,7 @@ export abstract class GameObject {
     }
 
     protected makeCanvasPosition(canvasPosition: CanvasPosition) {
-        let c;
+        let c ;
         let d;
         let r = 2.0;
 

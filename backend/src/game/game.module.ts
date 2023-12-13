@@ -9,12 +9,13 @@ import { AuthModule } from 'src/auth/auth.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { GameEngine } from './game.engine';
 import { EventsModule } from 'src/events/events.module';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Game]),
-    UserModule,
-    AuthModule,
+    forwardRef(() =>UserModule),
+    forwardRef(() =>AuthModule),
     forwardRef(() => EventsModule),
     NotificationModule,
   ],

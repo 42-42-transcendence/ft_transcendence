@@ -15,11 +15,14 @@ import { AchievementModule } from 'src/achievement/achievement.module';
 import { UserAchievementRepository } from 'src/user-achievement/user-achievement.repository';
 import { AchievementRepository } from 'src/achievement/achievement.repository';
 import { AuthRepository } from 'src/auth/auth.repository';
+import { GameModule } from 'src/game/game.module';
+import { GameService } from 'src/game/game.service';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     forwardRef(() => RelationModule),
+    GameModule,
     TypeOrmModule.forFeature([User]),
     UserAchievementModule,
   ],

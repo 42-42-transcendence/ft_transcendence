@@ -13,6 +13,8 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,6 +33,8 @@ import { userInfo } from 'os';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
+import { DashboardUserDto } from './dto/dashboard-user.dto';
+import { stringify } from 'querystring';
 
 @ApiTags('USER')
 @Controller('api/user')
@@ -52,18 +56,6 @@ export class UserController {
   async getJoinChannels(@Param('id') userID: string): Promise<ChannelMember[]> {
     return this.userService.getJoinChannels(userID);
   }
-
-  // @ApiOperation({
-  //   summary: '유저의 현재 접속한 전체 채널 조회',
-  // })
-  // @ApiOkResponse({
-  //   description: '성공',
-  //   type: [ChannelMember],
-  // })
-  // @Get('dashboard/:targetUserID')
-  // async getDashboards(@Param('id') userID: string): Promise<ChannelMember[]> {
-  //   return this.userService.getJoinChannels(userID);
-  // }
 
   @ApiOperation({
     summary: '유저 이미지 초기 설정',
@@ -101,7 +93,7 @@ export class UserController {
     if (file) {
       return await this.userService.setupImageUser(file, auth);
     }
-    else return { message: 'null image' };
+    else throw new BadRequestException(`입력된 이미지 파일이 없습니다.`);
   }
 
   @ApiOperation({
@@ -117,8 +109,6 @@ export class UserController {
     @GetAuth() auth: Auth,
   ): Promise<{ message: string }> {
      if (userID) {
-      console.log('------------------------- userID -------------------------');
-      // 닉네임 업데이트 요청인 경우
       return await this.userService.createNicknameUser(userID, auth);
     } else return { message: 'wrong nickname' };
   }
@@ -132,7 +122,7 @@ export class UserController {
   })
   @Get('profile/:targetUserID')
   async getUserProfile(@Param('targetUserID') nickname): Promise<UserprofileUserDto> {
-    const createdUser = await this.userService.getUserByNickname(nickname);
+    const createdUser = await this.userService.getUserByNicknameWithException(nickname);
     const achievementslist = await this.userService.getAchievements(createdUser);
     const userprofile = await this.userService.getUserProfile(createdUser, achievementslist);
     return userprofile;
@@ -150,19 +140,21 @@ export class UserController {
     const targetuser = await this.userService.getUserByNicknameWithException(UserID);
     const currentuser = await auth.user;
     const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
-    let tmptype;
-    if (relation == null) {
-      tmptype = RelationTypeEnum.UNKNOWN;
-    }
-    else {
-      tmptype = relation.relationType;
-    }
-    const userinfo = {
-      nickname: targetuser.nickname,
-      image: targetuser.avatar,
-      status: targetuser.status,
-      relation: tmptype,
-    };
-    return userinfo;
+    
+    if (relation == null) return await this.userService.getUserInfo(targetuser, RelationTypeEnum.UNKNOWN);
+    else return await this.userService.getUserInfo(targetuser, relation.relationType);
   }
+
+  @ApiOperation({
+    summary: '유저 전적 보기',
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: [ChannelMember],
+  })
+  @Get('dashboard/:targetUserID')
+  async getDashboards(@Param('targetUserID') userID: string, @GetAuth() auth: Auth): Promise<DashboardUserDto[]> {
+    return await this.userService.getDashboards(userID, auth);
+  }
+
 }

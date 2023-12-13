@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { GameTypeEnum } from '../enums/gameType.enum';
 import { GameModeEnum } from '../enums/gameMode.enum';
 import { ApiProperty} from '@nestjs/swagger';
+import { User } from 'src/user/entities/user.entity';
 //import { User } from '../user/user.entity.ts';
 
 @Entity()
@@ -78,7 +79,7 @@ export class Game {
     example: 'Normal',
     required: true,
   })
-  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT, GameModeEnum.FAST] })
+  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT] })
   gameMode: GameModeEnum;
 
   @ApiProperty({

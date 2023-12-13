@@ -24,11 +24,11 @@ export class Item extends GameObject {
         }
     }
 
-    public handleWithPaddleCollision(paddlePos: PaddlePos, gamedata: GameDataDto) {
+    public handleWithPaddleCollision(paddlePos: PaddlePos, paddle: Paddle[]) {
         if (paddlePos < 3) {
-            this.applyItemEffectToPaddle(gamedata.paddle[0]);
+            this.applyItemEffectToPaddle(paddle[0]);
         } else {
-            this.applyItemEffectToPaddle(gamedata.paddle[1]);
+            this.applyItemEffectToPaddle(paddle[1]);
         }
         this.toBeDestroyed = true;
         return true;

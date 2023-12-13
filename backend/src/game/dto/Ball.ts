@@ -4,6 +4,7 @@ import { GameObject } from "./GameObject";
 import { CanvasPosition } from "../enums/gameEnums";
 import { GameManager } from "./GameManager";
 import { GameDataDto } from "./in-game.dto";
+import { Paddle } from "./Paddle";
 
 export class Ball extends GameObject{
     public handleWithWallCollision(side: CanvasPosition, gamedata: GameDataDto) {
@@ -17,14 +18,14 @@ export class Ball extends GameObject{
             GameManager.scoreUpdate(1, gamedata);
         return true;
     }
-    public handleWithPaddleCollision(paddlePos: PaddlePos, gamedata: GameDataDto) {
+    public handleWithPaddleCollision(paddlePos: PaddlePos, dataPaddle: Paddle[]) {
         let paddle, normalReflect;
         if (paddlePos < 3) {
-            paddle = gamedata.paddle[0];
+            paddle = dataPaddle[0];
             normalReflect = vec2.fromValues(1, 0);
             this.factor = paddle.ballVelocityFactor;
         } else {
-            paddle = gamedata.paddle[1];
+            paddle = dataPaddle[1];
             normalReflect = vec2.fromValues(-1, 0);
             this.factor = paddle.ballVelocityFactor;
         }

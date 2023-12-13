@@ -2,6 +2,7 @@ import { Item } from "./Item";
 import {vec2} from "gl-matrix";
 import PhysicsEngine from "./PhysicsEngine";
 import { GameDataDto } from "./in-game.dto";
+import { Paddle } from "./Paddle";
 
 export class ItemManager {
     private static instance: ItemManager;
@@ -42,8 +43,8 @@ export class ItemManager {
         this.lastItemCreationTime = currentTime;
     }
 
-    public updateItems(delta: number, gamedata: GameDataDto) {
-        this.items.forEach(item => PhysicsEngine.GuaranteeConflict(item, gamedata, delta));
+    public updateItems(delta: number, paddle: Paddle[], gamedata: GameDataDto) {
+        this.items.forEach(item => PhysicsEngine.GuaranteeConflict(item, paddle, gamedata, delta));
         this.items = this.items.filter(item => !item.toBeDestroyed);
     }
 

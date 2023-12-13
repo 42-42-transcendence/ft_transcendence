@@ -13,14 +13,6 @@ export interface GameDataDto {
     delta: number,
 }
 
-export interface GameInfoDto {
-    readonly player1 : string,
-    readonly player2 : string,
-    readonly gameId : string,
-    readonly player1score: number,
-    readonly player2score : number
-}
-
 export interface GameOptionDto {
     player1 : string,
     player1score: number,
@@ -29,13 +21,6 @@ export interface GameOptionDto {
     gametype: GameTypeEnum,
     gamemode: GameModeEnum,
     isActive : boolean
-}
-
-export interface InGameDto { 
-    readonly displayName : string,
-    readonly gameId : string,
-    readonly player1 : string,
-    readonly player2 : string
 }
 
 export interface sendGameDataDto {

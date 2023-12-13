@@ -1,5 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { CanvasPosition, ObjectCorner, PaddlePos } from "../enums/gameEnums";
+import { GameManager } from "./GameManager";
 import { GameDataDto } from "./in-game.dto";
 import { Paddle } from "./Paddle";
 
@@ -64,7 +65,7 @@ export abstract class GameObject {
         return (q >= 0 && q <= l) && p < delta && p > 0;
     }
 
-    public checkWithPaddleCollision(delta: number, gamedata: GameDataDto) {
+    public checkWithPaddleCollision(delta: number, paddle: Paddle[]) {
         const cornerPaddleArray = [
             { corner: ObjectCorner.TopRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightDown] },
             { corner: ObjectCorner.BottomRight, paddlePos: [PaddlePos.RightFront, PaddlePos.RightUp] },
@@ -77,7 +78,7 @@ export abstract class GameObject {
 
             for (const pos of paddlePos) {
                 const ballDirection = vec2.scale(vec2.create(), this.direction, this.velocity * this.factor);
-                const { c, d, r } = this.makePaddlePosition(pos, gamedata);
+                const { c, d, r } = this.makePaddlePosition(pos, paddle);
                 const { p, q } = this.calculateCollision(ballPos, ballDirection, c, d);
 
                 if (this.checkCollision(p, q, r, delta)) {
@@ -132,17 +133,17 @@ export abstract class GameObject {
     }
 
     public handleWithWallCollision(side: CanvasPosition, gamedata: GameDataDto) {
-        console.error("handleWithWallCollision is not implemented" + side);
+        console.error("handleWithWallCollision is not implemented");
         return false;
     }
 
-    public handleWithPaddleCollision(paddlePos: PaddlePos, gamedata: GameDataDto) {
-        console.error("handleWithPaddleCollision is not implemented" + paddlePos);
+    public handleWithPaddleCollision(paddlePos: PaddlePos, paddle: Paddle[]) {
+        console.error("handleWithPaddleCollision is not implemented");
         return false;
     }
 
-    protected makePaddlePosition(paddlePos: PaddlePos, gamedata: GameDataDto) : {c: vec2, d: vec2, r: number} {
-        const paddle = gamedata.paddle;
+    protected makePaddlePosition(paddlePos: PaddlePos, dataPaddle: Paddle[]) : {c: vec2, d: vec2, r: number} {
+        const paddle = dataPaddle;
         let c = vec2.create();
         let d = vec2.create();
         let r : number;

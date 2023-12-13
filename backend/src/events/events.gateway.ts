@@ -100,7 +100,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       });
       await Promise.all(leaveChannels);
 
-      // this.allDeleteGameMatching(user.userID);
+      this.allDeleteGameMatching(user.userID);
       const saveClient = this.eventsService.getClient(user.userID);
       // 현재 client.id와 저장하고 있는 client.id가 같을 때만 client를 지우고, status를 변경한다
       if (client.id === saveClient.id) {
@@ -264,9 +264,39 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  async sendStartGameEvent(user: User, gameID: string) {
-    const client = this.eventsService.getClient(user.userID);
-    client.emit("startGame", gameID);
+/* ------------------ GAME --------------- */
+  async sendStartGameEvent(users: User[], mode: GameModeEnum, type: GameTypeEnum) {
+    const client = this.eventsService.getClient(users[0].userID);
+    const sendclient = this.eventsService.getClient(users[1].userID);
+
+    const gameOptions: GameOptionDto = {
+      player1: users[0].userID,
+      player2: users[1].userID,
+      player1score: 0,
+      player2score: 0,
+      gametype: type,
+      gamemode: mode,
+      isActive: false,
+    }
+
+    const gamedata: GameDataDto = {
+      paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02),
+      scores: [0, 0],
+      lastTime: 0,
+      mode: 'normal',
+      delta: 0,
+    }
+    // 유저 정상 접속 확인
+    console.log("userIDs: %s, %s", users[0].userID, users[1].userID);
+
+    const gameID = await this.eventsService.startGame(users[0].userID, users[1].userID, gameOptions, gamedata);
+    if (gameID) {
+      await this.userService.updateUserStatus(users[0], UserStatus.PLAYING);
+      await this.userService.updateUserStatus(users[1], UserStatus.PLAYING);
+    }
+    client.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
+    sendclient.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
   }
 
   hasAlreadyGameMatching(user: User): boolean {
@@ -281,17 +311,12 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.eventsService.deleteNormalGameQueueUser(userID);
   }
 
-  // deleteFastGameQueueUser(userID: string) {
-  //   this.eventsService.deleteFastGameQueueUser(userID);
-  // }
-
   deleteObjectGameQueueUser(userID: string) {
     this.eventsService.deleteObjectGameQueueUser(userID);
   }
 
   allDeleteGameMatching(userID: string) {
     this.eventsService.deleteNormalGameQueueUser(userID);
-    // this.eventsService.deleteFastGameQueueUser(userID);
     this.eventsService.deleteObjectGameQueueUser(userID);
   }
 
@@ -317,7 +342,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.5, 0.02),
       scores: [0, 0],
       lastTime: 0,
       mode: 'normal',
@@ -335,29 +360,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
     
     // 게임 정상 생성 확인
-    console.log("game ID: ", gameID);
+    console.log("normal game ID: ", gameID);
   }
 
-  // FAST 모드 삭제
-  // async fastGameMatching(user: User, mode: string) {
-  //   const client = this.eventsService.getClient(user.userID);
-  //   const readyUser = await this.eventsService.getReadyFastGameUser();
-  //   if (!readyUser) {
-  //     this.eventsService.addFastGameQueueUser(user.userID);
-  //     return ;
-  //   }
-  //   const readyUserClient = this.eventsService.getClient(readyUser.userID);
-
-  //   // 게임 룸 만들기
-
-  //   await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-  //   await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
-
-  //   client.emit("startGame", '1234');
-  //   readyUserClient.emit("startGame", '1234');
-  // }
-
-  async objectGameMatching(user: User, mode: string, type: GameTypeEnum) {
+  async objectGameMatching(user: User, mode: GameModeEnum, type: GameTypeEnum) {
     const client = this.eventsService.getClient(user.userID);
     const readyUser = await this.eventsService.getReadyObjectGameUser();
     if (!readyUser) {
@@ -367,12 +373,37 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const readyUserClient = this.eventsService.getClient(readyUser.userID);
 
     // 게임 룸 만들기
+    const gameOptions: GameOptionDto = {
+      player1: user.userID,
+      player2: readyUser.userID,
+      player1score: 0,
+      player2score: 0,
+      gametype: type,
+      gamemode: mode,
+      isActive: false,
+    }
 
-    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-    await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+    const gamedata: GameDataDto = {
+      paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 3.0, 0.02),
+      scores: [0, 0],
+      lastTime: 0,
+      mode: 'normal',
+      delta: 0,
+    }
+    // 유저 정상 접속 확인
+    console.log("userIDs: %s, %s", user.userID, readyUser.userID);
 
-    client.emit("startGame", '1234');
-    readyUserClient.emit("startGame", '1234');
+    const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
+    if (gameID) {
+      await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+      await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+    }
+    client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
+    readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
+    
+    // 게임 정상 생성 확인
+    console.log("object game ID: ", gameID);
   }
 
 }

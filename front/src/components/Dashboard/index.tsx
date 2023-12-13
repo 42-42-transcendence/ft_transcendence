@@ -26,7 +26,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRecodes = async () => {
       const ret = await request<Recode[]>(
-        `${SERVER_URL}/api/dashboard/${params.userID}`,
+        `${SERVER_URL}/api/user/dashboard/${params.userID}`,
         {
           method: 'GET',
         }

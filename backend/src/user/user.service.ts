@@ -19,6 +19,7 @@ import { Achievements, achievements } from 'src/achievement/achievement';
 import { UserinfoUserDto } from './dto/userinfo-user.dto';
 import { GameService } from 'src/game/game.service';
 import { DashboardUserDto } from './dto/dashboard-user.dto';
+import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 
 @Injectable()
 export class UserService {
@@ -112,13 +113,12 @@ export class UserService {
 	async setupImageUser(file: Express.Multer.File, auth: Auth): Promise<{ message: string }> {
 		console.log(file);
 		if (file.size > 3000000){
-			throw new BadRequestException(`파일 크기가 10MB를 넘습니다.`);
+			throw new BadRequestException(`파일 크기가 3MB를 넘습니다.`);
 		}
 		console.log((await auth.user).nickname);
 		const authuid = (await auth.user).userID; // image size, image 확장자 검사 한 번 더 필요
 		const extension = file.originalname.split('.').pop();
 		if (extension != 'jpeg' && extension != 'png' && extension != 'jpg' && extension != 'gif'){
-			console.log('-----------asdfas-df-asdf-asdf-asdf-a-sdf-asdf-----------asdf-adsf-ads-f-adsf-asdf-zvxc-cxz-v-vzcx-zxvc-zxcv-zxvc-sdfa----');
 			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg)`);
 		}
 		const filePath = path.join(__dirname, `../../assets/profiles/${authuid}.${extension}`);
@@ -231,5 +231,24 @@ export class UserService {
 	// type: 'ladder' | 'friendly';	- targetUserID에서 가져오고, user.game.gametype 확인
 	// score: string;			- targetUserID에서 가져오고, user.game.score 출력
 	// datetime으로 user1games와 user2games 번갈아가면서 스택 top 확인하면서 꺼내기
+	}
+
+	async endGameUser(nickname : string, matchId : string, isWin:boolean) : Promise<void> {
+		const user = await this.getUserByNicknameWithException(nickname);
+		const game = await this.gameservice.findGameById(matchId);
+		if (user) {
+			user.matchHistory.push(matchId);
+			if (isWin === true) {
+				user.win += 1;
+				if (game.gameType === GameTypeEnum.LADDER)
+					user.point += 20;
+			}
+			else {
+				user.lose += 1;
+				if (game.gameType === GameTypeEnum.LADDER)
+					user.point -= 20;
+			}
+			await this.userRepository.save(user);
+		}
 	}
 }

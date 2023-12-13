@@ -13,6 +13,8 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -91,7 +93,7 @@ export class UserController {
     if (file) {
       return await this.userService.setupImageUser(file, auth);
     }
-    else return { message: 'null image' };
+    else throw new BadRequestException(`입력된 이미지 파일이 없습니다.`);
   }
 
   @ApiOperation({
@@ -107,8 +109,6 @@ export class UserController {
     @GetAuth() auth: Auth,
   ): Promise<{ message: string }> {
      if (userID) {
-      console.log('------------------------- userID -------------------------');
-      // 닉네임 업데이트 요청인 경우
       return await this.userService.createNicknameUser(userID, auth);
     } else return { message: 'wrong nickname' };
   }
@@ -122,7 +122,7 @@ export class UserController {
   })
   @Get('profile/:targetUserID')
   async getUserProfile(@Param('targetUserID') nickname): Promise<UserprofileUserDto> {
-    const createdUser = await this.userService.getUserByNickname(nickname);
+    const createdUser = await this.userService.getUserByNicknameWithException(nickname);
     const achievementslist = await this.userService.getAchievements(createdUser);
     const userprofile = await this.userService.getUserProfile(createdUser, achievementslist);
     return userprofile;

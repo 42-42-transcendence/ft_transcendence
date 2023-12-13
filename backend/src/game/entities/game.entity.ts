@@ -79,7 +79,7 @@ export class Game {
     example: 'Normal',
     required: true,
   })
-  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT, GameModeEnum.FAST] })
+  @Column({ type: 'enum', enum: [GameModeEnum.NORMAL, GameModeEnum.OBJECT] })
   gameMode: GameModeEnum;
 
   @ApiProperty({

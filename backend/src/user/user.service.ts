@@ -98,7 +98,7 @@ export class UserService {
 		if (userID.length < 4 && userID.length > 8) {
 			throw new BadRequestException(`닉네임이 너무 짧습니다.`);
 		}
-		const user = await this.getUserByNicknameWithException(userID);
+		const user = await this.getUserByNickname(userID);
 		if (user) {
 		throw new BadRequestException(`${userID}를 가진 유저가 이미 있습니다.`);
 		}

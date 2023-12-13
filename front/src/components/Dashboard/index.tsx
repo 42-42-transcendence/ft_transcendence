@@ -11,7 +11,7 @@ export type Recode = {
   id: string;
   nickname: string;
   image: string;
-  mode: 'normal' | 'ai' | 'object';
+  mode: 'normal' | 'object';
   isWin: boolean;
   type: 'ladder' | 'friendly';
   score: string;

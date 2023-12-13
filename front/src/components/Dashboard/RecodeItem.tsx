@@ -11,7 +11,7 @@ const RecodeItem = ({ recode }: Props) => {
     <li className={styles.item}>
       <h3>VS</h3>
       <AvatarImage imageURI={recode.image} radius="64px" />
-      <div>{recode.id}</div>
+      <div>{recode.nickname}</div>
       <div className={recode.isWin ? styles.win : styles.lose}>
         {recode.score}
       </div>

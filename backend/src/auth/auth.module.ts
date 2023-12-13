@@ -34,6 +34,6 @@ import { AchievementRepository } from 'src/achievement/achievement.repository';
     UserAchievementRepository,
     AchievementRepository,
   ],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  exports: [AuthService, JwtStrategy, PassportModule, AuthRepository],
 })
 export class AuthModule {}

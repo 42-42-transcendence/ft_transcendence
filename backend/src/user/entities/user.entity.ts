@@ -73,50 +73,6 @@ export class User {
   lose: number;
 
   @ApiProperty({
-    description: '래더 승리 횟수',
-    example: '0',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 0,
-  })
-  ladderwin: number;
-
-  @ApiProperty({
-    description: '래더 패배 횟수',
-    example: '0',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 0,
-  })
-  ladderlose: number;
-
-  @ApiProperty({
-    description: '래더 승리 횟수',
-    example: '0',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 0,
-  })
-  friendlywin: number;
-
-  @ApiProperty({
-    description: '래더 패배 횟수',
-    example: '0',
-    required: true,
-  })
-  @Column({
-    nullable: false,
-    default: 0,
-  })
-  friendlylose: number;
-
-  @ApiProperty({
     description: '랭크 점수',
     example: '1000',
     required: true,
@@ -141,6 +97,12 @@ export class User {
     default: false,
   })
   isActiveOtp: boolean;
+
+  @ApiProperty({
+    description: 'GameId',
+    example: 'uuid',
+  })
+  matchHistory: string[];
 
   // @Column({
   //   nullable: false,
@@ -180,9 +142,5 @@ export class User {
   })
   notifications: Promise<Notification[]>
 
-  // @OneToMany(() => Game, (game) => game.playerOne)
-  // initiatedGames: Game[];
-
-  // @OneToMany(() => Game, (game) => game.playerTwo)
-  // joinedGames: Game[];
+  
 }

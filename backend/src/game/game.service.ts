@@ -26,7 +26,7 @@ interface Pair {
 @Injectable()
 export class GameService {
     constructor(@InjectRepository(Game) private gameRepository : Repository<Game>,
-                private userService : UserService,
+                @Inject(forwardRef(() => UserService)) private userService : UserService,
                 @Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
                 @Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine) {}
 

@@ -31,6 +31,8 @@ import { userInfo } from 'os';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
+import { DashboardUserDto } from './dto/dashboard-user.dto';
+import { stringify } from 'querystring';
 
 @ApiTags('USER')
 @Controller('api/user')
@@ -52,18 +54,6 @@ export class UserController {
   async getJoinChannels(@Param('id') userID: string): Promise<ChannelMember[]> {
     return this.userService.getJoinChannels(userID);
   }
-
-  // @ApiOperation({
-  //   summary: '유저의 현재 접속한 전체 채널 조회',
-  // })
-  // @ApiOkResponse({
-  //   description: '성공',
-  //   type: [ChannelMember],
-  // })
-  // @Get('dashboard/:targetUserID')
-  // async getDashboards(@Param('id') userID: string): Promise<ChannelMember[]> {
-  //   return this.userService.getJoinChannels(userID);
-  // }
 
   @ApiOperation({
     summary: '유저 이미지 초기 설정',
@@ -150,19 +140,21 @@ export class UserController {
     const targetuser = await this.userService.getUserByNicknameWithException(UserID);
     const currentuser = await auth.user;
     const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
-    let tmptype;
-    if (relation == null) {
-      tmptype = RelationTypeEnum.UNKNOWN;
-    }
-    else {
-      tmptype = relation.relationType;
-    }
-    const userinfo = {
-      nickname: targetuser.nickname,
-      image: targetuser.avatar,
-      status: targetuser.status,
-      relation: tmptype,
-    };
-    return userinfo;
+    
+    if (relation == null) return await this.userService.getUserInfo(currentuser, RelationTypeEnum.UNKNOWN);
+    else return await this.userService.getUserInfo(currentuser, relation.relationType);
   }
+
+  @ApiOperation({
+    summary: '유저 전적 보기',
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: [ChannelMember],
+  })
+  @Get('dashboard/:targetUserID')
+  async getDashboards(@Param('targetUserID') userID: string, @GetAuth() auth: Auth): Promise<DashboardUserDto[]> {
+    return await this.userService.getDashboards(userID, auth);
+  }
+
 }

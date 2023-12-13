@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { GameTypeEnum } from '../enums/gameType.enum';
 import { GameModeEnum } from '../enums/gameMode.enum';
 import { ApiProperty} from '@nestjs/swagger';
+import { User } from 'src/user/entities/user.entity';
 //import { User } from '../user/user.entity.ts';
 
 @Entity()

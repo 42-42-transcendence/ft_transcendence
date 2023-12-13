@@ -91,13 +91,8 @@ export class UserService {
 	}
 	
 	async createNicknameUser(userID: string, auth: Auth): Promise<{ message: string }> {
-		// assests/profiles/authUID.png
-		// ㄴ 만약 authUID가 있는지는, 어차피 writeFile은 덮어씌움
-		// user 객체가 이미 있으면, 그냥 return?
-		// image size, image 확장자 검사 한 번 더
-		// nickname 중복검사
 		if (userID.length < 4 && userID.length > 8) {
-			throw new BadRequestException(`닉네임이 너무 짧습니다.`);
+			throw new BadRequestException(`닉네임 길이가 너무 짧거나 깁니다.`);
 		}
 		const user = await this.getUserByNickname(userID);
 		if (user) {
@@ -116,7 +111,7 @@ export class UserService {
 			throw new BadRequestException(`파일 크기가 3MB를 넘습니다.`);
 		}
 		console.log((await auth.user).nickname);
-		const authuid = (await auth.user).userID; // image size, image 확장자 검사 한 번 더 필요
+		const authuid = (await auth.user).userID; 
 		const extension = file.originalname.split('.').pop();
 		if (extension != 'jpeg' && extension != 'png' && extension != 'jpg' && extension != 'gif'){
 			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg)`);
@@ -144,24 +139,20 @@ export class UserService {
 
   	async getAchievements(user: User): Promise<UserAchievementlistDto[]> {
 		const retlist: UserAchievementlistDto[] = [];
-		const cham: boolean[] =[true, false, false, false, false, false, false, false, false, false];
-    	if (user.win >= 1 || user.lose >= 1) cham[1] = true;
-    	if (user.win >= 1) cham[2] = true;
-		if (user.win >= 11) cham[3] = true;
-    	if (user.win >= 12) cham[4] = true;
-		if (user.win >= 13) cham[5] = true;
-    	if (user.win >= 14) cham[6] = true;
-		if (user.win >= 15) cham[7] = true;
-    	if (user.win >= 16) cham[8] = true;
-		if (user.win >= 17) cham[9] = true;
+    	if (user.win >= 1 || user.lose >= 1) user.userAchievementbool[1] = true;
+		if (user.win >= 1) user.userAchievementbool[2] = true;
+		if (user.win >= 10) user.userAchievementbool[3] = true;
+    	if (user.win >= 42) user.userAchievementbool[4] = true;
+
 		for (let i = 0; i < 10; i ++){
 			retlist.push({
 				id: achievements[i].id,
 				title: achievements[i].name,
 				description: achievements[i].description,
-				isAchieved: cham[i]
+				isAchieved: user.userAchievementbool[i]
 			})
 		}
+		await this.userRepository.save(user);
 		return retlist;
 		// return this.userRepository.getAchivements(User);
   	}
@@ -241,12 +232,24 @@ export class UserService {
 			if (isWin === true) {
 				user.win += 1;
 				if (game.gameType === GameTypeEnum.LADDER)
+				{
+					user.userAchievementbool[6] = true;
 					user.point += 20;
+					if (user.point >= 1200)
+						user.userAchievementbool[7] = true;
+					if (user.point >= 1400)
+						user.userAchievementbool[8] = true;
+					if (user.point >= 1600)	
+						user.userAchievementbool[9] = true;
+				}
 			}
 			else {
 				user.lose += 1;
 				if (game.gameType === GameTypeEnum.LADDER)
+				{
+					
 					user.point -= 20;
+				}
 			}
 			await this.userRepository.save(user);
 		}

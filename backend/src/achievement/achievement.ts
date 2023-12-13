@@ -25,47 +25,47 @@ export const achievements: Achievement[] = [
   },
   {
     id: Achievements.FIRSTGAME,
+    name: '🤺',
+    description: '첫 경기!',
+  },
+  {
+    id: Achievements.FIRSTGAME,
     name: '🎉',
     description: '첫 승리를 따내셨군요!',
   },
   {
-    id: Achievements.FIRSTWIN,
-    name: '🧑‍🤝‍🧑',
-    description: '새 친구를 만들자',
-  },
-  {
     id: Achievements.FOUR,
-    name: '🥊',
-    description: '첫 랭크 게임 도전',
-  },
-  {
-    id: Achievements.FIVE,
-    name: '🧹',
-    description: '퍼펙트 게임 성공!',
-  },
-  {
-    id: Achievements.SIX,
-    name: '🔟',
+    name: '😏',
     description: '10승 달성!',
   },
   {
-    id: Achievements.SEVEN,
-    name: '4️⃣2️⃣',
+    id: Achievements.FIVE,
+    name: '😎',
     description: '42승 달성!',
   },
   {
+    id: Achievements.SIX,
+    name: '🤕',
+    description: '첫 패배...',
+  },
+  {
+    id: Achievements.SEVEN,
+    name: '🎖',
+    description: '첫 랭크 게임 완료!',
+  },
+  {
     id: Achievements.EIGHT,
-    name: '💯',
-    description: '100승 달성!',
+    name: '🥉',
+    description: 'Bronze 등급 달성! (Rating 1200 ↑)',
   },
   {
     id: Achievements.NINE,
-    name: '🚫',
-    description: '첫 차단',
+    name: '🥈',
+    description: 'Silver 등급 달성! (Rating 1400 ↑)',
   },
   {
     id: Achievements.TEN,
-    name: '🕶️',
-    description: '랭킹 1등',
+    name: '🥇',
+    description: 'Gold 등급 달성! (Rating 1600 ↑)',
   },
 ];

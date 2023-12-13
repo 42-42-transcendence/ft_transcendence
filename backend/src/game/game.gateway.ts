@@ -22,8 +22,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   	constructor(@Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine,
 				@Inject(forwardRef(() => GameService)) private gameService: GameService,
                 private authService: AuthService,
-                private userService: UserService) {}
-
+                @Inject(forwardRef(() => UserService)) private userService : UserService,
+                ) {}
   afterInit() {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {

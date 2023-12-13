@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { actions as authActions } from '../../store/Auth/auth';
 import useRequest from '../../http/useRequest';
 import loadingImage from '../../assets/loading.gif';
+import editIcon from '../../assets/edit-icon.svg';
 
 type Props = {
   jwtToken: string;
@@ -98,10 +99,13 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
   return (
     <form className={styles.form} onSubmit={submitHandler}>
       <div className={styles.avatar}>
-        <label htmlFor="avatar">
+        <label htmlFor="avatar" className={styles['avatar-label']}>
           <div>프로필 이미지</div>
           <div>
             <AvatarImage imageURI={avatarFileURI} radius="200px" />
+          </div>
+          <div className={styles['edit-icon-wrapper']}>
+            <img src={editIcon} alt="avatar edit icon" />
           </div>
         </label>
         <input

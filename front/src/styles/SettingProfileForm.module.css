@@ -79,3 +79,16 @@
   width: 16px;
   fill: #646970;
 }
+
+.avatar-label {
+  position: relative;
+}
+
+.edit-icon-wrapper {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background-color: var(--active-color);
+  padding: 8px;
+  border-radius: 50%;
+}

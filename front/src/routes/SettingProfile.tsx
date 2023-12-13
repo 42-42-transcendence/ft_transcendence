@@ -11,7 +11,8 @@ const SettingProfilePage = () => {
 
   return (
     <main>
-      <h1>초기 설정</h1>
+      <h1>초기 프로필 설정</h1>
+      <p>아바타 및 닉네임을 설정하세요.</p>
       <SettingProfileForm jwtToken={jwtToken} />
     </main>
   );

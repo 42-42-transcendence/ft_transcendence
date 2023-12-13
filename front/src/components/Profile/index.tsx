@@ -124,11 +124,7 @@ const Profile = () => {
           hidden={true}
         />
         <div className={styles['edit-icon-wrapper']}>
-          <img
-            className={styles['edit-icon']}
-            src={editIcon}
-            alt="avatar edit icon"
-          />
+          <img src={editIcon} alt="avatar edit icon" />
         </div>
       </label>
       <button

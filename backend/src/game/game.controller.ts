@@ -103,14 +103,11 @@ export class GameController {
       throw new BadRequestException(`${sendUser.nickname}님은 현재 게임을 할 수 있는 상태가 아닙니다.`);
     }
 
-    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-
     // 여기에서 game방 객체를 만들던, gameID를 generate하던 gameID를 생성해줘야함
-    // gameType = PRIVATE
-    await this.eventsGateway.sendStartGameEvent(user, '1234');
-    // this.gameService.creategame() 
-    await this.eventsGateway.sendStartGameEvent(sendUser, '1234');
+    const type = GameTypeEnum.PRIVATE;
+    const mode = GameModeEnum.NORMAL;
+    const players = [user, sendUser];
+    await this.eventsGateway.sendStartGameEvent(players, mode, type);
 
     return ({ message: `${user.nickname}님이 성공적으로 게임을 수락하셨습니다.` });
   }
@@ -136,10 +133,6 @@ export class GameController {
     if (mode === GameModeEnum.NORMAL) {
       await this.eventsGateway.normalGameMatching(user, mode, type);
     }
-    // FAST 삭제
-    // else if (mode === GameModeEnum.FAST) {
-    //   await this.eventsGateway.fastGameMatching(user, mode);
-    // }
     else if (mode === GameModeEnum.OBJECT) {
       await this.eventsGateway.objectGameMatching(user, mode, type);
     }
@@ -167,9 +160,6 @@ export class GameController {
     if (mode === GameModeEnum.NORMAL) {
       this.eventsGateway.deleteNormalGameQueueUser(user.userID);
     }
-    // else if (mode === GameModeEnum.FAST) {
-    //   this.eventsGateway.deleteFastGameQueueUser(user.userID);
-    // }
     else if (mode === GameModeEnum.OBJECT) {
       this.eventsGateway.deleteObjectGameQueueUser(user.userID);
     }
@@ -185,7 +175,7 @@ export class GameController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Get('인게임/요청')
+  @Post('match/startAI')
   @UseGuards(AuthGuard())
   async changeAIUserStatus(
     @GetAuth() auth: Auth,
@@ -202,7 +192,7 @@ export class GameController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Get('인게임/요청')
+  @Post('match/exitAI')
   @UseGuards(AuthGuard())
   async changeAIUserStatusExit(
     @GetAuth() auth: Auth,

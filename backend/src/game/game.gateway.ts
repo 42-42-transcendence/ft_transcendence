@@ -4,12 +4,13 @@ import { GameService } from "./game.service";
 import { GameDataDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 import { UserStatus } from 'src/user/enums/user-status.enum';;
-import { forwardRef, Inject } from '@nestjs/common';;
+import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
 import { GameEngine } from './game.engine';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from 'src/auth/auth.service';
+import { SocketExceptionFilter } from 'src/events/socket.filter';
 
-
+@UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
     namespace: 'game',
     cors: {

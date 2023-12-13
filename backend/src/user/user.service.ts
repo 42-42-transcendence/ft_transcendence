@@ -233,8 +233,7 @@ export class UserService {
 	// datetime으로 user1games와 user2games 번갈아가면서 스택 top 확인하면서 꺼내기
 	}
 
-	async endGameUser(nickname : string, matchId : string, isWin:boolean) : Promise<void> {
-		const user = await this.getUserByNicknameWithException(nickname);
+	async endGameUser(user: User, matchId : string, isWin:boolean) : Promise<void> {
 		const game = await this.gameservice.findGameById(matchId);
 		if (user) {
 			user.matchHistory.push(matchId);

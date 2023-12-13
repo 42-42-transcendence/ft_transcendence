@@ -3,14 +3,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Game } from "./entities/game.entity";;
 import { UserService } from "../user/user.service";
-import { GameDataDto, GameInfoDto, InGameDto } from "./dto/in-game.dto";
-// import { GameInfoDto } from "./dto/in-game.dto";
+import { GameDataDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
-// import { GameObjectsDto } from "./dto/game-data.dto";
-import { User } from 'src/user/entities/user.entity';
 import { GameEngine} from './game.engine';
 import { UserStatus } from 'src/user/enums/user-status.enum';
-import { UserRepository } from 'src/user/user.repository';
 
 interface Pair {
     gameId : string;
@@ -21,7 +17,6 @@ interface Pair {
 export class GameService {
     constructor(@InjectRepository(Game) private gameRepository : Repository<Game>,
                 @Inject(forwardRef(() => UserService)) private userService : UserService,
-                private userRepository: UserRepository,
                 @Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine) {}
 
     private playerToGameId: Map<string, Pair> = new Map();
@@ -158,13 +153,13 @@ export class GameService {
             game.finished = true;
             if (Number(game.player1Score) > Number(game.player2Score)){
                 game.winner = game.player1;
-                this.endGameUser((await this.userService.getUserById(game.player1)), gameId, true);
-                this.endGameUser((await this.userService.getUserById(game.player2)), gameId, false);
+                this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, true);
+                this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, false);
             }
             else if (Number(game.player1Score) < Number(game.player2Score)){
                 game.winner = game.player2;
-                this.endGameUser((await this.userService.getUserById(game.player1)), gameId, false);
-                this.endGameUser((await this.userService.getUserById(game.player2)), gameId, true);
+                this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, false);
+                this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, true);
             }
             await this.gameRepository.save(game);
             this.deleteGameData(gameId);
@@ -180,14 +175,14 @@ export class GameService {
             if (game.player1 === userId) {
                 game.player2Score = 42;
                 game.winner = game.player2;
-                this.endGameUser((await this.userService.getUserById(game.player1)), gameId, false);
-                this.endGameUser((await this.userService.getUserById(game.player2)), gameId, true);
+                this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, false);
+                this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, true);
             }
             else {
                 game.player1Score = 42;
                 game.winner = game.player1;
-                this.endGameUser((await this.userService.getUserById(game.player1)), gameId, true);
-                this.endGameUser((await this.userService.getUserById(game.player2)), gameId, false);
+                this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, true);
+                this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, false);
             }
             await this.gameRepository.save(game);
             return true;
@@ -234,20 +229,5 @@ export class GameService {
 
     async getGameOptions(gameId : string) : Promise<GameOptionDto> {
         return this.gameIdToGameOption.get(gameId);
-    }
-
-    async endGameUser(user: User, matchId : string, isWin:boolean) : Promise<void> {
-        if (user) {
-            user.matchHistory.push(matchId);
-            if (isWin === true) {
-                user.win += 1;
-                user.point += 20;
-            }
-            else {
-                user.lose += 1;
-                user.point -= 20;
-            }
-            await this.userRepository.save(user);
-        }
     }
 }

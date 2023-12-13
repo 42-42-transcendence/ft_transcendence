@@ -74,7 +74,7 @@ const Profile = () => {
   };
 
   const avatarPatchHandler = async () => {
-    setEnteredAvatarFile(null);
+    setFeedbackMessage('');
     if (enteredAvatarFile === null) {
       setFeedbackMessage('입력된 파일이 없습니다.');
       return;
@@ -85,7 +85,6 @@ const Profile = () => {
       setFeedbackMessage('이미지 파일 크기는 최대 3MB입니다.');
       return;
     }
-    setFeedbackMessage('');
 
     const formData = new FormData();
     if (enteredAvatarFile !== null)
@@ -97,10 +96,6 @@ const Profile = () => {
         body: formData,
       }
     );
-
-    if (ret !== null) {
-      fetchProfile();
-    }
   };
 
   if (isLoading) return <img src={loadingImage} alt="loading" />;
@@ -127,12 +122,14 @@ const Profile = () => {
           <img src={editIcon} alt="avatar edit icon" />
         </div>
       </label>
-      <button
-        className={styles['avatar-patch-button']}
-        onClick={avatarPatchHandler}
-      >
-        Apply
-      </button>
+      {enteredAvatarFile !== null && (
+        <button
+          className={styles['avatar-patch-button']}
+          onClick={avatarPatchHandler}
+        >
+          Apply
+        </button>
+      )}
       <span className={styles.feedback}>{feedbackMessage}</span>
     </>
   );

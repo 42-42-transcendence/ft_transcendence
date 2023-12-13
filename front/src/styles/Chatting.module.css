@@ -36,6 +36,9 @@
 .member .staff {
   color: var(--staff-color);
 }
+.member.me {
+  border: 1px solid var(--active-color);
+}
 
 .contents {
   width: 50vw;

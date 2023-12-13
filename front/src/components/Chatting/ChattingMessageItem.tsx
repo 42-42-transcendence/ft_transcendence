@@ -23,6 +23,7 @@ const formatTimeToHHMM = (dateStr: string): string => {
 
 const ChattingMessageItem = ({ message, image }: Props) => {
   const userState = useUserState();
+
   if (message.chatType === 'system') {
     return (
       <li className={styles['message-item']}>

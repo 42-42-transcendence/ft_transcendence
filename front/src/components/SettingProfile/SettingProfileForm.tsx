@@ -1,5 +1,5 @@
 import styles from '../../styles/SettingProfileForm.module.css';
-import defaultThumNailURI from '../../assets/42logo.svg';
+import defaultThumNailURI from '../../assets/default.jpeg';
 import AvatarImage from '../../UI/AvatarImage';
 import { useEffect, useState } from 'react';
 import { SERVER_URL } from '../../App';

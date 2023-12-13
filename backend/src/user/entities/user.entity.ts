@@ -57,7 +57,7 @@ export class User {
   })
   @Column({
     nullable: false,
-    default: 20,
+    default: 0,
   })
   win: number;
 

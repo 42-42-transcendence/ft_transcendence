@@ -207,7 +207,7 @@ export class UserService {
 	const user = await this.getUserByNicknameWithException(targetuserID);
 	const retDashboards: DashboardUserDto[] = [];
 	if(!user.matchHistory)
-		throw new BadRequestException(`유저 게임 전적이 아직 없습니다.`);
+		return retDashboards;
 	for (let i = 0; i < user.matchHistory.length; i++){
 		const currentgame = await this.gameservice.findGameById(user.matchHistory[0]);
 		const targetUser:User = currentgame.player1 === user.nickname ? await this.getUserByNicknameWithException(currentgame.player2) : await this.getUserByNicknameWithException(currentgame.player1);

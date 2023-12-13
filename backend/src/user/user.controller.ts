@@ -141,8 +141,8 @@ export class UserController {
     const currentuser = await auth.user;
     const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
     
-    if (relation == null) return await this.userService.getUserInfo(currentuser, RelationTypeEnum.UNKNOWN);
-    else return await this.userService.getUserInfo(currentuser, relation.relationType);
+    if (relation == null) return await this.userService.getUserInfo(targetuser, RelationTypeEnum.UNKNOWN);
+    else return await this.userService.getUserInfo(targetuser, relation.relationType);
   }
 
   @ApiOperation({

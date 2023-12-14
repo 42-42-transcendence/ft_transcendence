@@ -89,32 +89,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.to(player2).emit("updateGame", sendGameDataDto);
   }
 
-//   async updateScores(data: Number[]) {
-//     const game : GameOptionDto = await this.gameService.getGameOptions(gameId);
-//     const player1 = game.player1;
-//     const player2 = game.player2;
-
-//     this.server.to(player1).emit("scoreUpdate", data);
-//     this.server.to(player2).emit("scoreUpdate", data);
-//   }
-
   @SubscribeMessage('KeyRelease')
   onKeyRelease(@ConnectedSocket() client: Socket) : void {
     const Pair = this.gameService.getPair(client.id);
     const gamedata = this.gameService.getGameData(Pair.gameId);
     const leftPaddle = gamedata.paddle[0];
     const rightPaddle = gamedata.paddle[1];
-    const delta = this.gameEngine.getDelta();
 
     if (Pair) {
         if (Pair.isFirst){
             leftPaddle.keyPress.up = false;
             leftPaddle.keyPress.down = false;
-            leftPaddle.updatePosition(delta);
         } else{
             rightPaddle.keyPress.up = false;
             rightPaddle.keyPress.down = false;
-            rightPaddle.updatePosition(delta);
         }
     }
 }
@@ -125,15 +113,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const gamedata = this.gameService.getGameData(Pair.gameId);
         const leftPaddle = gamedata.paddle[0];
         const rightPaddle = gamedata.paddle[1];
-        const delta = this.gameEngine.getDelta();
 
         if (Pair) {
             if (Pair.isFirst){
                 leftPaddle.keyPress.up = true;
-                leftPaddle.updatePosition(delta);
             } else{
                 rightPaddle.keyPress.up = true;
-                rightPaddle.updatePosition(delta);
             }
         }
     }
@@ -144,15 +129,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const gamedata = this.gameService.getGameData(Pair.gameId);
         const leftPaddle = gamedata.paddle[0];
         const rightPaddle = gamedata.paddle[1];
-        const delta = this.gameEngine.getDelta();
 
         if (Pair) {
             if (Pair.isFirst){
                 leftPaddle.keyPress.down = true;
-                leftPaddle.updatePosition(delta);
             } else{
                 rightPaddle.keyPress.down = true;
-                rightPaddle.updatePosition(delta);
             }
         }
     }

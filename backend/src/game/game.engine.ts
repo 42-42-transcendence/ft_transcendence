@@ -18,11 +18,8 @@ let sendData: sendGameDataDto = {
 export class GameEngine {
 	constructor(@Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
 				@Inject(forwardRef(() => GameService)) private gameService: GameService) {}
-    private lastTime: number = 0;
-    public delta: number = 0;
     
-    async updateGame(delta: number, gameId: string): Promise<void> {
-        let gamedata = this.gameService.getGameData(gameId);
+    async updateGame(delta: number, gamedata: GameDataDto): Promise<void> {
         if (gamedata.mode === 'object') {
 		/* 아이템 생성 */
 		ItemManager.getInstance().createItem();
@@ -50,6 +47,8 @@ export class GameEngine {
     @Interval(20)
     async startGameLoop(gameId: string): Promise<void> {
         const gameData = this.gameService.getGameData(gameId);
+        if (gameData.lastTime === 0)
+            gameData.lastTime = new Date().getTime();
         if (gameData.scores[0] === 5 || gameData.scores[1] === 5){
             (await this.gameService.getGameOptions(gameId)).isActive = false;
             const sendData = this.updateSendData(gameData);
@@ -58,16 +57,12 @@ export class GameEngine {
             return ;
         }
         const timeStamp = new Date().getTime();
-        gameData.delta = (timeStamp - this.lastTime) / 1000.0;
+        let delta = (timeStamp - gameData.lastTime) / 1000.0;
 
-        await this.updateGame(gameData.delta, gameId);
+        await this.updateGame(delta, gameData);
         const sendData = this.updateSendData(gameData);
         this.gameGateway.emitGameData(sendData, gameId);
     
-        this.lastTime = timeStamp;
-    }
-
-    getDelta(): number {
-        return this.delta;
+        gameData.lastTime = timeStamp;
     }
 }

@@ -281,7 +281,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.5, 0.02),
       scores: [0, 0],
       lastTime: 0,
       mode: 'normal',

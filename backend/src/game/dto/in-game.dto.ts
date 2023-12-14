@@ -10,7 +10,6 @@ export interface GameDataDto {
 	scores: number[],
 	lastTime: number,
 	mode: string,
-    delta: number,
 }
 
 export interface GameOptionDto {

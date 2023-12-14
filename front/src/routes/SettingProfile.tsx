@@ -5,8 +5,8 @@ const SettingProfilePage = () => {
   const location = useLocation();
   const jwtToken = location.state?.jwtToken;
 
-  if (jwtToken === null) {
-    return <Navigate to="/login" replace={true} />;
+  if (!jwtToken) {
+    return <Navigate to="/" replace={true} />;
   }
 
   return (

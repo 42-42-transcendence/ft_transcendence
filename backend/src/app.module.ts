@@ -17,6 +17,8 @@ import { EventsModule } from './events/events.module';
 import { NotificationModule } from './notification/notification.module';
 import { OtpModule } from './otp/otp.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -38,6 +40,9 @@ import { MulterModule } from '@nestjs/platform-express';
     OtpModule,
     MulterModule.register({
       dest: '../assets/images',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client', 'build'),
     }),
   ],
   controllers: [AppController],

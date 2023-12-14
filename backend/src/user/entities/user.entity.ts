@@ -94,9 +94,7 @@ export class User {
     description: '도전과제 달성 여부 리스트',
     example: '[{it, title, description}]',
   })
-  @Column({
-    default: [true, false, false, false, false, false, false, false, false, false]
-  })
+  @Column('boolean', { array: true, default: '{true, false, false, false, false, false, false, false, false, false}' })
   userAchievementbool: boolean[];
 
   @Column({ nullable: true })

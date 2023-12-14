@@ -50,7 +50,7 @@ export class GameEngine {
     @Interval(20)
     async startGameLoop(gameId: string): Promise<void> {
         const gameData = this.gameService.getGameData(gameId);
-        if (gameData.scores[0] == 5 || gameData.scores[1] == 5){
+        if (gameData.scores[0] === 5 || gameData.scores[1] === 5){
             (await this.gameService.getGameOptions(gameId)).isActive = false;
             const sendData = this.updateSendData(gameData);
             this.gameGateway.emitGameData(sendData, gameId);

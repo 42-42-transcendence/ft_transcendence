@@ -112,15 +112,13 @@ export class EventsService {
     }
 
     async deleteObjectGameQueueUser(userID: string) {
-        const index = this.normalGameQueue.indexOf(userID);
+        const index = this.objectGameQueue.indexOf(userID);
         const gameId = await this.gameService.getPlayerGameId(userID);
 
         if (index !== -1) {            
             if (gameId)
                 this.gameService.cancelGame(userID, gameId, "cancel");
-            else {
-                this.gameService.cancelGame(userID, gameId, "cancel");
-            }
+            this.objectGameQueue.splice(index, 1);
         }
     }
 

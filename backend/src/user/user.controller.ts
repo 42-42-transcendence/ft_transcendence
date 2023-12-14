@@ -110,7 +110,8 @@ export class UserController {
   ): Promise<{ message: string }> {
      if (userID) {
       return await this.userService.createNicknameUser(userID, auth);
-    } else return { message: 'wrong nickname' };
+    } else throw new BadRequestException(`nickname 형식이 잘못되었습니다.`);
+
   }
 
   @ApiOperation({
@@ -141,7 +142,7 @@ export class UserController {
     const currentuser = await auth.user;
     const relation = (await this.RelationService.getRelationByUsersWithunknown(currentuser, targetuser));
     
-    if (relation == null) return await this.userService.getUserInfo(targetuser, RelationTypeEnum.UNKNOWN);
+    if (relation === null) return await this.userService.getUserInfo(targetuser, RelationTypeEnum.UNKNOWN);
     else return await this.userService.getUserInfo(targetuser, relation.relationType);
   }
 

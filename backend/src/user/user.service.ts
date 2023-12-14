@@ -91,7 +91,7 @@ export class UserService {
 	}
 	
 	async createNicknameUser(userID: string, auth: Auth): Promise<{ message: string }> {
-		if (userID.length < 4 && userID.length > 8) {
+		if (userID.length < 4 || userID.length > 8) {
 			throw new BadRequestException(`닉네임 길이가 너무 짧거나 깁니다.`);
 		}
 		const user = await this.getUserByNickname(userID);
@@ -112,9 +112,9 @@ export class UserService {
 		}
 		console.log((await auth.user).nickname);
 		const authuid = (await auth.user).userID; 
-		const extension = file.originalname.split('.').pop();
+		const extension = file.originalname.split('.').pop().toLowerCase();;
 		if (extension != 'jpeg' && extension != 'png' && extension != 'jpg' && extension != 'gif'){
-			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg)`);
+			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg, gif)`);
 		}
 		const filePath = path.join(__dirname, `../../assets/profiles/${authuid}.${extension}`);
 		await fs.writeFile(filePath, file.buffer);
@@ -143,6 +143,7 @@ export class UserService {
 		if (user.win >= 1) user.userAchievementbool[2] = true;
 		if (user.win >= 10) user.userAchievementbool[3] = true;
     	if (user.win >= 42) user.userAchievementbool[4] = true;
+    	if (user.lose >= 1) user.userAchievementbool[5] = true;
 
 		for (let i = 0; i < 10; i ++){
 			retlist.push({
@@ -200,7 +201,7 @@ export class UserService {
 	if(!user.matchHistory)
 		return retDashboards;
 	for (let i = 0; i < user.matchHistory.length; i++){
-		const currentgame = await this.gameservice.findGameById(user.matchHistory[0]);
+		const currentgame = await this.gameservice.findGameById(user.matchHistory[i]);
 		const targetUser:User = currentgame.player1 === user.nickname ? await this.getUserByNicknameWithException(currentgame.player2) : await this.getUserByNicknameWithException(currentgame.player1);
 		const tmpboard:DashboardUserDto = {
 			id: currentgame.gameID,
@@ -214,14 +215,6 @@ export class UserService {
 		retDashboards.push(tmpboard);
 	}
 	return retDashboards;
-	// 	id: string		- targetUserID에서 가져오기
-	// nickname: string	- targetUserID에서 가져오기	
-	// image: string;		- targetUserID에서 가져오기	
-	// mode: 'normal' | 'object'; - targetUserID에서 가져오고, user.game.mode
-	// isWin: boolean,		- targetUserID에서 가져오고, user.game.winner 비교
-	// type: 'ladder' | 'friendly';	- targetUserID에서 가져오고, user.game.gametype 확인
-	// score: string;			- targetUserID에서 가져오고, user.game.score 출력
-	// datetime으로 user1games와 user2games 번갈아가면서 스택 top 확인하면서 꺼내기
 	}
 
 	async endGameUser(nickname : string, matchId : string, isWin:boolean) : Promise<void> {
@@ -247,7 +240,7 @@ export class UserService {
 				user.lose += 1;
 				if (game.gameType === GameTypeEnum.LADDER)
 				{
-					
+					user.userAchievementbool[6] = true;
 					user.point -= 20;
 				}
 			}

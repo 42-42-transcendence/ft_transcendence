@@ -217,8 +217,7 @@ export class UserService {
 	return retDashboards;
 	}
 
-	async endGameUser(nickname : string, matchId : string, isWin:boolean) : Promise<void> {
-		const user = await this.getUserByNicknameWithException(nickname);
+	async endGameUser(user: User, matchId : string, isWin:boolean) : Promise<void> {
 		const game = await this.gameservice.findGameById(matchId);
 		if (user) {
 			user.matchHistory.push(matchId);

@@ -27,10 +27,10 @@ export class GameEngine {
 		/* 아이템 생성 */
 		ItemManager.getInstance().createItem();
 		/* 아이템 업데이트 */
-		ItemManager.getInstance().updateItems(delta, gamedata);
+		ItemManager.getInstance().updateItems(delta, gamedata.paddle, gamedata);
 	    }
         /* 공 위치 업데이트 */
-        PhysicsEngine.GuaranteeConflict(gamedata.ball, gamedata, delta);
+        PhysicsEngine.GuaranteeConflict(gamedata.ball, gamedata.paddle, gamedata, delta);
 
         /* player 패들 이동 */
         gamedata.paddle[0].updatePosition(delta);
@@ -46,7 +46,7 @@ export class GameEngine {
         sendData.scores = gameData.scores;
     }
 
-    // This method will be called every 20ms
+    // This loop will be called every 20ms
     @Interval(20)
     async startGameLoop(gameId: string): Promise<void> {
         const gameData = this.gameService.getGameData(gameId);
@@ -60,7 +60,7 @@ export class GameEngine {
         const timeStamp = new Date().getTime();
         gameData.delta = (timeStamp - this.lastTime) / 1000.0;
 
-        await this.updateGame(this.delta, gameId);
+        await this.updateGame(gameData.delta, gameId);
         const sendData = this.updateSendData(gameData);
         this.gameGateway.emitGameData(sendData, gameId);
     

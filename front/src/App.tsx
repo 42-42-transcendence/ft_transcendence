@@ -3,6 +3,7 @@ import router from './routes';
 import ReduxProvider from './store/ReduxProvider';
 
 function App() {
+  console.log(process.env.REACT_APP_HOST_DOMAIN);
   return (
     <ReduxProvider>
       <RouterProvider router={router} />
@@ -11,4 +12,4 @@ function App() {
 }
 
 export default App;
-export const SERVER_URL = 'http://localhost:3001';
+export const SERVER_URL = `http://${process.env.REACT_APP_HOST_DOMAIN}:3000`;

@@ -62,26 +62,32 @@ const requestOAuth = async (
   const authCode = url.searchParams.get('code');
 
   try {
-    const authResponse = await fetch(`http://localhost:3001/api/auth`, {
-      method: 'POST',
-      body: JSON.stringify({ code: authCode }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const authResponse = await fetch(
+      `http://${process.env.REACT_APP_HOST_DOMAIN}:3000/api/auth`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ code: authCode }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!authResponse.ok) {
       throw new Error('OAuth Failed');
     }
     const authData = await authResponse.json();
 
-    const otpResponse = await fetch(`http://localhost:3001/api/otp`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + authData.jwtToken,
-      },
-    });
+    const otpResponse = await fetch(
+      `http://${process.env.REACT_APP_HOST_DOMAIN}:3001/api/otp`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + authData.jwtToken,
+        },
+      }
+    );
 
     if (!otpResponse.ok) {
       throw new Error('OTP Failed');

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, UnauthorizedException, UseFilters } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, NotFoundException, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
@@ -25,12 +25,14 @@ export class AuthService {
     const data = { code, grant_type, client_id, client_secret, redirect_uri };
 
     try {
-      const response = await axios.post(authUrl, data);
-      if (response.status === HttpStatus.OK) {
-        return response.data.access_token;
+      const res = await axios.post(authUrl, data);
+      if (!res || res.status !== HttpStatus.OK) {
+        throw new BadRequestException(`로그인 중 새로고침시 로그인 페이지로 돌아갑니다.`);
       }
+      
+      return (res.data.access_token);
     } catch (e) {
-      console.log('aaaaaaaa', e);
+      throw new BadRequestException(`로그인 중 새로고침시 로그인 페이지로 돌아갑니다.`);
     }
   }
 
@@ -43,13 +45,14 @@ export class AuthService {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
-      if (res.status === HttpStatus.OK) {
-        const intraUID = res.data.id;
-        return { intraUID };
+      if (!res || res.status !== HttpStatus.OK) {
+        throw new BadRequestException(`로그인 중 새로고침시 로그인 페이지로 돌아갑니다.`);
       }
+      const intraUID = res.data.id;
+
+      return { intraUID };
     } catch (e) {
-      console.log('bbbbbbbb', e);
+      throw new BadRequestException(`로그인 중 새로고침시 로그인 페이지로 돌아갑니다.`);
     }
   }
 

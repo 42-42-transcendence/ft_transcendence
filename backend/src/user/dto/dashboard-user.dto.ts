@@ -23,7 +23,7 @@ export class DashboardUserDto {
 
   @ApiProperty({
     description: '상대 프로필 이미지',
-    example: 'http://localhost:3001/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg',
+    example: 'http://localhost:3000/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg',
   })
   image: string;
 

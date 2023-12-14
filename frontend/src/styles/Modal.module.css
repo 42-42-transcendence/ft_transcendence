@@ -1,0 +1,219 @@
+.modal {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  min-width: 300px;
+  max-width: 500px;
+
+  background-color: var(--tone-up-color);
+  color: var(--text-white);
+  padding: 24px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 40;
+  animation: slide-down 300ms ease-out forwards;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -3rem);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.header {
+  border-bottom: 1px solid var(--tone-deep-color);
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.footer-button {
+  color: var(--text-white);
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+}
+
+.confirm {
+  background-color: var(--active-color);
+}
+.cancel {
+  background-color: var(--tone-deep-color);
+}
+.delete {
+  background-color: var(--focus-color);
+}
+
+.confirm:hover {
+  background-color: var(--active-hover-color);
+}
+.cancel:hover {
+  background-color: #030303;
+}
+.delete:hover {
+  background-color: var(--focus-hover-color);
+}
+
+.footer-button:disabled {
+  background-color: var(--tone-down-color);
+  color: #777777;
+}
+
+.user-wrapper {
+  width: 100%;
+  background-color: var(--tone-down-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: center;
+}
+
+.input-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px 16px;
+}
+
+.input-field .title {
+  width: 80px;
+}
+
+.input-field .toggle {
+  flex: 1;
+
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.toggle label {
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: #1f1f1f;
+  color: #777777;
+  border-radius: 4px;
+}
+
+.toggle input {
+  display: none;
+}
+
+.toggle label:has(input:checked) {
+  background-color: var(--active-color);
+  color: var(--text-white);
+}
+
+.input-field .input {
+  flex: 1;
+  padding: 8px 16px;
+  background-color: var(--tone-deep-color);
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  color: var(--text-white);
+}
+.input-field .input:disabled {
+  background-color: var(--tone-down-color);
+}
+
+.list-button {
+  width: 100%;
+  background-color: inherit;
+  color: var(--text-white);
+  border: none;
+  font-size: 16px;
+  padding: 8px;
+}
+.list-button:not(:last-of-type) {
+  margin-bottom: 4px;
+}
+
+.list-button:hover {
+  border-radius: 4px;
+  background-color: var(--tone-down-color);
+}
+
+.list-button:disabled {
+  background: none;
+  color: #777777;
+}
+
+.feedback {
+  color: var(--focus-color);
+  text-align: center;
+  margin: 8px auto;
+  max-width: 300px;
+  font-size: 14px;
+}
+
+.loading {
+  width: 100%;
+}
+
+.success-message {
+  color: var(--active-color);
+  margin: 32px;
+  text-align: center;
+}
+
+.otp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.otp-detail {
+  margin: 0;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--active-color);
+}
+
+.otp-label {
+  margin-bottom: 16px;
+}
+
+.otp-input {
+  background-color: var(--tone-deep-color);
+  border-radius: 4px;
+  padding: 8px 12px;
+  border: none;
+  outline: none;
+
+  width: 240px;
+  color: var(--active-color);
+  font-size: 20px;
+  text-align: center;
+}
+.otp-input::placeholder {
+  font-size: 16px;
+}

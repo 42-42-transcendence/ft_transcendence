@@ -42,11 +42,11 @@ export class User {
 
   @ApiProperty({
     description: '프로필 이미지',
-    example: 'http://localhost:3001/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg',
+    example: 'http://localhost:3000/assets/profiles/550e8400-e29b-41d4-a716-446655440000.jpg',
   })
   @Column({
     nullable: false,
-    default: 'http://localhost:3001/assets/profiles/default.jpeg',
+    default: `http://${process.env.HOST_DOMAIN}:3000/assets/profiles/default.jpeg`,
   })
   avatar: string;
 

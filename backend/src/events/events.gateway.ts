@@ -41,7 +41,7 @@ import { vec2 } from 'gl-matrix';
 @WebSocketGateway({
   namespace: '',
   cors: {
-    origin: 'http://localhost:3000',
+    origin: `http://${process.env.HOST_DOMAIN}:3000`,
   },
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {

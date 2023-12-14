@@ -1,0 +1,59 @@
+{
+  "name": "mig",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@loadable/component": "^5.15.3",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.59",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
+    "gl-matrix": "^3.4.3",
+    "lodash": "^4.17.21",
+    "math.js": "^1.1.46",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.3",
+    "react-router-dom": "^6.18.0",
+    "react-scripts": "5.0.1",
+    "redux-persist": "^6.0.0",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/loadable__component": "^5.13.7",
+    "@types/lodash": "^4.14.200",
+    "@types/react-router-dom": "^5.3.3",
+    "webpack": "^5.89.0"
+  }
+}

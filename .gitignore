@@ -37,3 +37,5 @@ backend/.idea
 
 data/
 backend/.env
+front/.env
+.env

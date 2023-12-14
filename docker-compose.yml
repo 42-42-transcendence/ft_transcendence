@@ -1,43 +1,39 @@
-version: '3.7'
-
 services:
-#    main:
-#        container_name: tsApp
-#        build:
-#            context: ./backend
-#            target: development
-#        ports:
-#            - 3000:3000
-#        command: npm run start:dev
-#        networks:
-#            - webnet
-#        depends_on:
-#            - postgres
+    transcendence:
+        container_name: transcendence
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        ports:
+            - 3000:3000
+        networks:
+            - webnet
+        depends_on:
+            - postgres
+        restart: on-failure:5
+
     postgres:
         container_name: postgres
         image: postgres:latest
-        networks:
-            - webnet
-        environment:
-            POSTGRES_PASSWORD: ts
-            POSTGRES_USER: ts
-            POSTGRES_DB: ts
-            PG_DATA: /var/lib/postgresql/data
-            TZ: 'Asia/Seoul'
+        env_file:
+            - .env
         ports:
-            - 5432:5432
+            - ${POSTGRES_PORT}:${POSTGRES_PORT}
         volumes:
             - ./data/postgres/:/var/lib/postgresql/data
-    pgadmin:
-        image: dpage/pgadmin4
-        restart: always
-        container_name: pgadmin4
-        ports:
-            - '5050:80'
-        environment:
-            PGADMIN_DEFAULT_EMAIL: ts@ts.com
-            PGADMIN_DEFAULT_PASSWORD: 1234
-        volumes:
-            - ./data/pgadmin/:/var/lib/pgadmin
+        networks:
+            - webnet
+
+    # pgadmin:
+    #     image: dpage/pgadmin4
+    #     restart: always
+    #     container_name: pgadmin4
+    #     ports:
+    #         - '5050:80'
+    #     environment:
+    #         PGADMIN_DEFAULT_EMAIL: ts@ts.com
+    #         PGADMIN_DEFAULT_PASSWORD: 1234
+    #     volumes:
+    #         - ./data/pgadmin/:/var/lib/pgadmin
 networks:
     webnet:

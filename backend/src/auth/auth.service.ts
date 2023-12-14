@@ -19,7 +19,7 @@ export class AuthService {
     const client_id = process.env.AUTH_ID;
     const client_secret = process.env.AUTH_SECRET;
     const grant_type = 'authorization_code';
-    const redirect_uri = 'http://localhost:3000/oauth';
+    const redirect_uri = `http://${process.env.HOST_DOMAIN}:3000/oauth`;
 
     const authUrl = 'https://api.intra.42.fr/oauth/token';
     const data = { code, grant_type, client_id, client_secret, redirect_uri };
@@ -32,6 +32,7 @@ export class AuthService {
       
       return (res.data.access_token);
     } catch (e) {
+	  console.log(e);
       throw new BadRequestException(`로그인 중 새로고침시 로그인 페이지로 돌아갑니다.`);
     }
   }

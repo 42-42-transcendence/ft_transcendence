@@ -88,9 +88,4 @@ export class AppController implements OnModuleInit{
       }
     }
   }
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
 }

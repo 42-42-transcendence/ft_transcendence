@@ -1,0 +1,49 @@
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar {
+  margin-right: 48px;
+  font-size: 20px;
+  width: 120px;
+}
+
+.items {
+  overflow: auto;
+  overflow-x: hidden;
+  max-height: 70vh;
+  height: 100%;
+  width: 50vw;
+}
+
+.item {
+  background-color: var(--tone-up-color);
+  width: 100%;
+  color: var(--text-white);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr 2fr 2fr 1fr;
+  align-items: center;
+
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  font-size: 16px;
+}
+
+/* .item h3 {
+  text-shadow: 0 1px 1px #fd2b2b;
+} */
+
+.mode {
+  color: #999999;
+  font-size: 12px;
+}
+
+.win {
+  color: var(--win-color);
+}
+.lose {
+  color: var(--lose-color);
+}

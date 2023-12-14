@@ -1,0 +1,34 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  max-width: 360px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.list {
+  width: 60%;
+  font-size: 20px;
+}
+
+.start {
+  width: 100%;
+  margin-top: 32px;
+  background-color: var(--focus-color);
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 48px;
+  color: var(--text-white);
+}
+
+.start:hover {
+  background-color: var(--focus-hover-color);
+}

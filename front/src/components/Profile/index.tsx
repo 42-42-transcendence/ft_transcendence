@@ -11,6 +11,7 @@ import useRequest from '../../http/useRequest';
 import { useParams } from 'react-router-dom';
 import { SERVER_URL } from '../../App';
 import editIcon from '../../assets/edit-icon.svg';
+import useUserState from '../../store/User/useUserState';
 
 export type Achievement = {
   id: string;
@@ -35,6 +36,7 @@ const Profile = () => {
 
   const { isLoading, error, request } = useRequest();
   const params = useParams();
+  const userState = useUserState();
 
   const showAchievementDetail = useModalState('showAchievementDetail');
 
@@ -72,7 +74,7 @@ const Profile = () => {
   };
 
   const avatarPatchHandler = async () => {
-    setEnteredAvatarFile(null);
+    setFeedbackMessage('');
     if (enteredAvatarFile === null) {
       setFeedbackMessage('입력된 파일이 없습니다.');
       return;
@@ -83,7 +85,6 @@ const Profile = () => {
       setFeedbackMessage('이미지 파일 크기는 최대 3MB입니다.');
       return;
     }
-    setFeedbackMessage('');
 
     const formData = new FormData();
     if (enteredAvatarFile !== null)
@@ -95,10 +96,6 @@ const Profile = () => {
         body: formData,
       }
     );
-
-    if (ret !== null) {
-      fetchProfile();
-    }
   };
 
   if (isLoading) return <img src={loadingImage} alt="loading" />;
@@ -107,37 +104,46 @@ const Profile = () => {
 
   const avatarFileURL =
     enteredAvatarFile === null
-      ? profileInfo?.image
+      ? profileInfo.image
       : URL.createObjectURL(enteredAvatarFile);
+
+  let avatarContents = (
+    <>
+      <label className={styles['avatar-label']} htmlFor="avatar">
+        <AvatarImage imageURI={avatarFileURL} radius={'240px'} />
+        <input
+          type="file"
+          id="avatar"
+          name="avatar"
+          onChange={avatarChangeHandler}
+          hidden={true}
+        />
+        <div className={styles['edit-icon-wrapper']}>
+          <img src={editIcon} alt="avatar edit icon" />
+        </div>
+      </label>
+      {enteredAvatarFile !== null && (
+        <button
+          className={styles['avatar-patch-button']}
+          onClick={avatarPatchHandler}
+        >
+          Apply
+        </button>
+      )}
+      <span className={styles.feedback}>{feedbackMessage}</span>
+    </>
+  );
+
+  if (params.userID !== userState.id) {
+    avatarContents = <AvatarImage imageURI={avatarFileURL} radius={'240px'} />;
+  }
+
   return (
     <>
       <div className={styles.profile}>
         <div className={styles.avatar}>
           <h1>{profileInfo.nickname}</h1>
-          <label className={styles['avatar-label']} htmlFor="avatar">
-            <AvatarImage imageURI={avatarFileURL} radius={'240px'} />
-            <input
-              type="file"
-              id="avatar"
-              name="avatar"
-              onChange={avatarChangeHandler}
-              hidden={true}
-            />
-            <div className={styles['edit-icon-wrapper']}>
-              <img
-                className={styles['edit-icon']}
-                src={editIcon}
-                alt="avatar edit icon"
-              />
-            </div>
-          </label>
-          <button
-            className={styles['avatar-patch-button']}
-            onClick={avatarPatchHandler}
-          >
-            Apply
-          </button>
-          <span className={styles.feedback}>{feedbackMessage}</span>
+          {avatarContents}
         </div>
         <div className={styles.detail}>
           <Card className={`${styles.grid} ${styles.winCount}`}>

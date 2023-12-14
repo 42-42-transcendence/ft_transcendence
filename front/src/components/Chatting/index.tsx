@@ -118,7 +118,6 @@ const Chatting = () => {
   );
 
   const updatedMembesrHandler = useCallback((members: ChatMember[]) => {
-    console.log(members);
     setMembers(members);
   }, []);
 

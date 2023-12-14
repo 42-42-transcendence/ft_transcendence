@@ -28,7 +28,7 @@ const OAuth = () => {
       <Await resolve={oAuthData}>
         {(ret: oAuthResponseData | string) => {
           if (typeof ret === 'string') {
-            return <h1 style={{ textAlign: 'center' }}>{ret}</h1>;
+            return <Navigate to="/login" replace={true} />;
           } else if (ret.isFirst) {
             return (
               <Navigate

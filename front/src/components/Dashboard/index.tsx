@@ -11,7 +11,7 @@ export type Recode = {
   id: string;
   nickname: string;
   image: string;
-  mode: 'normal' | 'ai' | 'object';
+  mode: 'normal' | 'object';
   isWin: boolean;
   type: 'ladder' | 'friendly';
   score: string;
@@ -26,7 +26,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRecodes = async () => {
       const ret = await request<Recode[]>(
-        `${SERVER_URL}/api/dashboard/${params.userID}`,
+        `${SERVER_URL}/api/user/dashboard/${params.userID}`,
         {
           method: 'GET',
         }

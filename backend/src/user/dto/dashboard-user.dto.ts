@@ -43,7 +43,7 @@ export class DashboardUserDto {
     description: '게임 타입 (랭크, 친선전)',
     example: 'ladder, friendly',
   })
-  type: GameTypeEnum;
+  type: string;
 
   @ApiProperty({ 
     description: '스코어',

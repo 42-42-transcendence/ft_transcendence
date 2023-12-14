@@ -20,6 +20,7 @@ import { UserinfoUserDto } from './dto/userinfo-user.dto';
 import { GameService } from 'src/game/game.service';
 import { DashboardUserDto } from './dto/dashboard-user.dto';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
+import { GameModeEnum } from 'src/game/enums/gameMode.enum';
 
 @Injectable()
 export class UserService {
@@ -195,6 +196,25 @@ export class UserService {
 		return userinfo;
 	}
 
+	async createDummyDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
+		const user = await this.getUserByNicknameWithException(targetuserID);
+		const retDashboards: DashboardUserDto[] = [];
+		for (let i = 0; i < 10; i++){
+			const currentgameid = `uuid${i}`;
+			const tmpboard:DashboardUserDto = {
+				id: currentgameid,
+				nickname: `dummyuser${i}`,
+				image: user.avatar,
+				mode: i%2 === 1 ? GameModeEnum.NORMAL : GameModeEnum.OBJECT,
+				isWin: i%2 === 1 ? true : false,
+				type: i%2 === 1 ? GameTypeEnum.LADDER : 'friendly',
+				score: `${i}:${i}`,
+			}
+			retDashboards.push(tmpboard);
+		}
+		return retDashboards;
+		}
+
 	async getDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
 	const user = await this.getUserByNicknameWithException(targetuserID);
 	const retDashboards: DashboardUserDto[] = [];
@@ -209,7 +229,7 @@ export class UserService {
 			image: targetUser.avatar,
 			mode: currentgame.gameMode,
 			isWin: currentgame.winner === user.nickname ? true : false,
-			type: currentgame.gameType,
+			type: currentgame.gameType === GameTypeEnum.LADDER ? GameTypeEnum.LADDER : 'friendly',
 			score: `${currentgame.player1Score}:${currentgame.player2Score}`,
 		}
 		retDashboards.push(tmpboard);

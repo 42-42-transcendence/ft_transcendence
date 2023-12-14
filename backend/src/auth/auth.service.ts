@@ -19,7 +19,7 @@ export class AuthService {
     const client_id = process.env.AUTH_ID;
     const client_secret = process.env.AUTH_SECRET;
     const grant_type = 'authorization_code';
-    const redirect_uri = `http://${process.env.HOST_DOMAIN}:3000/oauth`;
+    const redirect_uri = `http://${process.env.HOST_DOMAIN}:${process.env.HOST_PORT}/oauth`;
 
     const authUrl = 'https://api.intra.42.fr/oauth/token';
     const data = { code, grant_type, client_id, client_secret, redirect_uri };

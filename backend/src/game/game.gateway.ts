@@ -14,7 +14,7 @@ import { SocketExceptionFilter } from 'src/events/socket.filter';
 @WebSocketGateway({
     namespace: 'game',
     cors: {
-        origin: `http://${process.env.HOST_DOMAIN}:3000`,
+        origin: `http://${process.env.HOST_DOMAIN}:${process.env.HOST_PORT}`,
     }
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {

@@ -79,7 +79,7 @@ const requestOAuth = async (
     const authData = await authResponse.json();
 
     const otpResponse = await fetch(
-      `http://${process.env.REACT_APP_HOST_DOMAIN}:3000/api/otp`,
+      `http://${process.env.REACT_APP_HOST_DOMAIN}:${process.env.REACT_APP_HOST_PORT}/api/otp`,
       {
         method: 'GET',
         headers: {

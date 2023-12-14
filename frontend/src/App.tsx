@@ -11,4 +11,4 @@ function App() {
 }
 
 export default App;
-export const SERVER_URL = `http://${process.env.REACT_APP_HOST_DOMAIN}:3000`;
+export const SERVER_URL = `http://${process.env.REACT_APP_HOST_DOMAIN}:${process.env.REACT_APP_HOST_PORT}`;

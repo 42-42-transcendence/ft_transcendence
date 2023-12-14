@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeORMConfig } from './config/typeorm.config';
 import { UserAchievementModule } from './user-achievement/user-achievement.module';
 import { ChannelMemberModule } from './channel-member/channel-member.module';
 import { RelationModule } from './relation/relation.module';
@@ -19,13 +18,16 @@ import { OtpModule } from './otp/otp.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path';
+import { TypeOrmConfigService } from './config/typeorm-config.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(typeORMConfig),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfigService,
+    }),
     AchievementModule,
     ChannelModule,
     ChannelMemberModule,

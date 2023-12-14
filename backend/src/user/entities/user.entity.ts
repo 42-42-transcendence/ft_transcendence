@@ -46,7 +46,7 @@ export class User {
   })
   @Column({
     nullable: false,
-    default: `http://${process.env.HOST_DOMAIN}:3000/assets/profiles/default.jpeg`,
+    default: `http://${process.env.HOST_DOMAIN}:${process.env.HOST_PORT}/assets/profiles/default.jpeg`,
   })
   avatar: string;
 

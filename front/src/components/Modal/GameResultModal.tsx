@@ -9,8 +9,8 @@ type Props = {
 };
 
 const sendEndGameRequest = () => {
-    const response = fetch(`${SERVER_URL}/인게임/종료`, {
-        method: 'GET',
+    const response = fetch(`${SERVER_URL}/api/game/exitAI`, {
+        method: 'POST',
     });
 }
 

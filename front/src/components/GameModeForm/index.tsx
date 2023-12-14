@@ -9,39 +9,42 @@ import useOpenModal from '../../store/Modal/useOpenModal';
 import useUserState from '../../store/User/useUserState';
 import { useSocket } from '../../socket/SocketContext';
 import { SERVER_URL } from '../../App';
-
-const sendInGameRequest = async () => {
-  try {
-    const response = await fetch(`${SERVER_URL}/인게임/요청`, {
-      method: 'GET'
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-  } catch (error) {
-    console.error('Error during the API call:', error);
-  }
-};
+import { useEffect } from 'react';
+import useRequest from '../../http/useRequest';
 
 const GameModeForm = () => {
+  const [startAIMatch, setStartAIMatch] = useState(false);
   const userState = useUserState();
   const navigate = useNavigate();
   const openHandler = useOpenModal('showGameMatching');
   const { socket } = useSocket();
   const showGameMatching = useModalState('showGameMatching');
+  const { request } = useRequest();
   const [enteredMode, setEnteredMode] = useState<string>('normal');
+  useEffect(() => {
+    const AIMatch = async () => {
+      const response = await request(`${SERVER_URL}/api/game/startAI`, {
+        method: 'POST',
+      });
+      if (response === null) {
+        console.log("something wrong");
+      } else {
+        navigate(`/game/AI-mode`, { state: { gameMode: enteredMode, player: [userState.id, "AI"]} });
+      }
+    };
+    if (startAIMatch) {
+      setStartAIMatch(false);
+      AIMatch();
+    }
+  }, [startAIMatch]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (enteredMode === 'AI') {
-      // if (!socket) return console.error('socket is null');
-      await sendInGameRequest();
-      navigate(`/game/AI-mode`, { state: { gameMode: enteredMode, player: [userState.id, "AI"]} });
-    } else {
-      openHandler();
+      setStartAIMatch(true);
+      return;
     }
+    openHandler();
   };
 
   return (

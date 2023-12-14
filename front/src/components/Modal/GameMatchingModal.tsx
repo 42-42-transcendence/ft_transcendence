@@ -38,6 +38,7 @@ const GameMatchingModal = ({ mode }: Props) => {
           }
         );
       };
+      cancelMatch();
       closeModalHandler();
     };
   }, [request, mode, closeModalHandler]);

@@ -60,8 +60,8 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         navigate('/login', { state: { message: message } });
       });
 
-      newSocket.on('startGame', (gameID: string, playerID: string[], mode: string) => {
-        navigate(`/game/${gameID}`, { state: { mode, playerID } });
+      newSocket.on('startGame', (data: any) => {
+        navigate(`/game/${data.gameID}`, { state: { data } });
       });
 
       setSocket(newSocket);

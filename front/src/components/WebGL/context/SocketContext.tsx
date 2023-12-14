@@ -20,12 +20,11 @@ type ChildProps = {
 const SocketContextProvider = ({ children }: ChildProps) => {
     const userState = useUserState();
     const authState = useAuthState();
-    const dispatch = useDispatch();
     const [socket, setSocket] = useState<Socket | null>(null);
 
     useEffect(() => {
         if (!socket) {
-            const newSocket = io(SERVER_URL + "/game", {
+            const newSocket = io(`${SERVER_URL}/game`, {
                 auth: {
                     token: authState.token,
                 },
@@ -44,6 +43,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 gameDataFromServer.ballPos[0] = gameData.ballPos[0];
                 gameDataFromServer.ballPos[1] = gameData.ballPos[1];
                 gameDataFromServer.itemsPos = gameData.itemsPos;
+                console.log("data received......");
             });
 
             newSocket.on('endGame', () => {
@@ -56,6 +56,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 GameManager.scoreUpdate(null);
             });
 
+
             setSocket(newSocket);
         }
 
@@ -65,7 +66,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 setSocket(null);
             }
         };
-    }, [socket, authState, dispatch]);
+    }, [socket, authState]);
 
     return (
         <SocketContext.Provider value={{ socket }}>

@@ -92,6 +92,10 @@ export class UserService {
 	}
 	
 	async createNicknameUser(userID: string, auth: Auth): Promise<{ message: string }> {
+		if (await auth.user)
+		{
+			throw new BadRequestException(`이미 생성된 유저입니다.`);
+		}
 		if (userID.length < 4 || userID.length > 8) {
 			throw new BadRequestException(`닉네임 길이가 너무 짧거나 깁니다.`);
 		}

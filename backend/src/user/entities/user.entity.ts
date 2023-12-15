@@ -90,6 +90,13 @@ export class User {
   @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
   userAchievements: UserAchievement[];
 
+  @ApiProperty({
+    description: '도전과제 달성 여부 리스트',
+    example: '[{it, title, description}]',
+  })
+  @Column('boolean', { array: true, default: '{true, false, false, false, false, false, false, false, false, false}' })
+  userAchievementbool: boolean[];
+
   @Column({ nullable: true })
   otpAuthSecret: string;
 

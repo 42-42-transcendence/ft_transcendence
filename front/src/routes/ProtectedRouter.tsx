@@ -58,6 +58,6 @@ const ProtectedRouter = () => {
       </SocketContextProvider>
     );
   }
-  return <Navigate to="/login" />;
+  return <Navigate to="/login" replace={true} />;
 };
 export default ProtectedRouter;

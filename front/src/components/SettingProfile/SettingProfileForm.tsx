@@ -93,7 +93,7 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
     if (responseFile === null) return;
 
     dispatch(authActions.setAuthToken(jwtToken));
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   return (

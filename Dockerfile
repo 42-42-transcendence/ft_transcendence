@@ -10,6 +10,8 @@ ENV POSTGRES_PORT $POSTGRES_PORT
 ENV HOST_PORT $HOST_PORT
 ENV REACT_APP_HOST_PORT $REACT_APP_HOST_PORT
 
+RUN npm i -g npm@latest
+
 COPY ./front /var/front
 
 # COPY .env /var/frontend/.env

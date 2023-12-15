@@ -1,28 +1,43 @@
-name = transcendence
-all:
-	@printf "Running ${name}...\n"
-	@docker-compose -f ./docker-compose.yml up -d
+NAME = transcendence
+DCFILE = docker-compose.yml
+DCPATH = ./
+DCCMD = docker compose
+
+all: $(NAME)
+
+$(NAME):
+	make build
+	make up
 
 build:
-	@printf "Building ${name}...\n"
-	@docker-compose -f ./docker-compose.yml up -d --build
+	@printf "Building ${NAME}...\n"
+	@$(DCCMD) -f $(DCPATH)$(DCFILE) build
+
+up:
+	@printf "Running ${NAME}...\n"
+	@$(DCCMD) -f $(DCPATH)$(DCFILE) up -d
 
 down:
-	@printf "Stopping ${name}...\n"
-	@docker-compose -f ./docker-compose.yml down
+	@printf "Stopping ${NAME}...\n"
+	@$(DCCMD) -f $(DCPATH)$(DCFILE) down
 
-re:	down
-	@printf "Rebuilding ${name}...\n"
-	@docker-compose -f ./docker-compose.yml up -d --build
+clean:
+	@printf "Cleaning ${NAME}...\n"
+	@$(DCCMD) -f $(DCPATH)$(DCFILE) down -v
+	@rm -rf data
 
-clean: down
-	@printf "Cleaning ${name}...\n"
-	@docker system prune -a
-	@rm ./backend/assets/profiles/*
 fclean:
 	@printf "!FCLEANING! docker\n"
-	@docker system prune --all --force --volumes
-	@docker network prune --force
-	@docker volume prune --force
+	@$(DCCMD) -f $(DCPATH)$(DCFILE) down -v
+	@rm -rf data
+	@docker image ls -q | xargs docker image rm
 
-.PHONY	: all build down re clean fclean
+re:
+	make clean
+	make all
+
+fre:
+	make fclean
+	make all
+
+.PHONY: all build up down clean fclean re fre

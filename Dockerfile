@@ -10,11 +10,11 @@ ENV POSTGRES_PORT $POSTGRES_PORT
 ENV HOST_PORT $HOST_PORT
 ENV REACT_APP_HOST_PORT $REACT_APP_HOST_PORT
 
-COPY ./frontend /var/frontend
+COPY ./front /var/front
 
 # COPY .env /var/frontend/.env
 
-WORKDIR /var/frontend
+WORKDIR /var/front
 
 RUN npm install
 
@@ -28,7 +28,7 @@ WORKDIR /var/app
 
 RUN mkdir client
 
-RUN cp -r ../frontend/build ./client/build
+RUN cp -r ../front/build ./client/build
 
 RUN npm install
 

@@ -20,6 +20,7 @@ import { UserinfoUserDto } from './dto/userinfo-user.dto';
 import { GameService } from 'src/game/game.service';
 import { DashboardUserDto } from './dto/dashboard-user.dto';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
+import { GameModeEnum } from 'src/game/enums/gameMode.enum';
 
 @Injectable()
 export class UserService {
@@ -91,13 +92,12 @@ export class UserService {
 	}
 	
 	async createNicknameUser(userID: string, auth: Auth): Promise<{ message: string }> {
-		// assests/profiles/authUID.png
-		// ㄴ 만약 authUID가 있는지는, 어차피 writeFile은 덮어씌움
-		// user 객체가 이미 있으면, 그냥 return?
-		// image size, image 확장자 검사 한 번 더
-		// nickname 중복검사
-		if (userID.length < 4 && userID.length > 8) {
-			throw new BadRequestException(`닉네임이 너무 짧습니다.`);
+		if (await auth.user)
+		{
+			throw new BadRequestException(`이미 생성된 유저입니다.`);
+		}
+		if (userID.length < 4 || userID.length > 8) {
+			throw new BadRequestException(`닉네임 길이가 너무 짧거나 깁니다.`);
 		}
 		const user = await this.getUserByNickname(userID);
 		if (user) {
@@ -116,10 +116,10 @@ export class UserService {
 			throw new BadRequestException(`파일 크기가 3MB를 넘습니다.`);
 		}
 		console.log((await auth.user).nickname);
-		const authuid = (await auth.user).userID; // image size, image 확장자 검사 한 번 더 필요
-		const extension = file.originalname.split('.').pop();
+		const authuid = (await auth.user).userID; 
+		const extension = file.originalname.split('.').pop().toLowerCase();;
 		if (extension != 'jpeg' && extension != 'png' && extension != 'jpg' && extension != 'gif'){
-			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg)`);
+			throw new BadRequestException(`이미지 형식만 프로필로 설정 가능합니다. (jpeg, png, jpg, gif)`);
 		}
 		const filePath = path.join(__dirname, `../../assets/profiles/${authuid}.${extension}`);
 		await fs.writeFile(filePath, file.buffer);
@@ -144,24 +144,21 @@ export class UserService {
 
   	async getAchievements(user: User): Promise<UserAchievementlistDto[]> {
 		const retlist: UserAchievementlistDto[] = [];
-		const cham: boolean[] =[true, false, false, false, false, false, false, false, false, false];
-    	if (user.win >= 1 || user.lose >= 1) cham[1] = true;
-    	if (user.win >= 1) cham[2] = true;
-		if (user.win >= 11) cham[3] = true;
-    	if (user.win >= 12) cham[4] = true;
-		if (user.win >= 13) cham[5] = true;
-    	if (user.win >= 14) cham[6] = true;
-		if (user.win >= 15) cham[7] = true;
-    	if (user.win >= 16) cham[8] = true;
-		if (user.win >= 17) cham[9] = true;
+    	if (user.win >= 1 || user.lose >= 1) user.userAchievementbool[1] = true;
+		if (user.win >= 1) user.userAchievementbool[2] = true;
+		if (user.win >= 10) user.userAchievementbool[3] = true;
+    	if (user.win >= 42) user.userAchievementbool[4] = true;
+    	if (user.lose >= 1) user.userAchievementbool[5] = true;
+
 		for (let i = 0; i < 10; i ++){
 			retlist.push({
 				id: achievements[i].id,
 				title: achievements[i].name,
 				description: achievements[i].description,
-				isAchieved: cham[i]
+				isAchieved: user.userAchievementbool[i]
 			})
 		}
+		await this.userRepository.save(user);
 		return retlist;
 		// return this.userRepository.getAchivements(User);
   	}
@@ -203,13 +200,32 @@ export class UserService {
 		return userinfo;
 	}
 
+	async createDummyDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
+		const user = await this.getUserByNicknameWithException(targetuserID);
+		const retDashboards: DashboardUserDto[] = [];
+		for (let i = 0; i < 10; i++){
+			const currentgameid = `uuid${i}`;
+			const tmpboard:DashboardUserDto = {
+				id: currentgameid,
+				nickname: `dummyuser${i}`,
+				image: user.avatar,
+				mode: i%2 === 1 ? GameModeEnum.NORMAL : GameModeEnum.OBJECT,
+				isWin: i%2 === 1 ? true : false,
+				type: i%2 === 1 ? GameTypeEnum.LADDER : 'friendly',
+				score: `${i}:${i}`,
+			}
+			retDashboards.push(tmpboard);
+		}
+		return retDashboards;
+		}
+
 	async getDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
 	const user = await this.getUserByNicknameWithException(targetuserID);
 	const retDashboards: DashboardUserDto[] = [];
 	if(!user.matchHistory)
 		return retDashboards;
 	for (let i = 0; i < user.matchHistory.length; i++){
-		const currentgame = await this.gameservice.findGameById(user.matchHistory[0]);
+		const currentgame = await this.gameservice.findGameById(user.matchHistory[i]);
 		const targetUser:User = currentgame.player1 === user.nickname ? await this.getUserByNicknameWithException(currentgame.player2) : await this.getUserByNicknameWithException(currentgame.player1);
 		const tmpboard:DashboardUserDto = {
 			id: currentgame.gameID,
@@ -217,20 +233,12 @@ export class UserService {
 			image: targetUser.avatar,
 			mode: currentgame.gameMode,
 			isWin: currentgame.winner === user.nickname ? true : false,
-			type: currentgame.gameType,
+			type: currentgame.gameType === GameTypeEnum.LADDER ? GameTypeEnum.LADDER : 'friendly',
 			score: `${currentgame.player1Score}:${currentgame.player2Score}`,
 		}
 		retDashboards.push(tmpboard);
 	}
 	return retDashboards;
-	// 	id: string		- targetUserID에서 가져오기
-	// nickname: string	- targetUserID에서 가져오기	
-	// image: string;		- targetUserID에서 가져오기	
-	// mode: 'normal' | 'object'; - targetUserID에서 가져오고, user.game.mode
-	// isWin: boolean,		- targetUserID에서 가져오고, user.game.winner 비교
-	// type: 'ladder' | 'friendly';	- targetUserID에서 가져오고, user.game.gametype 확인
-	// score: string;			- targetUserID에서 가져오고, user.game.score 출력
-	// datetime으로 user1games와 user2games 번갈아가면서 스택 top 확인하면서 꺼내기
 	}
 
 	async endGameUser(user: User, matchId : string, isWin:boolean) : Promise<void> {
@@ -240,12 +248,24 @@ export class UserService {
 			if (isWin === true) {
 				user.win += 1;
 				if (game.gameType === GameTypeEnum.LADDER)
+				{
+					user.userAchievementbool[6] = true;
 					user.point += 20;
+					if (user.point >= 1200)
+						user.userAchievementbool[7] = true;
+					if (user.point >= 1400)
+						user.userAchievementbool[8] = true;
+					if (user.point >= 1600)	
+						user.userAchievementbool[9] = true;
+				}
 			}
 			else {
 				user.lose += 1;
 				if (game.gameType === GameTypeEnum.LADDER)
+				{
+					user.userAchievementbool[6] = true;
 					user.point -= 20;
+				}
 			}
 			await this.userRepository.save(user);
 		}

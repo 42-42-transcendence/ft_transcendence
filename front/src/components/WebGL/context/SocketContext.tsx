@@ -1,7 +1,6 @@
 import {io, Socket} from 'socket.io-client';
 import {SERVER_URL} from "../../../App";
 import useAuthState from "../../../store/Auth/useAuthState";
-import {useDispatch} from "react-redux";
 import React, {createContext, useContext, useEffect, useState} from "react";
 import data, {gameDataFromServer} from "../interface/gameData";
 import useUserState from "../../../store/User/useUserState";
@@ -43,6 +42,8 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 gameDataFromServer.ballPos[0] = gameData.ballPos[0];
                 gameDataFromServer.ballPos[1] = gameData.ballPos[1];
                 gameDataFromServer.itemsPos = gameData.itemsPos;
+                gameDataFromServer.scores[0] = gameData.scores[0];
+                gameDataFromServer.scores[1] = gameData.scores[1];
                 console.log("data received......");
             });
 

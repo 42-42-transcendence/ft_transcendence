@@ -23,19 +23,19 @@ const GameModeForm = () => {
   const [enteredMode, setEnteredMode] = useState<string>('normal');
   useEffect(() => {
     const AIMatch = async () => {
+      if (!startAIMatch)
+        return;
       const response = await request(`${SERVER_URL}/api/game/startAI`, {
         method: 'POST',
       });
-      if (response === null) {
-        console.log("something wrong");
-      } else {
-        navigate(`/game/AI-mode`, { state: { gameMode: enteredMode, player: [userState.id, "AI"]} });
-      }
+      // if (response === null) {
+      //   console.log("response is null");
+      // } else {
+        navigate(`/game/AI-mode`, { state: { data: {mode: enteredMode, playerID: [userState.id, "AI"]}}});
+      // }
     };
-    if (startAIMatch) {
-      setStartAIMatch(false);
-      AIMatch();
-    }
+    setStartAIMatch(false);
+    AIMatch();
   }, [startAIMatch]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

@@ -28,6 +28,7 @@ const GameLogic = () => {
 
     let socket: any = null;
     useEffect(() => {
+        console.log(state.data);
         try {
             data.canvasRef = canvasRef.current;
             data.profileRef[0] = profileRef1.current;

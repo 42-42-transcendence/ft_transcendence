@@ -1,21 +1,25 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import Modal from '../../UI/Modal';
 import styles from '../../styles/Modal.module.css';
 import { useNavigate } from 'react-router-dom';
 import { SERVER_URL } from '../../App';
+import useRequest from "../../http/useRequest";
 
 type Props = {
     result: 'win' | 'lost';
 };
 
-const sendEndGameRequest = () => {
-    const response = fetch(`${SERVER_URL}/api/game/exitAI`, {
-        method: 'POST',
-    });
-}
-
 const GameResultModal = ({ result }: Props) => {
     const navigate = useNavigate();
+    const { request } = useRequest();
+    const sendEndGameRequest = useCallback(async () => {
+        const response = await request(`${SERVER_URL}/game/api/exitAI`, {
+            method: 'POST',
+        });
+        if (response === null) {
+            console.log("response is null");
+        }
+    }, [request]);
 
     const closeAndRedirectHandler = () => {
         sendEndGameRequest();

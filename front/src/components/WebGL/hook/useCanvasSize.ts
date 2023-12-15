@@ -1,12 +1,13 @@
 import { useEffect} from 'react';
 import { debounce } from 'lodash'; // lodash의 debounce 함수 사용
 import data from '../interface/gameData';
+import { useCallback } from 'react';
 
 function useCanvasSize() {
   const ratio = 4.0 / 3.0;
 
 // 창 크기가 변할 때 실행될 함수
-const updateCanvasSize = debounce(() => {
+    const updateCanvasSize = useCallback(debounce(() => {
     const canvasRef = data.canvasRef;
 
 	if (!canvasRef) return;
@@ -14,7 +15,8 @@ const updateCanvasSize = debounce(() => {
     canvasRef.height = canvasRef.width / ratio;
 
     // 캔버스의 부모 요소에 대한 스타일 설정
-    const canvasContainer = canvasRef.parentElement as HTMLDivElement;
+    const canvasContainer = canvasRef.parentElement;
+    if (!canvasContainer) return;
     canvasContainer.style.display = 'flex';
     canvasContainer.style.justifyContent = 'center';
     canvasContainer.style.alignItems = 'center';
@@ -46,7 +48,7 @@ const updateCanvasSize = debounce(() => {
 
     if (!data.gl) return;
     data.gl.viewport(0, 0, canvasRef.width, canvasRef.height);
-}, 10); // 디바운스
+    }, 10), [data.canvasRef]);
 
   useEffect(() => {
     window.addEventListener('resize', updateCanvasSize);
@@ -56,7 +58,7 @@ const updateCanvasSize = debounce(() => {
       window.removeEventListener('resize', updateCanvasSize);
       updateCanvasSize.cancel(); // 디바운스된 함수를 취소
     };
-  }, []);
+  }, [updateCanvasSize]);
 
   if (!data.canvasRef) {
     return null;

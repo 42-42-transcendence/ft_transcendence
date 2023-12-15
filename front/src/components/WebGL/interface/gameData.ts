@@ -5,6 +5,7 @@ export let gameDataFromServer = {
 	height: [0, 0],
 	ballPos: vec2.fromValues(0, 0),
 	itemsPos: [] as vec2[],
+	scores: [0, 0],
 }
 
 let data: gameData = {

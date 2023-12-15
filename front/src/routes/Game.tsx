@@ -3,8 +3,6 @@ import {SocketContextProvider} from "../components/WebGL/context/SocketContext";
 import GameLogic from './GameLogic';
 
 const GamePage = () => {
-    
-
     return (
         <main>
             <SocketContextProvider>

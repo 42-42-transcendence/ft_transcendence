@@ -10,6 +10,18 @@ export enum CanvasPosition {
 }
 
 export class GameManager {
+    static resetGame() {
+        this.resetBallPosition()
+        data.paddle.forEach((paddle, index) => {
+            paddle.position[1] = 0;
+            if (index === 0)
+                paddle.position[0] = -0.96;
+            else
+                paddle.position[0] = 0.96;
+        });
+        data.scores = [0, 0];
+        this.scoreUpdate(null);
+    }
     /* the playerSide 0 = leftPlayer and 1 is the other player */
     static scoreUpdate(playerSide: number | null) {
         if (playerSide === 0 || playerSide === 1) {

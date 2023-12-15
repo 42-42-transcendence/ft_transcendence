@@ -16,7 +16,6 @@ const GameMatchingModal = ({ mode }: Props) => {
   const { isLoading, error, request } = useRequest();
   const closeModalHandler = useCloseModal();
 
-
   useEffect(() => {
     const startMatch = async () => {
 

@@ -21,7 +21,7 @@ const useGameEvent = () => {
         return () => {
             window.removeEventListener('gameEnd', handleGameEnd);
         };
-    }, []);
+    }, [socket]);
     return gameResult;
 };
 

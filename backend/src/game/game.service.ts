@@ -33,19 +33,19 @@ export class GameService {
         }
         
         // 올바른 유저 정보 확인용
+        console.log("--------------------");
         console.log(user.nickname);
         console.log(user.userID);
         console.log(user2.nickname);
         console.log(user2.userID);
+        console.log("--------------------");
         //
 
         const game = await this.gameRepository.save({title: user.nickname+" vs "+user2.nickname, player1 : user.userID, player2 : user2.userID, gameType: gameOptions.gametype, gameMode: gameOptions.gamemode});
         this.playerToGameId.set(userId1, {gameId : game.gameID, isFirst : true});
         this.playerToGameId.set(userId2, {gameId : game.gameID, isFirst : false});
-        gameOptions.isActive = true;
         this.gameIdToGameOption.set(game.gameID, gameOptions);
         this.gameIdToGameData.set(game.gameID, gameData);
-
         return game.gameID;
     }
 
@@ -58,7 +58,7 @@ export class GameService {
                 await this.gameRepository.delete(gameId);
         }
     }
-      
+
     startGameEngine(gameId: string){
         this.gameEngine.startGameLoop(gameId);
     }
@@ -148,20 +148,21 @@ export class GameService {
         if (game) {
             game.player1Score = dto.scores[0];
             game.player2Score = dto.scores[1];
-            this.userService.updateUserStatus((await this.userService.getUserById(game.player1)), UserStatus.ONLINE);
-            this.userService.updateUserStatus((await this.userService.getUserById(game.player2)), UserStatus.ONLINE);
             game.finished = true;
             if (Number(game.player1Score) > Number(game.player2Score)){
                 game.winner = game.player1;
+                await this.gameRepository.save(game);
+                console.log(`----------gameId: ${gameId} ---------------`);
                 this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, true);
                 this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, false);
             }
             else if (Number(game.player1Score) < Number(game.player2Score)){
                 game.winner = game.player2;
+                await this.gameRepository.save(game);
+                console.log(`----------gameId: ${gameId} ---------------`);
                 this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, false);
                 this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, true);
             }
-            await this.gameRepository.save(game);
             this.deleteGameData(gameId);
         }
     }
@@ -169,22 +170,21 @@ export class GameService {
     async recordAbortLoss (gameId : string, userId : string) : Promise <boolean> {
         const game : Game = await this.findGameById(gameId);
         if (game && game.finished === false) {
-            this.userService.updateUserStatus((await this.userService.getUserById(game.player1)), UserStatus.ONLINE);
-            this.userService.updateUserStatus((await this.userService.getUserById(game.player2)), UserStatus.ONLINE);
             game.finished = true;
             if (game.player1 === userId) {
                 game.player2Score = 42;
                 game.winner = game.player2;
+                await this.gameRepository.save(game);
                 this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, false);
                 this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, true);
             }
             else {
                 game.player1Score = 42;
                 game.winner = game.player1;
+                await this.gameRepository.save(game);
                 this.userService.endGameUser((await this.userService.getUserById(game.player1)), gameId, true);
                 this.userService.endGameUser((await this.userService.getUserById(game.player2)), gameId, false);
             }
-            await this.gameRepository.save(game);
             return true;
         }
         return false;

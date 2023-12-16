@@ -236,7 +236,11 @@ export class UserService {
 	async endGameUser(user: User, matchId : string, isWin:boolean) : Promise<void> {
 		const game = await this.gameservice.findGameById(matchId);
 		if (user) {
+			console.log(`-------------user: ${user.userID}-------------`);
+			console.log(`-------------game: ${matchId}-------------`);
+			console.log(`-------------game: ${user.matchHistory}-------------`);
 			user.matchHistory.push(matchId);
+			console.log(`-------------game: ${user.matchHistory}-------------`);
 			if (isWin === true) {
 				user.win += 1;
 				if (game.gameType === GameTypeEnum.LADDER)

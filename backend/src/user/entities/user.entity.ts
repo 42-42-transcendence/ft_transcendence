@@ -102,7 +102,7 @@ export class User {
     description: 'GameId',
     example: 'uuid',
   })
-  matchHistory: string[];
+  matchHistory: string[]=[];
 
   // @Column({
   //   nullable: false,

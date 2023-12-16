@@ -1,13 +1,12 @@
 import { ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from "./game.service";
-import { GameDataDto } from "./dto/in-game.dto";
+import { GameDataDto, sendGameDataDto } from "./dto/in-game.dto";
 import { GameOptionDto } from "./dto/in-game.dto";
 import { UserStatus } from 'src/user/enums/user-status.enum';;
 import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
 import { GameEngine } from './game.engine';
 import { UserService } from 'src/user/user.service';
-import { AuthService } from 'src/auth/auth.service';
 import { SocketExceptionFilter } from 'src/events/socket.filter';
 
 @UseFilters(new SocketExceptionFilter())
@@ -22,7 +21,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   	constructor(@Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine,
 				@Inject(forwardRef(() => GameService)) private gameService: GameService,
-                private authService: AuthService,
                 @Inject(forwardRef(() => UserService)) private userService : UserService,
                 ) {}
   afterInit() {}
@@ -35,8 +33,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
     if (this.gameService.isPlayer(userID)) {
         const gameId: string = await this.gameService.getPlayerGameId(userID);
-        this.server.in(client.id).socketsLeave(gameId);
-        console.log(`${user.nickname} joined room ${gameId}`);//
+        const gameOptions: GameOptionDto = await this.gameService.getGameOptions(gameId);
+        this.server.in(client.id).socketsJoin(gameId);
+        console.log(`${user.nickname} joined room ${gameId}`);
+        
+        if (gameOptions.isActive === false){
+            this.gameEngine.startGameLoop(gameId);
+            gameOptions.isActive = true;
+        }
     }
   }
 
@@ -45,22 +49,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
 
         if (this.gameService.isPlayer(user.userID)) {
-          const gameId : string = await this.gameService.getPlayerGameId(client.id);
-          if (gameId && this.gameService.isActive(gameId))
-          {
-              const gameData : GameDataDto = this.gameService.getGameData(gameId);
-              if (gameData) {
-                  if (gameData.scores[0] !== 5 || gameData.scores[1] !== 5)
-                    this.gameService.recordAbortLoss(gameId, user.userID);
-                this.gameService.cancelGame(user.userID, gameId, "abort");
-              }
-          }
-          else {
-              this.gameService.deletePlayer(client.id);
-              this.gameService.deleteGameOption(gameId);
-              this.gameService.deleteGameData(gameId);
-          }
-          this.server.in(client.id).socketsLeave(gameId);
+        const gameId : string = await this.gameService.getPlayerGameId(client.id);
+        if (gameId && this.gameService.isActive(gameId))
+        {
+            const gameData : GameDataDto = this.gameService.getGameData(gameId);
+            if (gameData) {
+                if (gameData.scores[0] !== 5 || gameData.scores[1] !== 5)
+                this.gameService.recordAbortLoss(gameId, user.userID);
+            this.gameService.cancelGame(user.userID, gameId, "abort");
+            }
+        }
+        else {
+            this.gameService.deletePlayer(client.id);
+            this.gameService.deleteGameOption(gameId);
+            this.gameService.deleteGameData(gameId);
+        }
+        await this.userService.updateUserStatus(user, UserStatus.ONLINE);
+        this.server.in(client.id).socketsLeave(gameId);
       }
       console.log(`GAME GATEWAY ----------- ${client.id} disconnected -------------------`);
   }
@@ -80,19 +85,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 //   }
 
 // 서버에서 일방적으로 요청 (updateGame 핸들러)
-  async emitGameData(sendGameDataDto: any, gameId: string) {
-    const game : GameOptionDto = await this.gameService.getGameOptions(gameId);
-    const player1 = game.player1;
-    const player2 = game.player2;
+  async emitGameData(sendGameDataDto: sendGameDataDto, gameId: string) {
+    // const game : GameOptionDto = await this.gameService.getGameOptions(gameId);
+    // const player1 = game.player1;
+    // const player2 = game.player2;
 
-    this.server.to(player1).emit("updateGame", sendGameDataDto);
-    this.server.to(player2).emit("updateGame", sendGameDataDto);
+    // this.server.to(`${gameId}`).emit("updateGame", sendGameDataDto);
+    this.server.emit("updateGame", sendGameDataDto);
+    console.log("sending data.......");
   }
 
   @SubscribeMessage('KeyRelease')
-  onKeyRelease(@ConnectedSocket() client: Socket) : void {
-    const Pair = this.gameService.getPair(client.id);
-    const gamedata = this.gameService.getGameData(Pair.gameId);
+  async onKeyRelease(@ConnectedSocket() client: Socket) : Promise<void> {
+    const nickname = client.handshake.query.userID;
+    const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+
+    const Pair = this.gameService.getPair(user.userID);
+    const gameid = await this.gameService.getPlayerGameId(user.userID);
+    const gamedata = this.gameService.getGameData(gameid);
     const leftPaddle = gamedata.paddle[0];
     const rightPaddle = gamedata.paddle[1];
 
@@ -100,41 +110,56 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         if (Pair.isFirst){
             leftPaddle.keyPress.up = false;
             leftPaddle.keyPress.down = false;
+            console.log("player1 keyPress off");
+            
         } else{
             rightPaddle.keyPress.up = false;
             rightPaddle.keyPress.down = false;
+            console.log("player2 keyPress off");
         }
     }
 }
 
   @SubscribeMessage('UpKey')
-  UpKeyPressed(@ConnectedSocket() client: Socket) : void {
-        const Pair = this.gameService.getPair(client.id);
-        const gamedata = this.gameService.getGameData(Pair.gameId);
+  async UpKeyPressed(@ConnectedSocket() client: Socket) : Promise<void> {
+        const nickname = client.handshake.query.userID;
+        const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+
+        const Pair = this.gameService.getPair(user.userID);
+        const gameid = await this.gameService.getPlayerGameId(user.userID);
+        const gamedata = this.gameService.getGameData(gameid);
         const leftPaddle = gamedata.paddle[0];
         const rightPaddle = gamedata.paddle[1];
 
         if (Pair) {
             if (Pair.isFirst){
                 leftPaddle.keyPress.up = true;
+                console.log("player1 keyPress up");
             } else{
                 rightPaddle.keyPress.up = true;
+                console.log("player2 keyPress up");
             }
         }
     }
 
   @SubscribeMessage('DownKey')
-  DownKeyPressed(@ConnectedSocket() client: Socket) : void {
-        const Pair = this.gameService.getPair(client.id);
-        const gamedata = this.gameService.getGameData(Pair.gameId);
+  async DownKeyPressed(@ConnectedSocket() client: Socket) : Promise<void> {
+        const nickname = client.handshake.query.userID;
+        const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+
+        const Pair = this.gameService.getPair(user.userID);
+        const gameid = await this.gameService.getPlayerGameId(user.userID);
+        const gamedata = this.gameService.getGameData(gameid);
         const leftPaddle = gamedata.paddle[0];
         const rightPaddle = gamedata.paddle[1];
 
         if (Pair) {
             if (Pair.isFirst){
                 leftPaddle.keyPress.down = true;
+                console.log("player1 keyPress down");
             } else{
                 rightPaddle.keyPress.down = true;
+                console.log("player2 keyPress down");
             }
         }
     }
@@ -149,8 +174,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.gameService.deletePlayer(player2);
         const isEnded = await this.gameService.endOfGame(gamedata, gameId);
         if (isEnded) {
-            this.server.to(player1).emit('endGame');
-            this.server.to(player2).emit('endGame');
+            this.server.emit('endGame');
             await this.userService.updateUserStatus(await this.userService.getUserById(player1), UserStatus.ONLINE);
             await this.userService.updateUserStatus(await this.userService.getUserById(player2), UserStatus.ONLINE);
         }

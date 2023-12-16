@@ -285,15 +285,13 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       scores: [0, 0],
       lastTime: 0,
       mode: 'normal',
-      delta: 0,
     }
     // 유저 정상 접속 확인
     console.log("userIDs: %s, %s", users[0].userID, users[1].userID);
 
     const gameID = await this.eventsService.startGame(users[0].userID, users[1].userID, gameOptions, gamedata);
     if (gameID) {
-      await this.userService.updateUserStatus(users[0], UserStatus.PLAYING);
-      await this.userService.updateUserStatus(users[1], UserStatus.PLAYING);
+      console.log("game started");
     }
     client.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
     sendclient.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
@@ -346,10 +344,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       scores: [0, 0],
       lastTime: 0,
       mode: 'normal',
-      delta: 0,
     }
-    // 유저 정상 접속 확인
-    console.log("userIDs: %s, %s", user.userID, readyUser.userID);
 
     const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
     if (gameID) {
@@ -361,6 +356,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     
     // 게임 정상 생성 확인
     console.log("normal game ID: ", gameID);
+    this.eventsService.g_startGameLoop(gameID);
   }
 
   async objectGameMatching(user: User, mode: GameModeEnum, type: GameTypeEnum) {
@@ -389,7 +385,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       scores: [0, 0],
       lastTime: 0,
       mode: 'normal',
-      delta: 0,
     }
     // 유저 정상 접속 확인
     console.log("userIDs: %s, %s", user.userID, readyUser.userID);

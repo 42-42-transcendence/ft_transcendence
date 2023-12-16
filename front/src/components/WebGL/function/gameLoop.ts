@@ -2,6 +2,7 @@ import data from '../interface/gameData';
 import { render } from './render';
 import update from "./update";
 import receive from "./receive";
+import { GameManager } from "../class/GameManager";
 
 export function gameLoop(timeStamp: number) {
 	if (data.endGame) {
@@ -15,6 +16,8 @@ export function gameLoop(timeStamp: number) {
 	// }
 	if (data.mode === 'AI')
 		update(delta);
+	if (data.endGame)
+		GameManager.endGame();
 	else
 		receive();
 	render();

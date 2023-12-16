@@ -60,7 +60,7 @@ export class GameManager {
         }
 
         ItemManager.getInstance().clearItems();
-        gameDataFromServer.itemsPos = [];
+        gameDataFromServer.itemsPos = null;
         // WebGL 컨텍스트 해제
         gl.getExtension('WEBGL_lose_context')?.loseContext();
     }

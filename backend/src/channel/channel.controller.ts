@@ -690,7 +690,7 @@ export class ChannelController {
       }
 
       if (objectUserRole.isMuted === true) {
-        this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
+        await this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
         const content = `${mutedUser.nickname}님께서 뮤트가 해제되었습니다.`;
         await this.eventsGateway.updatedSystemMessage(content, channel, user);
         await this.eventsGateway.updatedMembersForAllUsers(channel);
@@ -698,7 +698,7 @@ export class ChannelController {
         return ({ message: content });
       }
 
-      this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, true);
+      await this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, true);
         // setTimeout(() => {
         //   if (objectUserRole.isMuted === true) {
         //     this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);

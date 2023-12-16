@@ -9,7 +9,7 @@ const usePopstate = () => {
     const { request } = useRequest();
     const { socket } = useSocket();
     const sendEndGameRequest = useCallback(async () => {
-        const response = await request(`${SERVER_URL}/game/api/exitAI`, {
+        const response = await request(`${SERVER_URL}/api/game/exitAI`, {
             method: 'POST',
         });
         if (response === null) {

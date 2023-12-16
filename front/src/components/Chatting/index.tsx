@@ -91,9 +91,9 @@ const Chatting = () => {
       setChannelTitle(title);
       setMembers(members);
       setMessages(
-        messages.filter(
-          (message) => !isBlockedMember(message.userNickname, members)
-        )
+        messages
+          .filter((message) => !isBlockedMember(message.userNickname, members))
+          .slice(-100)
       );
     },
     []

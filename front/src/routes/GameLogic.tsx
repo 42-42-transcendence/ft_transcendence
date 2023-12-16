@@ -28,6 +28,8 @@ const GameLogic = () => {
 
     let socket: any = null;
     useEffect(() => {
+        if (data.endGame)
+            return;
         console.log(state.data);
         try {
             data.canvasRef = canvasRef.current;

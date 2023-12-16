@@ -15,7 +15,7 @@ const usePopstate = () => {
         if (response === null) {
             console.log("response is null");
         }
-    }, [request]);
+    }, [socket]);
 
     const handler = () => {
         if (data.mode === 'AI')

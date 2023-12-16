@@ -9,7 +9,7 @@ export function gameLoop(timeStamp: number) {
 		return;
 	}
 	let delta = (timeStamp - data.lastTime) / 1000.0;
-	// if (timeStamp < data.lastTime + (1000 / 30)) {
+	// if (timeStamp < data.lastTime + (1000 / 10)) {
 	// 	requestAnimationFrame(gameLoop);
 	// 	return;
 	// }

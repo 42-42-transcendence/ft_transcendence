@@ -7,6 +7,7 @@ import { GameManager } from "../class/GameManager";
 export function gameLoop(timeStamp: number) {
 	if (data.endGame) {
 		cancelAnimationFrame(data.requestId);
+		GameManager.cleanupWebGL();
 		GameManager.endGame();
 		return;
 	}

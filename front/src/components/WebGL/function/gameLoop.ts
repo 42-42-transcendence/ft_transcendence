@@ -2,16 +2,11 @@ import data from '../interface/gameData';
 import { render } from './render';
 import update from "./update";
 import receive from "./receive";
-import { useSocket } from "../context/SocketContext";
 import { GameManager } from "../class/GameManager";
 
 export function gameLoop(timeStamp: number) {
-	const { socket } = useSocket();
 	if (data.endGame) {
-		if (socket)
-			socket.disconnect();
 		cancelAnimationFrame(data.requestId);
-		GameManager.cleanupWebGL();
 		data.isFirstRender = true;
 		return;
 	}

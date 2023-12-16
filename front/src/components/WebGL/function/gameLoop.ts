@@ -8,7 +8,8 @@ import { GameManager } from "../class/GameManager";
 export function gameLoop(timeStamp: number) {
 	const { socket } = useSocket();
 	if (data.endGame) {
-		socket?.disconnect();
+		if (socket)
+			socket.disconnect();
 		cancelAnimationFrame(data.requestId);
 		GameManager.cleanupWebGL();
 		data.isFirstRender = true;

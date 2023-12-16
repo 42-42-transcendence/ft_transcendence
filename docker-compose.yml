@@ -14,11 +14,12 @@ services:
             - .env
         ports:
             - ${HOST_PORT}:${HOST_PORT}
+        volumes:
+            - ./data/app/:/var/app/assets/profiles
         networks:
             - webnet
         depends_on:
             - postgres
-        restart: on-failure:5
 
     postgres:
         container_name: postgres

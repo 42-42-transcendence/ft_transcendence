@@ -12,6 +12,10 @@ export class ChatService {
   async getAllChats(): Promise<Chat[]> {
     return (await this.chatRepository.getAllChats());
   }
+  
+  async getRecentHundredChatsByChannelID(channelID: string): Promise<Chat[]> {
+		return (this.chatRepository.getRecentHundredChatsByChannelID(channelID));
+	}
 
   async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
     return (await this.chatRepository.createChatMessage(createChatMessageDto));

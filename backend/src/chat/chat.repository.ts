@@ -18,6 +18,20 @@ export class ChatRepository extends Repository<Chat> {
 		return (await this.find());
 	}
 
+	async getRecentHundredChatsByChannelID(channelID: string): Promise<Chat[]> {
+		const chats = await this
+			.createQueryBuilder('chat')
+			.leftJoinAndSelect('chat.channel', 'channel')
+			.where('channel.channelID = :channelID', { channelID })
+			.orderBy('chat.createdAt', 'DESC')
+			.take(100)
+			.getMany();
+		
+		chats.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+		
+		return (chats);
+	}
+
 	async createChatMessage(createChatMessageDto: CreateChatMessageDto): Promise<Chat> {
 		const chat = this.create({
 			content: createChatMessageDto.content,

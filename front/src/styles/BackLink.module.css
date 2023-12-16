@@ -1,0 +1,8 @@
+.link {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--focus-color);
+}
+.link:hover {
+  background-color: var(--focus-hover-color);
+}

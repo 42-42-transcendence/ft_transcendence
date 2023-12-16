@@ -1,0 +1,36 @@
+services:
+    transcendence:
+        container_name: transcendence
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            args:
+                - REACT_APP_HOST_DOMAIN=${REACT_APP_HOST_DOMAIN}
+                - HOST_PORT=${HOST_PORT}
+                - POSTGRES_PORT=${POSTGRES_PORT}
+                - REACT_APP_HOST_PORT=${REACT_APP_HOST_PORT}
+                - REACT_APP_HOST_REDIRECT_URI=${REACT_APP_HOST_REDIRECT_URI}
+        env_file:
+            - .env
+        ports:
+            - ${HOST_PORT}:${HOST_PORT}
+        networks:
+            - webnet
+        depends_on:
+            - postgres
+        restart: on-failure:5
+
+    postgres:
+        container_name: postgres
+        image: postgres:latest
+        env_file:
+            - .env
+        ports:
+            - ${POSTGRES_PORT}:${POSTGRES_PORT}
+        volumes:
+            - ./data/postgres/:/var/lib/postgresql/data
+        networks:
+            - webnet
+
+networks:
+    webnet:

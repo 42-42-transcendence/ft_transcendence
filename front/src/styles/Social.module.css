@@ -1,0 +1,108 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  position: relative;
+  width: fit-content;
+}
+
+.items {
+  overflow: auto;
+  overflow-x: hidden;
+  height: 100%;
+  max-height: 70vh;
+  width: 50vw;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, auto));
+  gap: 16px;
+}
+.item {
+  position: relative;
+}
+
+.item.offline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.full-width {
+  width: 50vw;
+}
+
+.sidebar {
+  margin-right: 48px;
+  font-size: 20px;
+  width: 120px;
+}
+
+.status {
+  position: relative;
+  margin-left: 8px;
+}
+
+.status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  position: absolute;
+
+  transform: translate(-150%, 50%);
+  border-radius: 50%;
+}
+
+.status.online {
+  color: var(--online-color);
+}
+.status.online::before {
+  background-color: var(--online-color);
+}
+
+.status.offline {
+  color: var(--offline-color);
+}
+.status.offline::before {
+  background-color: var(--offline-color);
+}
+
+.status.in-game {
+  color: var(--in-game-color);
+}
+.status.in-game::before {
+  background-color: var(--in-game-color);
+}
+
+.add {
+  width: 100%;
+  background-color: var(--focus-color);
+  color: var(--text-white);
+  font-size: 20px;
+}
+.add:hover {
+  background-color: var(--focus-hover-color);
+}
+
+.dropdown {
+  position: absolute;
+}
+
+.icons {
+  position: absolute;
+  top: -32px;
+  left: 60px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.icon {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}

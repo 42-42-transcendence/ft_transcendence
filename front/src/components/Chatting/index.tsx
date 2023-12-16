@@ -112,7 +112,7 @@ const Chatting = () => {
     (message: Message) => {
       if (isBlockedMember(message.userNickname, members)) return;
 
-      setMessages((prevMessages) => [...prevMessages, message]);
+      setMessages((prevMessages) => [...prevMessages, message].slice(-100));
     },
     [members]
   );

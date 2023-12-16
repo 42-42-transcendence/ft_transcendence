@@ -233,14 +233,22 @@ export class UserService {
 	// datetime으로 user1games와 user2games 번갈아가면서 스택 top 확인하면서 꺼내기
 	}
 
-	async endGameUser(user: User, matchId : string, isWin:boolean) : Promise<void> {
+	async endGameUser(nickname: string, matchId : string, isWin:boolean) : Promise<void> {
 		const game = await this.gameservice.findGameById(matchId);
-		if (user) {
-			console.log(`-------------user: ${user.userID}-------------`);
-			console.log(`-------------game: ${matchId}-------------`);
-			console.log(`-------------game: ${user.matchHistory}-------------`);
+		const user = await this.getUserByNickname(nickname);
+
+		if (nickname) {
+			console.log(`game ID: ${game.gameID}`);
+			console.log(`game finished: ${game.finished}`);
+			console.log(`game date: ${game.date}`);
+			console.log(`game mode: ${game.gameMode}`);
+			console.log(`game type: ${game.gameType}`);
+			console.log(`game WINNER: ${game.winner}`);
+			console.log(`PLAYER 1: ${game.player1}`);
+			console.log(`PLAYER 2: ${game.player2}`);
+			console.log(`PLAYER1 score: ${game.player1Score}`);
+			console.log(`PLAYER2 score: ${game.player2Score}`);
 			user.matchHistory.push(matchId);
-			console.log(`-------------game: ${user.matchHistory}-------------`);
 			if (isWin === true) {
 				user.win += 1;
 				if (game.gameType === GameTypeEnum.LADDER)

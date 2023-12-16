@@ -2,16 +2,13 @@ import { Item } from "./Item";
 import {vec2} from "gl-matrix";
 import PhysicsEngine from "./PhysicsEngine";
 import { GameDataDto } from "./in-game.dto";
-import { Paddle } from "./Paddle";
 
 export class ItemManager {
     private static instance: ItemManager;
-    public items: Item[];
     private lastItemCreationTime: number;
 
     constructor() {
         this.lastItemCreationTime = Date.now();
-        this.items = [];
     }
 
     public static getInstance(): ItemManager {
@@ -21,11 +18,11 @@ export class ItemManager {
         return this.instance;
     }
 
-    public createItem() {
+    public createItem(items: Item[]) {
         const currentTime = Date.now();
         let randomX = Math.random();
 
-        if (currentTime - this.lastItemCreationTime < 1000 || this.items.length >= 5)
+        if (currentTime - this.lastItemCreationTime < 1000 || items.length >= 5)
             return;
         if (randomX < 0.5) {
             randomX = randomX * 0.6 - 0.5;
@@ -39,16 +36,16 @@ export class ItemManager {
         const radius = 0.01;
 
         const newItem = new Item(position, direction, velocity, radius);
-        this.items.push(newItem);
+        items.push(newItem);
         this.lastItemCreationTime = currentTime;
     }
 
-    public updateItems(delta: number, paddle: Paddle[], gamedata: GameDataDto) {
-        this.items.forEach(item => PhysicsEngine.GuaranteeConflict(item, paddle, gamedata, delta));
-        this.items = this.items.filter(item => !item.toBeDestroyed);
+    public updateItems(delta: number, gamedata: GameDataDto) {
+        gamedata.items.forEach(item => PhysicsEngine.GuaranteeConflict(item, gamedata, delta));
+        gamedata.items = gamedata.items.filter(item => !item.toBeDestroyed);
     }
 
-    public clearItems() {
-        this.items = [];
+    public clearItems(items: Item[]) {
+        items = [];
     }
 }

@@ -27,9 +27,7 @@ import { SocketException } from './socket.exception';
 import { UserStatus } from 'src/user/enums/user-status.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
 import { GameModeEnum } from 'src/game/enums/gameMode.enum';
-import { race } from 'rxjs';
 import { GameDataDto, GameOptionDto } from 'src/game/dto/in-game.dto';
-import { read } from 'fs';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 import { SendMessageDto } from './dto/send-message.dto';
 import { Paddle } from 'src/game/dto/Paddle';
@@ -270,10 +268,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const sendclient = this.eventsService.getClient(users[1].userID);
 
     const gameOptions: GameOptionDto = {
-      player1: users[0].userID,
-      player2: users[1].userID,
-      player1score: 0,
-      player2score: 0,
+      player1: users[0].nickname,
+      player2: users[1].nickname,
       gametype: type,
       gamemode: mode,
       isActive: false,
@@ -281,20 +277,22 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.5, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 3.0, 0.02),
       scores: [0, 0],
+      items: [],
       lastTime: 0,
       mode: 'normal',
     }
     // 유저 정상 접속 확인
-    console.log("userIDs: %s, %s", users[0].userID, users[1].userID);
+    console.log("userIDs: %s, %s", users[0].nickname, users[1].nickname);
 
     const gameID = await this.eventsService.startGame(users[0].userID, users[1].userID, gameOptions, gamedata);
     if (gameID) {
-      console.log("game started");
+      client.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
+      sendclient.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
     }
-    client.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
-    sendclient.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
+   
+    this.eventsService.g_startGameLoop(gameID);
   }
 
   hasAlreadyGameMatching(user: User): boolean {
@@ -329,10 +327,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // 게임 룸 만들기
     const gameOptions: GameOptionDto = {
-      player1: user.userID,
-      player2: readyUser.userID,
-      player1score: 0,
-      player2score: 0,
+      player1: user.nickname,
+      player2: readyUser.nickname,
       gametype: type,
       gamemode: mode,
       isActive: false,
@@ -340,19 +336,18 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.5, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 3.0, 0.02),
       scores: [0, 0],
+      items: [],
       lastTime: 0,
       mode: 'normal',
     }
 
     const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
     if (gameID) {
-      await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-      await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+      client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
+      readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
     }
-    client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
-    readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
     
     // 게임 정상 생성 확인
     console.log("normal game ID: ", gameID);
@@ -370,10 +365,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // 게임 룸 만들기
     const gameOptions: GameOptionDto = {
-      player1: user.userID,
-      player2: readyUser.userID,
-      player1score: 0,
-      player2score: 0,
+      player1: user.nickname,
+      player2: readyUser.nickname,
       gametype: type,
       gamemode: mode,
       isActive: false,
@@ -381,24 +374,20 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 3.0, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.5, 0.02),
       scores: [0, 0],
+      items: [],
       lastTime: 0,
-      mode: 'normal',
+      mode: 'object',
     }
-    // 유저 정상 접속 확인
-    console.log("userIDs: %s, %s", user.userID, readyUser.userID);
 
     const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
     if (gameID) {
-      await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-      await this.userService.updateUserStatus(readyUser, UserStatus.PLAYING);
+      client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
+      readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
     }
-    client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
-    readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
-    
-    // 게임 정상 생성 확인
-    console.log("object game ID: ", gameID);
-  }
 
+    console.log("object game ID: ", gameID);
+    this.eventsService.g_startGameLoop(gameID);
+  }
 }

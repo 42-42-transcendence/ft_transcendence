@@ -1,18 +1,9 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { vec2 } from 'gl-matrix';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
 import { ItemManager } from './dto/ItemManager';
 import PhysicsEngine from './dto/PhysicsEngine';
 import { GameDataDto, sendGameDataDto } from "./dto/in-game.dto";
-
-let sendData: sendGameDataDto = {
-	paddlePos: [[0, 0], [0, 0]],
-	height: [0, 0],
-	ballPos: [0, 0],
-    // itemsPos: [vec2.fromValues(0, 0), vec2.fromValues(0, 0)],
-    scores: [0, 0],
-}
 
 @Injectable()
 export class GameEngine {
@@ -22,23 +13,19 @@ export class GameEngine {
     async updateGame(delta: number, gamedata: GameDataDto): Promise<void> {
         if (gamedata.mode === 'object') {
 		    /* 아이템 생성 */
-		    ItemManager.getInstance().createItem();
+		    ItemManager.getInstance().createItem(gamedata.items);
 		    /* 아이템 업데이트 */
-		    ItemManager.getInstance().updateItems(delta, gamedata.paddle, gamedata);
+		    ItemManager.getInstance().updateItems(delta, gamedata);
 	    }
         /* 공 위치 업데이트 */
-        PhysicsEngine.GuaranteeConflict(gamedata.ball, gamedata.paddle, gamedata, delta);
+        PhysicsEngine.GuaranteeConflict(gamedata.ball, gamedata, delta);
 
         /* player 패들 이동 */
         gamedata.paddle[0].updatePosition(delta);
         gamedata.paddle[1].updatePosition(delta);
-        console.log(gamedata.ball.position[0]);
-        console.log(gamedata.ball.position[1]);
-        console.log(gamedata.paddle[0].position);
-        console.log(gamedata.paddle[1].position);
     }
     
-    updateSendData(gameData: GameDataDto){
+    updateSendData(sendData: sendGameDataDto, gameData: GameDataDto){
         sendData.height[0] = gameData.paddle[0].height;
         sendData.height[1] = gameData.paddle[1].height;
         sendData.paddlePos[0][0] = gameData.paddle[0].position[0];
@@ -48,25 +35,34 @@ export class GameEngine {
         sendData.ballPos[0] = gameData.ball.position[0];
         sendData.ballPos[1] = gameData.ball.position[1];
         sendData.scores = gameData.scores;
-        // sendData.Itempos
-        return sendData;
+        for (let i = 0; i < gameData.items.length; i++){
+            sendData.itemsPos[i] = [gameData.items[i].position[0], gameData.items[i].position[1]];
+        }
     }
-    
 
     async startGameLoop(gameId: string): Promise<void> {
         const interval = setInterval(async () => { 
             const gameData = this.gameService.getGameData(gameId);
-            if (!gameData)
+            const sendData: sendGameDataDto = {
+                paddlePos: [[0, 0], [0, 0]],
+                height: [0, 0],
+                ballPos: [0, 0],
+                itemsPos: [],
+                scores: [0, 0],
+            }
+            if (!gameData){
+                clearInterval(interval);
                 return ;
+            }
             if (gameData.lastTime === 0)
                 gameData.lastTime = new Date().getTime();
             if (gameData.scores[0] === 5 || gameData.scores[1] === 5){
-                console.log("game end to max score");
-                (await this.gameService.getGameOptions(gameId)).isActive = false;
-                const sendData = this.updateSendData(gameData);
-                this.gameGateway.emitGameData(sendData, gameId);
-                await this.gameGateway.gameEnd(gameData, gameId);
                 clearInterval(interval);
+                console.log("game end with max score");
+                (await this.gameService.getGameOptions(gameId)).isActive = false;
+                this.updateSendData(sendData, gameData);
+                this.gameGateway.emitGameData(sendData, gameId);
+                await this.gameGateway.gameEnd(gameData, gameId);                
                 return ;
             }
             const timeStamp = new Date().getTime();
@@ -75,10 +71,10 @@ export class GameEngine {
             //     return ;
             // }
             await this.updateGame(delta, gameData);
-            const sendData = this.updateSendData(gameData);
+            this.updateSendData(sendData, gameData);
             this.gameGateway.emitGameData(sendData, gameId);
             
             gameData.lastTime = timeStamp;
-        }, 1000 / 60);
+        }, 1000 / 120);
     }
 }

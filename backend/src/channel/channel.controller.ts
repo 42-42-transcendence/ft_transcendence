@@ -149,8 +149,8 @@ export class ChannelController {
         await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
       }
       // 멀티 페이지 생각해볼 것 (알림으로 들어갈시 아마 또 떠버리게 될거임)
-      this.eventsGateway.updatedSystemMessage(content, channel, user);
-      this.eventsGateway.updatedMembersForAllUsers(channel);
+      await this.eventsGateway.updatedSystemMessage(content, channel, user);
+      await this.eventsGateway.updatedMembersForAllUsers(channel);
       return ({ isAuthenticated: true });
     }
 
@@ -162,8 +162,8 @@ export class ChannelController {
       if (member.role === ChannelMemberRole.INVITE) {
         await this.channelService.enterUserToChannel(channel);
         await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
-        this.eventsGateway.updatedSystemMessage(content, channel, user);
-        this.eventsGateway.updatedMembersForAllUsers(channel);
+        await this.eventsGateway.updatedSystemMessage(content, channel, user);
+        await this.eventsGateway.updatedMembersForAllUsers(channel);
       }
       return ({ isAuthenticated: true });
     }
@@ -179,8 +179,8 @@ export class ChannelController {
     if (member && (member.role === ChannelMemberRole.INVITE)) {
       await this.channelService.enterUserToChannel(channel);
       await this.channelMemberService.updateChannelMemberRoleByChannelMember(member, ChannelMemberRole.GUEST);
-      this.eventsGateway.updatedSystemMessage(content, channel, user);
-      this.eventsGateway.updatedMembersForAllUsers(channel);
+      await this.eventsGateway.updatedSystemMessage(content, channel, user);
+      await this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     if (!member) {
@@ -190,8 +190,8 @@ export class ChannelController {
         user,
         role: ChannelMemberRole.GUEST
       });
-      this.eventsGateway.updatedSystemMessage(content, channel, user);
-      this.eventsGateway.updatedMembersForAllUsers(channel);
+      await this.eventsGateway.updatedSystemMessage(content, channel, user);
+      await this.eventsGateway.updatedMembersForAllUsers(channel);
     }
 
     return ({ isAuthenticated: true });
@@ -693,7 +693,7 @@ export class ChannelController {
         this.channelMemberService.updateChannelMemberIsMutedByChannelMember(objectUserRole, false);
         const content = `${mutedUser.nickname}님께서 뮤트가 해제되었습니다.`;
         await this.eventsGateway.updatedSystemMessage(content, channel, user);
-        this.eventsGateway.updatedMembersForAllUsers(channel);
+        await this.eventsGateway.updatedMembersForAllUsers(channel);
 
         return ({ message: content });
       }
@@ -707,7 +707,7 @@ export class ChannelController {
 
       const content = `${mutedUser.nickname}님께서 뮤트되었습니다.`;
       await this.eventsGateway.updatedSystemMessage(content, channel, user);
-      this.eventsGateway.updatedMembersForAllUsers(channel);
+      await this.eventsGateway.updatedMembersForAllUsers(channel);
 
       return ({ message: content });
     }

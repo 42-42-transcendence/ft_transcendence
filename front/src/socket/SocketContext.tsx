@@ -27,7 +27,7 @@ const SocketContextProvider = ({ children }: ChildProps) => {
 
   useEffect(() => {
     if (!socket) {
-      const newSocket = io(`${SERVER_URL}/game`, {
+      const newSocket = io(`${SERVER_URL}`, {
         auth: {
           token: authState.token,
         },

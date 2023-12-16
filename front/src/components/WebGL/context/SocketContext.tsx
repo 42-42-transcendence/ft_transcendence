@@ -44,10 +44,10 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 gameDataFromServer.itemsPos = gameData.itemsPos;
                 gameDataFromServer.scores[0] = gameData.scores[0];
                 gameDataFromServer.scores[1] = gameData.scores[1];
-                console.log("data received......");
             });
 
             newSocket.on('endGame', (nickName: string) => {
+                console.log("endgame received");
                 data.winner = nickName;
                 data.endGame = true;
             });

@@ -24,7 +24,6 @@ const usePopstate = () => {
         GameManager.cleanupWebGL();
         data.isFirstRender = true;
         socket?.disconnect();
-        GameManager.endGame();
     };
 
     useEffect(() => {

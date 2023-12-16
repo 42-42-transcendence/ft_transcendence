@@ -2,13 +2,16 @@ import data from '../interface/gameData';
 import { render } from './render';
 import update from "./update";
 import receive from "./receive";
+import { useSocket } from "../context/SocketContext";
 import { GameManager } from "../class/GameManager";
 
 export function gameLoop(timeStamp: number) {
+	const { socket } = useSocket();
 	if (data.endGame) {
+		socket?.disconnect();
 		cancelAnimationFrame(data.requestId);
 		GameManager.cleanupWebGL();
-		GameManager.endGame();
+		data.isFirstRender = true;
 		return;
 	}
 	let delta = (timeStamp - data.lastTime) / 1000.0;

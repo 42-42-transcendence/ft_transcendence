@@ -25,7 +25,7 @@ let data: gameData = {
 	canvasRef: null,
 	program: [null, null],
 	mode: 'normal',
-	matchResult: '',
+	winner: '',
 	uColorLocation: null,
 	requestId: 0,
 	endGame: false,

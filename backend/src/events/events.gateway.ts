@@ -124,7 +124,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const auth = await this.authService.checkAuthByJWT(client.handshake.auth.token);
     const user = await this.authService.getUserByAuthWithWsException(auth);
     const channel = await this.channelService.getChannelByIdWithException(data.channelID);
-    const messages = await channel.chats;
+    const messages = await this.chatService.getRecentHundredChatsByChannelID(channel.channelID);
     const channelMembers = await channel.channelMembers;
     const members = await this.eventsService.createEventsMembers(channelMembers, user);
     const title = channel.title;

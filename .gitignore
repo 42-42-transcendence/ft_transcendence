@@ -59,5 +59,7 @@ front/.idea/
 
 data/
 backend/.env
+backend/package-lock.json
 front/.env
+front/package-lock.json
 .env

@@ -7,6 +7,7 @@ import { GameManager } from "../class/GameManager";
 export function gameLoop(timeStamp: number) {
 	if (data.endGame) {
 		cancelAnimationFrame(data.requestId);
+		GameManager.endGame();
 		return;
 	}
 	let delta = (timeStamp - data.lastTime) / 1000.0;
@@ -16,8 +17,6 @@ export function gameLoop(timeStamp: number) {
 	// }
 	if (data.mode === 'AI')
 		update(delta);
-	if (data.endGame)
-		GameManager.endGame();
 	else
 		receive();
 	render();

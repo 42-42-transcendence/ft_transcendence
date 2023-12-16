@@ -1,4 +1,4 @@
-import data from "../interface/gameData";
+import data, {gameDataFromServer} from "../interface/gameData";
 import {vec2} from "gl-matrix";
 import {ItemManager} from "./ItemManager";
 
@@ -60,6 +60,7 @@ export class GameManager {
         }
 
         ItemManager.getInstance().clearItems();
+        gameDataFromServer.itemsPos = [];
         // WebGL 컨텍스트 해제
         gl.getExtension('WEBGL_lose_context')?.loseContext();
     }
@@ -83,7 +84,6 @@ export class GameManager {
         // ball.direction = vec2.fromValues(1.0, 0);
 
         /* 게임 종료 */
-        cancelAnimationFrame(data.requestId);
         window.dispatchEvent(new CustomEvent('gameEnd', {}));
     }
     static isMatchConcluded() {

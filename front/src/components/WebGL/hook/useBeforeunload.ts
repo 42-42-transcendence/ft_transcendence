@@ -14,7 +14,7 @@ const useBeforeunload = () => {
                 GameManager.cleanupWebGL();
                 data.isFirstRender = true;
                 socket?.disconnect();
-                window.dispatchEvent(new CustomEvent('gameEnd', {}));
+                GameManager.endGame();
             }
         };
         window.addEventListener('beforeunload', handler);

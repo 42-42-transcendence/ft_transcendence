@@ -10,9 +10,6 @@ const useGameEvent = () => {
         const handleGameEnd = () => {
             setGameResult(data.matchResult);
             data.endGame = true;
-            GameManager.cleanupWebGL();
-            socket?.disconnect();
-            data.isFirstRender = true;
         };
         window.addEventListener('gameEnd', handleGameEnd);
         return () => {

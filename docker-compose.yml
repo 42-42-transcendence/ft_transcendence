@@ -9,6 +9,7 @@ services:
                 - HOST_PORT=${HOST_PORT}
                 - POSTGRES_PORT=${POSTGRES_PORT}
                 - REACT_APP_HOST_PORT=${REACT_APP_HOST_PORT}
+                - REACT_APP_HOST_REDIRECT_URI=${REACT_APP_HOST_REDIRECT_URI}
         env_file:
             - .env
         ports:

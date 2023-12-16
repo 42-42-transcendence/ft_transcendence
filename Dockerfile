@@ -4,23 +4,21 @@ ARG REACT_APP_HOST_DOMAIN
 ARG POSTGRES_PORT
 ARG HOST_PORT
 ARG REACT_APP_HOST_PORT
+ARG REACT_APP_HOST_REDIRECT_URI
 
 ENV REACT_APP_HOST_DOMAIN $REACT_APP_HOST_DOMAIN
 ENV POSTGRES_PORT $POSTGRES_PORT
 ENV HOST_PORT $HOST_PORT
 ENV REACT_APP_HOST_PORT $REACT_APP_HOST_PORT
+ENV REACT_APP_HOST_REDIRECT_URI $REACT_APP_HOST_REDIRECT_URI
 
 RUN npm i -g npm@latest npm-check-updates@latest
 
 COPY ./front /var/front
 
-# COPY .env /var/frontend/.env
-
 WORKDIR /var/front
 
-RUN ncu
-
-RUN ncu -u
+RUN ncu > ncu_frontend.log
 
 RUN npm install
 
@@ -36,10 +34,7 @@ RUN mkdir client
 
 RUN cp -r ../front/build ./client/build
 
-RUN ncu
-
-# 패키지 충돌 발생 reflect-metadata - @nestjs/common@10.2.10
-# RUN ncu -u
+RUN ncu > ncu_backend.log
 
 RUN npm install
 

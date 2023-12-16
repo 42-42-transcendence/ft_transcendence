@@ -20,6 +20,7 @@ interface gameData {
 	scoreRef: (HTMLDivElement | null)[];
 	program: (WebGLProgram | null)[];
 	mode: string;
+	matchResult: string;
 	uColorLocation: WebGLUniformLocation | null;
 	requestId: number;
 	endGame: boolean;

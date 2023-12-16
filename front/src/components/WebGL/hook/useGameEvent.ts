@@ -8,10 +8,7 @@ const useGameEvent = () => {
 
     useEffect(() => {
         const handleGameEnd = () => {
-            if (data.scores[0] === 5)
-                setGameResult('win');
-            else
-                setGameResult('lose');
+            setGameResult(data.matchResult);
             data.endGame = true;
             GameManager.cleanupWebGL();
             socket?.disconnect();

@@ -47,7 +47,8 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 console.log("data received......");
             });
 
-            newSocket.on('endGame', () => {
+            newSocket.on('endGame', (matchResult: string) => {
+                data.matchResult = matchResult;
                 data.endGame = true;
             });
 

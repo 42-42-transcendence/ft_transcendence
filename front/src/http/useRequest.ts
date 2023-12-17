@@ -13,9 +13,7 @@ const useRequest = () => {
 
   const handleUnauthorized = useCallback(() => {
     closeModal();
-    navigate('/login', {
-      state: { message: '토큰 정보가 유효하지 않습니다.' },
-    });
+    navigate('/login');
   }, [closeModal, navigate]);
 
   const request = useCallback(

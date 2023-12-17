@@ -54,7 +54,7 @@ const Otp = () => {
 
     if (ret !== null) {
       dispatch(authActions.setAuthToken(jwtToken));
-      navigate('/');
+      navigate('/', { replace: true });
     }
   };
 

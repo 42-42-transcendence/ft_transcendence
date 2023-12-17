@@ -1,5 +1,5 @@
 import styles from '../../styles/SettingProfileForm.module.css';
-import defaultThumNailURI from '../../assets/42logo.svg';
+import defaultThumNailURI from '../../assets/default.jpeg';
 import AvatarImage from '../../UI/AvatarImage';
 import { useEffect, useState } from 'react';
 import { SERVER_URL } from '../../App';
@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { actions as authActions } from '../../store/Auth/auth';
 import useRequest from '../../http/useRequest';
 import loadingImage from '../../assets/loading.gif';
+import editIcon from '../../assets/edit-icon.svg';
 
 type Props = {
   jwtToken: string;
@@ -92,16 +93,19 @@ const SettingProfileForm = ({ jwtToken }: Props) => {
     if (responseFile === null) return;
 
     dispatch(authActions.setAuthToken(jwtToken));
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   return (
     <form className={styles.form} onSubmit={submitHandler}>
       <div className={styles.avatar}>
-        <label htmlFor="avatar">
+        <label htmlFor="avatar" className={styles['avatar-label']}>
           <div>프로필 이미지</div>
           <div>
             <AvatarImage imageURI={avatarFileURI} radius="200px" />
+          </div>
+          <div className={styles['edit-icon-wrapper']}>
+            <img src={editIcon} alt="avatar edit icon" />
           </div>
         </label>
         <input

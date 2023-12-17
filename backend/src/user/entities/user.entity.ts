@@ -4,7 +4,6 @@ import { ChannelMember } from '../../channel-member/entities/channel-member.enti
 import { Chat } from '../../chat/entities/chat.entity';
 import { Relation } from '../../relation/entities/relation.entity';
 import { Auth } from 'src/auth/entities/auth.entity';
-import { Game } from 'src/game/entities/game.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserStatus } from '../enums/user-status.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
@@ -109,7 +108,7 @@ export class User {
     description: 'GameId',
     example: 'uuid',
   })
-  matchHistory: string[];
+  matchHistory: string[]=[];
 
   // @Column({
   //   nullable: false,

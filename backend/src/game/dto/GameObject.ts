@@ -1,6 +1,5 @@
 import { vec2 } from "gl-matrix";
 import { CanvasPosition, ObjectCorner, PaddlePos } from "../enums/gameEnums";
-import { GameManager } from "./GameManager";
 import { GameDataDto } from "./in-game.dto";
 import { Paddle } from "./Paddle";
 
@@ -120,7 +119,6 @@ export abstract class GameObject {
     }
 
     public clampWithWall() {
-        console.log("clampWithWall");
         const min = -1.0 + this.radius * 1.1;
         const max = 1.0 - this.radius * 1.1;
         const x = this.clamp(this.position[0], min, max);

@@ -20,7 +20,7 @@ interface gameData {
 	scoreRef: (HTMLDivElement | null)[];
 	program: (WebGLProgram | null)[];
 	mode: string;
-	forTestSocket: any;
+	winner: string;
 	uColorLocation: WebGLUniformLocation | null;
 	requestId: number;
 	endGame: boolean;

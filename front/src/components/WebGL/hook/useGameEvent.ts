@@ -1,27 +1,33 @@
 import { useEffect, useState } from 'react';
 import data from '../interface/gameData';
-import {GameManager} from "../class/GameManager";
 import { useSocket } from '../context/SocketContext';
+import useUserState from "../../../store/User/useUserState";
 const useGameEvent = () => {
     const [gameResult, setGameResult] = useState('');
     const { socket } = useSocket();
+    const userState = useUserState();
 
     useEffect(() => {
         const handleGameEnd = () => {
-            if (data.scores[0] === 5)
+            if (data.mode === 'AI') {
+                if (data.scores[0] === 5)
+                    setGameResult('win');    
+                else
+                    setGameResult('lost');
+            } else {
+            if (data.winner === userState.id)
                 setGameResult('win');
             else
-                setGameResult('lose');
+                setGameResult('lost');
+            }
             data.endGame = true;
-            GameManager.cleanupWebGL();
             socket?.disconnect();
-            data.isFirstRender = true;
         };
         window.addEventListener('gameEnd', handleGameEnd);
         return () => {
             window.removeEventListener('gameEnd', handleGameEnd);
         };
-    }, []);
+    }, [socket]);
     return gameResult;
 };
 

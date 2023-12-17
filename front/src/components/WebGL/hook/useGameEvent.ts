@@ -9,11 +9,19 @@ const useGameEvent = () => {
 
     useEffect(() => {
         const handleGameEnd = () => {
+            if (data.mode === 'AI') {
+                if (data.scores[0] === 5)
+                    setGameResult('win');    
+                else
+                    setGameResult('lost');
+            } else {
             if (data.winner === userState.id)
                 setGameResult('win');
             else
                 setGameResult('lost');
+            }
             data.endGame = true;
+            socket?.disconnect();
         };
         window.addEventListener('gameEnd', handleGameEnd);
         return () => {

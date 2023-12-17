@@ -4,6 +4,8 @@ export let gameDataFromServer = {
 	paddlePos: [vec2.fromValues(0, 0), vec2.fromValues(0, 0)],
 	height: [0, 0],
 	ballPos: vec2.fromValues(0, 0),
+	itemsPos: [] as vec2[],
+	scores: [0, 0],
 }
 
 let data: gameData = {
@@ -23,9 +25,9 @@ let data: gameData = {
 	canvasRef: null,
 	program: [null, null],
 	mode: 'normal',
+	winner: '',
 	uColorLocation: null,
 	requestId: 0,
-	forTestSocket: null,
 	endGame: false,
 };
 

@@ -1,4 +1,4 @@
-import data from "../interface/gameData";
+import data, {gameDataFromServer} from "../interface/gameData";
 import {vec2} from "gl-matrix";
 import {ItemManager} from "./ItemManager";
 
@@ -10,6 +10,18 @@ export enum CanvasPosition {
 }
 
 export class GameManager {
+    static resetGame() {
+        this.resetBallPosition()
+        data.paddle.forEach((paddle, index) => {
+            paddle.position[1] = 0;
+            if (index === 0)
+                paddle.position[0] = -0.96;
+            else
+                paddle.position[0] = 0.96;
+        });
+        data.scores = [0, 0];
+        this.scoreUpdate(null);
+    }
     /* the playerSide 0 = leftPlayer and 1 is the other player */
     static scoreUpdate(playerSide: number | null) {
         if (playerSide === 0 || playerSide === 1) {
@@ -48,7 +60,8 @@ export class GameManager {
         }
 
         ItemManager.getInstance().clearItems();
-        // WebGL 컨텍스트 해제
+        gameDataFromServer.itemsPos = [];
+                // WebGL 컨텍스트 해제
         gl.getExtension('WEBGL_lose_context')?.loseContext();
     }
 
@@ -61,7 +74,7 @@ export class GameManager {
     }
 
     static endGame() {
-        const ball = data.ball;
+        // const ball = data.ball;
         /* 테스트용 초기화 코드 */
         // for (let i = 0; i < 2; i++) {
         //     ball.position[i] = 0;

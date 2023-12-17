@@ -1,13 +1,14 @@
 import data from '../interface/gameData';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext'
 
 function usePress() {
 	const { socket } = useSocket();
-	function keyDownHandler(event : KeyboardEvent) {
+
+	const keyDownHandler = useCallback((event : KeyboardEvent)=>{
 		if (socket === null && data.mode !== 'AI') {
-				console.error('context is null');
-				return;
+			console.error('context is null');
+			return;
 		}
 
 		if (event.key === 'ArrowUp') {
@@ -21,9 +22,10 @@ function usePress() {
 			else
 				socket!.emit('DownKey'); // 인자 없이 요청
 			}
-		}
+		}, [socket]);
 
-	function keyUpHandler(event : KeyboardEvent) {
+
+	const keyUpHandler = useCallback((event : KeyboardEvent)=> {
 		if (socket === null && data.mode !== 'AI') {
 			console.error('context is null');
 			return;
@@ -41,7 +43,7 @@ function usePress() {
 			else
 				socket!.emit('KeyRelease'); // 인자 없이 요청
 		}
-	}
+	}, [socket]);
 
 	useEffect(() => {
 	  window.addEventListener('keydown', keyDownHandler);
@@ -50,7 +52,7 @@ function usePress() {
 			window.removeEventListener('keydown', keyDownHandler);
 			window.removeEventListener('keyup', keyUpHandler);
 		}
-	}, []);
+	}, [keyDownHandler, keyUpHandler]);
 }
 
   export default usePress;

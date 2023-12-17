@@ -18,18 +18,17 @@ function initialize(state: any) {
 
 	data.scores = [0, 0];
 	data.paddle = [new Paddle(-0.96, 0), new Paddle(0.96, 0)];
-	if (data.profileRef[0] && data.profileRef[1] && state && state.player) {
-		data.profileRef[0].innerHTML = state.player[0];
-		data.profileRef[1].innerHTML = state.player[1];
-		data.mode = state.gameMode;
-		data.forTestSocket = state.socket;
+	if (data.profileRef[0] && data.profileRef[1] && state.data && state.data.playerID) {
+		data.profileRef[0].innerHTML = state.data.playerID[0];
+		data.profileRef[1].innerHTML = state.data.playerID[1];
+		data.mode = state.data.mode;
 	}
 
 	data.lastTime = performance.now();
 	data.endGame = false;
 
 	data.ball = new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 2.0, 0.02);
-	if (state.gameMode !== 'object') {
+	if (state.data.mode !== 'object') {
 		data.ball.velocity = 3.0;
 		data.paddle[0].speed = 1.5;
 		data.paddle[1].speed = 1.5;

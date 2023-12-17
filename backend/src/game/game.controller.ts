@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, BadReques
 import { GameService } from './game.service';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Game } from './entities/game.entity';
-// import { GameInfoDto } from './dto/in-game.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
@@ -175,7 +174,7 @@ export class GameController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Post('match/startAI')
+  @Post('startAI')
   @UseGuards(AuthGuard())
   async changeAIUserStatus(
     @GetAuth() auth: Auth,
@@ -183,6 +182,7 @@ export class GameController {
     const user = await auth.user;
 
     await this.userService.updateUserStatus(user, UserStatus.PLAYING);
+    console.log("I am AI");
 
     return ({ message: `AI모드 유저 상태를 PLAYING으로 변경`})
   }
@@ -192,7 +192,7 @@ export class GameController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Post('match/exitAI')
+  @Post('exitAI')
   @UseGuards(AuthGuard())
   async changeAIUserStatusExit(
     @GetAuth() auth: Auth,
@@ -200,7 +200,8 @@ export class GameController {
     const user = await auth.user;
 
     await this.userService.updateUserStatus(user, UserStatus.ONLINE);
-
+    console.log("I am not AI");
+    
     return ({ message: `AI모드 종료 후 유저 상태를 ONLINE으로 변경`})
   }
 }

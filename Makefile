@@ -18,7 +18,7 @@ re:	down
 clean: down
 	@printf "Cleaning ${name}...\n"
 	@docker system prune -a
-	@rm ./backend/assets/profiles/*
+	# rm ./backend/assets/profiles/*
 fclean:
 	@printf "!FCLEANING! docker\n"
 	@docker system prune --all --force --volumes

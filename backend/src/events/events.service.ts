@@ -112,15 +112,13 @@ export class EventsService {
     }
 
     async deleteObjectGameQueueUser(userID: string) {
-        const index = this.normalGameQueue.indexOf(userID);
+        const index = this.objectGameQueue.indexOf(userID);
         const gameId = await this.gameService.getPlayerGameId(userID);
 
         if (index !== -1) {            
             if (gameId)
                 this.gameService.cancelGame(userID, gameId, "cancel");
-            else {
-                this.gameService.cancelGame(userID, gameId, "cancel");
-            }
+            this.objectGameQueue.splice(index, 1);
         }
     }
 
@@ -145,22 +143,25 @@ export class EventsService {
         return (undefined);
     }
     
-    async g_startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto): Promise <string> {
-        const gameID = await this.gameService.startGame(userId1, userId2, dto, data);
+    g_startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto) {
+        const gameID = this.gameService.startGame(userId1, userId2, dto, data);
         return (gameID);
     }
 
-    async startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
-        const gameId = await this.g_startGame(userId1, userId2, dto, data);
+    g_startGameLoop(gameid: string){
+        this.gameService.startGameEngine(gameid);
+    }
+
+    startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
+        const gameId = this.g_startGame(userId1, userId2, dto, data);
         if (!gameId){
             console.log("startGame Fail");//
-            this.gameService.deletePlayer(this.getClient(userId1).id);
-            this.gameService.deletePlayer(this.getClient(userId2).id);
-            this.gameService.deleteGameOption(gameId);
+            // this.gameService.deletePlayer(this.getClient(userId1).id);
+            // this.gameService.deletePlayer(this.getClient(userId2).id);
+            // this.gameService.deleteGameOption(gameId);
             return null;
         }
         console.log("ready to run engine!");//
-        this.gameService.startGameEngine(gameId);
 
         return (gameId);
     }

@@ -10,26 +10,6 @@ export class AIManager {
         return AIManager.instance;
     }
 
-    public testPlayer1() {
-        const movePaddle = () => {
-            const topBoundary = 1.0; // 캔버스의 상단 경계
-            const bottomBoundary = -1.0; // 캔버스의 하단 경계
-
-            const paddleY = data.paddle[0].position[1];
-            const paddleHeightHalf = data.paddle[0].height / 2;
-
-            if (paddleY + paddleHeightHalf >= topBoundary - 0.001) {
-                data.paddle[0].keyPress.up = false;
-                data.paddle[0].keyPress.down = true;
-            }
-            else if (paddleY - paddleHeightHalf <= bottomBoundary + 0.001) {
-                data.paddle[0].keyPress.up = true;
-                data.paddle[0].keyPress.down = false;
-            }
-        };
-        movePaddle();
-    }
-
     public GuaranteeConflict(copy: Ball, delta: number, depth: number = 0) {
         if (depth > 10) {
             data.paddle[1].keyPress.up = false;

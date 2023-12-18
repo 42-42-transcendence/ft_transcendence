@@ -5,7 +5,7 @@ import gameLoop from '../components/WebGL/function/gameLoop';
 import shader from '../components/WebGL/function/shader';
 import initialize from '../components/WebGL/function/initialize';
 import usePress from "../components/WebGL/hook/usePress";
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import usePopstate from "../components/WebGL/hook/usePopstate";
 import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
 import GameResultModal from "../components/Modal/GameResultModal";
@@ -18,7 +18,6 @@ const GameLogic = () => {
     const profileRef2 = useRef<HTMLDivElement>(null);
     const scoreRef2 = useRef<HTMLDivElement>(null);
     const [error, setError] = useState(null);
-    const { gameId } = useParams();
     const { state } = useLocation();
     const gameResult = useGameEvent();
     useBeforeunload();
@@ -28,13 +27,17 @@ const GameLogic = () => {
 
     let socket: any = null;
     useEffect(() => {
-        console.log(state.data);
         try {
+            if (!data.validation)
+                throw new Error('Error: wrong game page');
             data.canvasRef = canvasRef.current;
             data.profileRef[0] = profileRef1.current;
             data.scoreRef[0] = scoreRef1.current;
             data.profileRef[1] = profileRef2.current;
             data.scoreRef[1] = scoreRef2.current;
+            data.gameId = state.data.gameID;
+            if (state.data.mode !== 'AI' && !data.gameId)
+                throw new Error('gameID is undefined');
 
             /* webGL 초기화 */
             initialize(state);
@@ -50,7 +53,7 @@ const GameLogic = () => {
                 socket.disconnect();
             }
         };
-    }, []);
+    }, [data.validation]);
     if (error) {
         return (
             <div style={{color:'#be0000', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column'}}>

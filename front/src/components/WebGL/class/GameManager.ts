@@ -59,6 +59,10 @@ export class GameManager {
             });
         }
 
+        if (data.gameId) {
+            data.gameId = undefined;
+        }
+
         ItemManager.getInstance().clearItems();
         gameDataFromServer.itemsPos = [];
                 // WebGL 컨텍스트 해제

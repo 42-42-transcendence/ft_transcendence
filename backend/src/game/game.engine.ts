@@ -10,7 +10,7 @@ export class GameEngine {
 	constructor(@Inject(forwardRef(() => GameGateway)) private gameGateway : GameGateway,
 				@Inject(forwardRef(() => GameService)) private gameService: GameService) {}
 
-    async updateGame(delta: number, gamedata: GameDataDto): Promise<void> {
+    updateGame(delta: number, gamedata: GameDataDto) {
         if (gamedata.mode === 'object') {
 		    /* 아이템 생성 */
 		    ItemManager.getInstance().createItem(gamedata.items);
@@ -56,7 +56,7 @@ export class GameEngine {
             }
             if (gameData.lastTime === 0)
                 gameData.lastTime = new Date().getTime();
-            if (gameData.scores[0] === 5 || gameData.scores[1] === 5){
+            if (gameData.scores[0] === 10 || gameData.scores[1] === 10){
                 clearInterval(interval);
                 (await this.gameService.getGameOptions(gameId)).isActive = false;
                 this.updateSendData(sendData, gameData);
@@ -66,14 +66,11 @@ export class GameEngine {
             }
             const timeStamp = new Date().getTime();
             let delta = (timeStamp - gameData.lastTime) / 1000.0;
-            // if (timeStamp < gameData.lastTime + (1000 / 60)){
-            //     return ;
-            // }
-            await this.updateGame(delta, gameData);
+            this.updateGame(delta, gameData);
             this.updateSendData(sendData, gameData);
             this.gameGateway.emitGameData(sendData, gameId);
             
             gameData.lastTime = timeStamp;
-        }, 1000 / 120);
+        }, 1000 / 200);
     }
 }

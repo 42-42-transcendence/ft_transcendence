@@ -22,24 +22,24 @@ export class GameService {
     private gameIdToGameData: Map<string, GameDataDto> = new Map();
 
     /* ------------------- Game Methods ----------------------- */
-    async startGame(userId1: string, userId2: string, gameOptions: GameOptionDto, gameData: GameDataDto): Promise<string> {
-        const user = await this.userService.getUserById(userId1);
-        const user2 = await this.userService.getUserById(userId2);
+    async startGame(userNickname1: string, userNickname2: string, gameOptions: GameOptionDto, gameData: GameDataDto): Promise<string> {
+        const user = await this.userService.getUserByNickname(userNickname1);
+        const user2 = await this.userService.getUserByNickname(userNickname2);
         if (!user || !user2) {
             console.log("user unavailable to match");
             return null;
         }
 
-        const game = await this.gameRepository.save({title: user.nickname+" vs "+user2.nickname, player1 : user.nickname, player2 : user2.nickname, gameType: gameOptions.gametype, gameMode: gameOptions.gamemode});
-        this.playerToGameId.set(userId1, {gameId : game.gameID, isFirst : true});
-        this.playerToGameId.set(userId2, {gameId : game.gameID, isFirst : false});
+        const game = await this.gameRepository.save({title: user.nickname+" vs "+user2.nickname, player1 : userNickname1, player2 : userNickname2, gameType: gameOptions.gametype, gameMode: gameOptions.gamemode});
+        this.playerToGameId.set(userNickname1, {gameId : game.gameID, isFirst : true});
+        this.playerToGameId.set(userNickname2, {gameId : game.gameID, isFirst : false});
         this.gameIdToGameOption.set(game.gameID, gameOptions);
         this.gameIdToGameData.set(game.gameID, gameData);
         return game.gameID;
     }
 
-    async cancelGame(userId : string, gameId : string, option: string) : Promise<void> {
-        this.deletePlayer(userId);
+    async cancelGame(userNickname : string, gameId : string, option: string) : Promise<void> {
+        this.deletePlayer(userNickname);
         this.deleteGameOption(gameId);
         this.deleteGameData(gameId);
         if (option === "cancel"){
@@ -139,42 +139,40 @@ export class GameService {
             if (Number(game.player1Score) > Number(game.player2Score)){
                 game.winner = game.player1;
                 await this.gameRepository.save(game);
-                this.userService.endGameUser(game.player1, gameId, true);
-                this.userService.endGameUser(game.player2, gameId, false);
+                await this.userService.endGameUser(game.player1, gameId, true);
+                await this.userService.endGameUser(game.player2, gameId, false);
             }
             else if (Number(game.player1Score) < Number(game.player2Score)){
                 game.winner = game.player2;
                 await this.gameRepository.save(game);
-                this.userService.endGameUser(game.player1, gameId, false);
-                this.userService.endGameUser(game.player2, gameId, true);
+                await this.userService.endGameUser(game.player1, gameId, false);
+                await this.userService.endGameUser(game.player2, gameId, true);
             }
-            this.deleteGameData(gameId);
         }
     }
 
-    async recordAbortLoss (gameId : string, userId : string) : Promise <boolean> {
+    async recordAbortLoss (gameId : string, userNickname : string) : Promise <string> {
         const game : Game = await this.findGameById(gameId);
         if (game && game.finished === false) {
             game.finished = true;
-            if (userId === game.player1) {
+            if (userNickname === game.player1) {
                 game.player1Score = 0;
                 game.player2Score = 42;
                 game.winner = game.player2;
                 await this.gameRepository.save(game);
-                this.userService.endGameUser(game.player1, gameId, true);
-                this.userService.endGameUser(game.player2, gameId, false);
+                await this.userService.endGameUser(game.player1, gameId, true);
+                await this.userService.endGameUser(game.player2, gameId, false);
             }
             else {
                 game.player2Score = 0;
                 game.player1Score = 42;
                 game.winner = game.player1;
                 await this.gameRepository.save(game);
-                this.userService.endGameUser(game.player1, gameId, false);
-                this.userService.endGameUser(game.player2, gameId, true);
+                await this.userService.endGameUser(game.player1, gameId, false);
+                await this.userService.endGameUser(game.player2, gameId, true);
             }
-            return true;
         }
-        return false;
+        return game.winner;
     }
 
     async deleteGameOption(gameId : string) {
@@ -185,8 +183,8 @@ export class GameService {
             return ;
     }
 
-    async deletePlayer(userId : string) {
-        const result = this.playerToGameId.delete(userId);
+    async deletePlayer(userNickname : string) {
+        const result = this.playerToGameId.delete(userNickname);
         
         if (result == false)
             // throw new NotFoundException(`deletePlayer: 해당 유저 id를 찾을 수 없습니다: ${userId}`);
@@ -201,17 +199,17 @@ export class GameService {
             return ;
     }
 
-    isPlayer(userId : string) : boolean {
-        return this.playerToGameId.has(userId);
+    isPlayer(userNickname : string) : boolean {
+        return this.playerToGameId.has(userNickname);
     }
 
-    async getPlayerGameId(userId : string) : Promise<string> {
-        const gameId = this.playerToGameId.get(userId);
+    async getPlayerGameId(userNickname : string) : Promise<string> {
+        const gameId = this.playerToGameId.get(userNickname);
         return gameId ? gameId.gameId : null;
     }
 
-    getPair(userId : string) : Pair {
-        return this.playerToGameId.get(userId);
+    getPair(userNickname : string) : Pair {
+        return this.playerToGameId.get(userNickname);
     }
 
     async getGameOptions(gameId : string) : Promise<GameOptionDto> {

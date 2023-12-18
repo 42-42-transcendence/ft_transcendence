@@ -19,7 +19,6 @@ export class UserAchievementRepository extends Repository<UserAchievement> {
 
   async createuserachievement(user: User, id: number): Promise<UserAchievement> {
     const createdachievement = await this.achivementRepository.getachievementById(id);
-    console.log(createdachievement.id);
     //에러처리 필요함 없는 유저나, 없는 도전과제 번호
     let isach;
     if (id === 0) isach = true;

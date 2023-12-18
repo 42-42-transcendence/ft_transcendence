@@ -87,7 +87,6 @@ export class UserRepository extends Repository<User> {
   }
 
   async getUserProfile(user: User): Promise<UserprofileUserDto> {
-    console.log(user.userAchievements[0].achievement.description);
     const achlist: UserAchievementlistDto[] = [];
     for (let i = 0; i < 10; i++) {
       const tmpinfo = {

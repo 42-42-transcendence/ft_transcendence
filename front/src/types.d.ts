@@ -20,6 +20,8 @@ interface gameData {
 	scoreRef: (HTMLDivElement | null)[];
 	program: (WebGLProgram | null)[];
 	mode: string;
+	validation: boolean;
+	gameId: string | undefined;
 	winner: string;
 	uColorLocation: WebGLUniformLocation | null;
 	requestId: number;

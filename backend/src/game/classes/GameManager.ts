@@ -14,7 +14,13 @@ export class GameManager {
         const ball = gamedata.ball;
         for (let i = 0; i < 2; i++)
             ball.position[i] = 0;
-        ball.direction = vec2.fromValues(1.0, 0);
+
+        let rand = Math.random() * 2;
+        if (rand < 1)
+            ball.direction = vec2.fromValues(1.0, 0);
+        else
+            ball.direction = vec2.fromValues(-1.0, 0);        
         ball.factor = 1.0;
+        ball.velocity = 1.0;
     }
 }

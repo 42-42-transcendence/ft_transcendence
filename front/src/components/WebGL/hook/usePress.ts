@@ -10,19 +10,18 @@ function usePress() {
 			console.error('context is null');
 			return;
 		}
-
 		if (event.key === 'ArrowUp') {
 			if (data.mode === 'AI')
 				data.paddle[0].keyPress.up = true;
 			else
-				socket!.emit('UpKey'); // 인자 없이 요청
+				socket!.emit('UpKey',  { gameId: data.gameId } );
 			} else if (event.key === 'ArrowDown') {
 			if (data.mode === 'AI')
 				data.paddle[0].keyPress.down = true;
 			else
-				socket!.emit('DownKey'); // 인자 없이 요청
+				socket!.emit('DownKey', { gameId: data.gameId } );
 			}
-		}, [socket]);
+		}, [socket, data.gameId]);
 
 
 	const keyUpHandler = useCallback((event : KeyboardEvent)=> {
@@ -30,20 +29,19 @@ function usePress() {
 			console.error('context is null');
 			return;
 		}
-
 		if (event.key === 'ArrowUp') {
 			if (data.mode === 'AI')
 				data.paddle[0].keyPress.up = false;
 			else
-				socket!.emit('KeyRelease'); // 인자 없이 요청
+				socket!.emit('UpKeyRelease', { gameId: data.gameId } );
 			data.paddle[0].keyPress.up = false;
 		} else if (event.key === 'ArrowDown') {
 			if (data.mode === 'AI')
 				data.paddle[0].keyPress.down = false;
 			else
-				socket!.emit('KeyRelease'); // 인자 없이 요청
+				socket!.emit('DownKeyRelease', { gameId: data.gameId } );
 		}
-	}, [socket]);
+	}, [socket, data.gameId]);
 
 	useEffect(() => {
 	  window.addEventListener('keydown', keyDownHandler);

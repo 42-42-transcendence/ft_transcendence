@@ -25,6 +25,8 @@ let data: gameData = {
 	canvasRef: null,
 	program: [null, null],
 	mode: 'normal',
+	validation: true,
+	gameId: '',
 	winner: '',
 	uColorLocation: null,
 	requestId: 0,

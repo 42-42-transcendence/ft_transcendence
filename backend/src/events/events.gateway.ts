@@ -30,7 +30,7 @@ import { GameModeEnum } from 'src/game/enums/gameMode.enum';
 import { GameDataDto, GameOptionDto } from 'src/game/dto/in-game.dto';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 import { SendMessageDto } from './dto/send-message.dto';
-import { Paddle } from 'src/game/dto/Paddle';
+import { Paddle } from 'src/game/classes/Paddle';
 import { Ball } from 'src/game/classes/Ball';
 import { vec2 } from 'gl-matrix';
 
@@ -277,14 +277,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 3.0, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.0, 0.02),
       scores: [0, 0],
       items: [],
       lastTime: 0,
       mode: 'normal',
     }
 
-    const gameID = await this.eventsService.startGame(users[0].userID, users[1].userID, gameOptions, gamedata);
+    const gameID = await this.eventsService.startGame(users[0].nickname, users[1].nickname, gameOptions, gamedata);
     if (gameID) {
       client.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
       sendclient.emit("startGame", { gameID: gameID, playerID: [users[0].nickname, users[1].nickname], mode: "normal" });
@@ -334,14 +334,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 3.0, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.0, 0.02),
       scores: [0, 0],
       items: [],
       lastTime: 0,
       mode: 'normal',
     }
 
-    const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
+    const gameID = await this.eventsService.startGame(user.nickname, readyUser.nickname, gameOptions, gamedata);
     if (gameID) {
       client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
       readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "normal" });
@@ -371,14 +371,14 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     const gamedata: GameDataDto = {
       paddle: [new Paddle(-0.96, 0), new Paddle(0.96, 0)],
-      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 1.5, 0.02),
+      ball : new Ball(vec2.fromValues(0, 0), vec2.fromValues(1.0, 0), 0.5, 0.02),
       scores: [0, 0],
       items: [],
       lastTime: 0,
       mode: 'object',
     }
 
-    const gameID = await this.eventsService.startGame(user.userID, readyUser.userID, gameOptions, gamedata);
+    const gameID = await this.eventsService.startGame(user.nickname, readyUser.nickname, gameOptions, gamedata);
     if (gameID) {
       client.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
       readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });

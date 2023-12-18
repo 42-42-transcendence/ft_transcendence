@@ -17,7 +17,7 @@ const RecodeList = ({ filteredRecodes, isLoading, error }: Props) => {
   let contents: React.ReactNode = recodeItemList;
   if (error) contents = <h1>{error}</h1>;
   else if (isLoading) contents = <img src={loadingImage} alt="loading" />;
-  else if (recodeItemList.length === 0) contents = <h1>No Recodes.</h1>;
+  else if (recodeItemList.length === 0) contents = <h1>No Records.</h1>;
 
   return <ul className={styles.items}>{contents}</ul>;
 };

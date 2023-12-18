@@ -32,6 +32,11 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 },
             });
 
+            newSocket.on('nonPlayer', () => {
+                data.validation = false;
+                newSocket.disconnect();
+            });
+
             newSocket.on('updateGame', (gameData: any) => {
                 gameDataFromServer.height[0] = gameData.height[0];
                 gameDataFromServer.height[1] = gameData.height[1];
@@ -47,17 +52,9 @@ const SocketContextProvider = ({ children }: ChildProps) => {
             });
 
             newSocket.on('endGame', (nickName: string) => {
-                console.log("endgame received");
                 data.winner = nickName;
                 data.endGame = true;
             });
-
-            newSocket.on('scoreUpdate', (score: number[]) => {
-                data.scores[0] = score[0];
-                data.scores[1] = score[1];
-                GameManager.scoreUpdate(null);
-            });
-
 
             setSocket(newSocket);
         }

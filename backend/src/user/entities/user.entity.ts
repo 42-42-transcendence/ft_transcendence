@@ -108,7 +108,11 @@ export class User {
     description: 'GameId',
     example: 'uuid',
   })
-  matchHistory: string[]=[];
+  @Column('text', {
+    array: true,
+    default: [],
+  })
+  matchHistory: string[];
 
   // @Column({
   //   nullable: false,

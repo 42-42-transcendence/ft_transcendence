@@ -19,12 +19,7 @@ function receive() {
     if (gameDataFromServer.itemsPos && gameDataFromServer.itemsPos.length > 0) {
         ItemManager.getInstance().clearItems();
         for (let i = 0; i < gameDataFromServer.itemsPos.length; i++) {
-			const position = vec2.fromValues(0.0, 0.0);
-			const direction = vec2.fromValues(1.0, 0.0);
-			const velocity = 1.0;
-			const radius = 0.01;
-
-			const newItem = new Item(position, direction, velocity, radius);
+			const newItem = new Item(vec2.fromValues(0.0, 0.0), vec2.fromValues(0.0, 0.0), 1.0, 0.01);
 			ItemManager.getInstance().items.push(newItem);
 		}
 

@@ -1,12 +1,12 @@
-import { ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from "./game.service";
 import { GameDataDto, sendGameDataDto, GameOptionDto } from "./dto/in-game.dto";
 import { UserStatus } from 'src/user/enums/user-status.enum';;
 import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
-import { GameEngine } from './game.engine';
 import { UserService } from 'src/user/user.service';
 import { SocketExceptionFilter } from 'src/events/socket.filter';
+import { SocketException } from 'src/events/socket.exception';
 
 @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
@@ -18,46 +18,55 @@ import { SocketExceptionFilter } from 'src/events/socket.filter';
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server : Server;
 
-  	constructor(@Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine,
-				@Inject(forwardRef(() => GameService)) private gameService: GameService,
+  	constructor(@Inject(forwardRef(() => GameService)) private gameService: GameService,
                 @Inject(forwardRef(() => UserService)) private userService : UserService,
                 ) {}
   afterInit() {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     const nickname = client.handshake.query.userID;
+    if (typeof nickname !== 'string') {
+        throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+    }
     const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
-    const userID = user.userID;
 
     console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
-    if (this.gameService.isPlayer(userID)) {
-        const gameId: string = await this.gameService.getPlayerGameId(userID);
+    if (this.gameService.isPlayer(nickname)) {
+        const gameId: string = await this.gameService.getPlayerGameId(nickname);
         const gameOptions: GameOptionDto = await this.gameService.getGameOptions(gameId);
         gameOptions.isActive = true;
         this.server.in(client.id).socketsJoin(gameId);
-        console.log(`${user.nickname} joined room ${gameId}`);
+        console.log(`${nickname} joined room ${gameId}`);
         await this.userService.updateUserStatus(user, UserStatus.PLAYING);
     }
+    else /*(if db has no game id)*/
+        this.server.to(client.id).emit("nonPlayer");
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     const nickname = client.handshake.query.userID;
+    if (typeof nickname !== 'string') {
+        throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+    }
     const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
 
-    if (this.gameService.isPlayer(user.userID)){
-        const gameId : string = await this.gameService.getPlayerGameId(user.userID);
+    if (this.gameService.isPlayer(nickname)){
+        const gameId : string = await this.gameService.getPlayerGameId(nickname);
 
         if (gameId && this.gameService.isActive(gameId)) {
             const gameData : GameDataDto = this.gameService.getGameData(gameId);
-            if (gameData) {
-                if (gameData.scores[0] !== 5 && gameData.scores[1] !== 5){
-                    this.gameService.recordAbortLoss(gameId, user.nickname);
-                    this.gameEnd(gameData, gameId);
-                }
+
+            (await this.gameService.getGameOptions(gameId)).isActive = false;
+            if (gameData.scores[0] !== 10 && gameData.scores[1] !== 10){
+                const winner = await this.gameService.recordAbortLoss(gameId, nickname); 
+                this.server.to(gameId).emit("endGame", winner);
+                this.gameService.deletePlayer(nickname);
+                this.gameService.deleteGameOption(gameId);
+                this.gameService.deleteGameData(gameId);
             }
         }
         else {
-            this.gameService.deletePlayer(user.userID);
+            this.gameService.deletePlayer(nickname);
             this.gameService.deleteGameOption(gameId);
             this.gameService.deleteGameData(gameId);
         }
@@ -82,41 +91,62 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 //           client.emit("notReconnected");
 //   }
 
-// 서버에서 일방적으로 요청 (updateGame 핸들러)
+
   async emitGameData(sendGameDataDto: sendGameDataDto, gameId: string) {
     this.server.to(gameId).emit("updateGame", sendGameDataDto);
   }
 
-  @SubscribeMessage('KeyRelease')
-  async onKeyRelease(@ConnectedSocket() client: Socket) : Promise<void> {
+  @SubscribeMessage('UpKeyRelease')
+  async onUpKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
     const nickname = client.handshake.query.userID;
-    const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+    if (typeof nickname !== 'string') {
+        throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+    }
 
-    const Pair = this.gameService.getPair(user.userID);
-    const gameid = await this.gameService.getPlayerGameId(user.userID);
-    const gamedata = this.gameService.getGameData(gameid);
+    const Pair = this.gameService.getPair(nickname);
+    const gamedata = this.gameService.getGameData(data.gameId);
     const leftPaddle = gamedata.paddle[0];
     const rightPaddle = gamedata.paddle[1];
 
     if (Pair) {
         if (Pair.isFirst){
             leftPaddle.keyPress.up = false;
-            leftPaddle.keyPress.down = false;
         } else {
             rightPaddle.keyPress.up = false;
+        }
+    }
+}
+
+  @SubscribeMessage('DownKeyRelease')
+  async onDownKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
+    const nickname = client.handshake.query.userID;
+    if (typeof nickname !== 'string') {
+        throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+    }
+
+    const Pair = this.gameService.getPair(nickname);
+    const gamedata = this.gameService.getGameData(data.gameId);
+    const leftPaddle = gamedata.paddle[0];
+    const rightPaddle = gamedata.paddle[1];
+
+    if (Pair) {
+        if (Pair.isFirst){
+            leftPaddle.keyPress.down = false;
+        } else {
             rightPaddle.keyPress.down = false;
         }
     }
 }
 
   @SubscribeMessage('UpKey')
-  async UpKeyPressed(@ConnectedSocket() client: Socket) : Promise<void> {
+  async UpKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
         const nickname = client.handshake.query.userID;
-        const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+        if (typeof nickname !== 'string') {
+            throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+        }
 
-        const Pair = this.gameService.getPair(user.userID);
-        const gameid = await this.gameService.getPlayerGameId(user.userID);
-        const gamedata = this.gameService.getGameData(gameid);
+        const Pair = this.gameService.getPair(nickname);
+        const gamedata = this.gameService.getGameData(data.gameId);
         const leftPaddle = gamedata.paddle[0];
         const rightPaddle = gamedata.paddle[1];
 
@@ -130,13 +160,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
   @SubscribeMessage('DownKey')
-  async DownKeyPressed(@ConnectedSocket() client: Socket) : Promise<void> {
+  async DownKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
         const nickname = client.handshake.query.userID;
-        const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+        if (typeof nickname !== 'string') {
+            throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+        }
 
-        const Pair = this.gameService.getPair(user.userID);
-        const gameid = await this.gameService.getPlayerGameId(user.userID);
-        const gamedata = this.gameService.getGameData(gameid);
+        const Pair = this.gameService.getPair(nickname);
+        const gamedata = this.gameService.getGameData(data.gameId);
         const leftPaddle = gamedata.paddle[0];
         const rightPaddle = gamedata.paddle[1];
 

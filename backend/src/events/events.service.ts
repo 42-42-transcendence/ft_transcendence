@@ -75,12 +75,13 @@ export class EventsService {
     }
 
     async deleteNormalGameQueueUser(userID: string) {
+        const user = await this.userService.getUserById(userID);
         const index = this.normalGameQueue.indexOf(userID);
-        const gameId = await this.gameService.getPlayerGameId(userID);
+        const gameId = await this.gameService.getPlayerGameId(user.nickname);
 
-        if (index !== -1) {            
+        if (index !== -1) {          
             if (gameId)
-                this.gameService.cancelGame(userID, gameId, "cancel");
+                this.gameService.cancelGame(user.nickname, gameId, "cancel");
             this.normalGameQueue.splice(index, 1);
         }
     }
@@ -112,12 +113,13 @@ export class EventsService {
     }
 
     async deleteObjectGameQueueUser(userID: string) {
+        const user = await this.userService.getUserById(userID);
         const index = this.objectGameQueue.indexOf(userID);
-        const gameId = await this.gameService.getPlayerGameId(userID);
+        const gameId = await this.gameService.getPlayerGameId(user.nickname);
 
         if (index !== -1) {            
             if (gameId)
-                this.gameService.cancelGame(userID, gameId, "cancel");
+                this.gameService.cancelGame(user.nickname, gameId, "cancel");
             this.objectGameQueue.splice(index, 1);
         }
     }
@@ -143,8 +145,8 @@ export class EventsService {
         return (undefined);
     }
     
-    g_startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto) {
-        const gameID = this.gameService.startGame(userId1, userId2, dto, data);
+    g_startGame(userNickname1: string, userNickname2: string, dto: GameOptionDto, data: GameDataDto) {
+        const gameID = this.gameService.startGame(userNickname1, userNickname2, dto, data);
         return (gameID);
     }
 
@@ -152,11 +154,11 @@ export class EventsService {
         this.gameService.startGameEngine(gameid);
     }
 
-    async startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
-        const gameId = await this.g_startGame(userId1, userId2, dto, data);
+    async startGame(userNickname1: string, userNickname2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
+        const gameId = await this.g_startGame(userNickname1, userNickname2, dto, data);
         if (!gameId){
-            this.gameService.cancelGame(userId1, gameId, "cancel");
-            this.gameService.cancelGame(userId2, gameId, "cancel");
+            this.gameService.cancelGame(userNickname1, gameId, "cancel");
+            this.gameService.cancelGame(userNickname2, gameId, "cancel");
             return null;
         }
 

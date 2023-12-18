@@ -155,8 +155,8 @@ export class UserController {
   })
   @Get('dashboard/:targetUserID')
   async getDashboards(@Param('targetUserID') userID: string, @GetAuth() auth: Auth): Promise<DashboardUserDto[]> {
-    // return await this.userService.getDashboards(userID, auth);
-    return await this.userService.createDummyDashboards(userID, auth);
+    return await this.userService.getDashboards(userID, auth);
+    //return await this.userService.createDummyDashboards(userID, auth);
 
   }
 

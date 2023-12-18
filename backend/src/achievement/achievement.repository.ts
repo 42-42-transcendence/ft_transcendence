@@ -18,7 +18,6 @@ export class AchievementRepository extends Repository<Achievement> {
     });
 
     const result = await this.save(createdachievement);
-    console.log(result.description);
     return result;
   }
 

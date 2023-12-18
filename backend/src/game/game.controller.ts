@@ -182,7 +182,6 @@ export class GameController {
     const user = await auth.user;
 
     await this.userService.updateUserStatus(user, UserStatus.PLAYING);
-    console.log("I am AI");
 
     return ({ message: `AI모드 유저 상태를 PLAYING으로 변경`})
   }
@@ -200,7 +199,6 @@ export class GameController {
     const user = await auth.user;
 
     await this.userService.updateUserStatus(user, UserStatus.ONLINE);
-    console.log("I am not AI");
     
     return ({ message: `AI모드 종료 후 유저 상태를 ONLINE으로 변경`})
   }

@@ -3,8 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Game } from "./entities/game.entity";;
 import { UserService } from "../user/user.service";
-import { GameDataDto } from "./dto/in-game.dto";
-import { GameOptionDto } from "./dto/in-game.dto";
+import { GameDataDto, GameOptionDto } from "./dto/in-game.dto";
 import { GameEngine} from './game.engine';
 
 interface Pair {
@@ -30,15 +29,6 @@ export class GameService {
             console.log("user unavailable to match");
             return null;
         }
-        
-        // 올바른 유저 정보 확인용
-        console.log("--------------------");
-        console.log(user.nickname);
-        console.log(user.userID);   
-        console.log(user2.nickname);
-        console.log(user2.userID);
-        console.log("--------------------");
-        //
 
         const game = await this.gameRepository.save({title: user.nickname+" vs "+user2.nickname, player1 : user.nickname, player2 : user2.nickname, gameType: gameOptions.gametype, gameMode: gameOptions.gamemode});
         this.playerToGameId.set(userId1, {gameId : game.gameID, isFirst : true});

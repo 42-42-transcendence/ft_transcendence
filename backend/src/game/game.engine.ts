@@ -1,8 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
-import { ItemManager } from './dto/ItemManager';
-import PhysicsEngine from './dto/PhysicsEngine';
+import { ItemManager } from './classes/ItemManager';
+import PhysicsEngine from './classes/PhysicsEngine';
 import { GameDataDto, sendGameDataDto } from "./dto/in-game.dto";
 
 @Injectable()
@@ -58,7 +58,6 @@ export class GameEngine {
                 gameData.lastTime = new Date().getTime();
             if (gameData.scores[0] === 5 || gameData.scores[1] === 5){
                 clearInterval(interval);
-                console.log("game end with max score");
                 (await this.gameService.getGameOptions(gameId)).isActive = false;
                 this.updateSendData(sendData, gameData);
                 this.gameGateway.emitGameData(sendData, gameId);

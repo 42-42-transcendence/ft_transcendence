@@ -1,5 +1,5 @@
 import { GameObject } from "./GameObject";
-import { GameDataDto } from "./in-game.dto";
+import { GameDataDto } from "../dto/in-game.dto";
 
 class PhysicsEngine {
     static GuaranteeConflict(object: GameObject, gamedata: GameDataDto, delta: number, depth: number = 0) {

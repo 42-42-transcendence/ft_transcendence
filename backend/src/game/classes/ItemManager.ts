@@ -1,7 +1,7 @@
 import { Item } from "./Item";
 import {vec2} from "gl-matrix";
 import PhysicsEngine from "./PhysicsEngine";
-import { GameDataDto } from "./in-game.dto";
+import { GameDataDto } from "../dto/in-game.dto";
 
 export class ItemManager {
     private static instance: ItemManager;

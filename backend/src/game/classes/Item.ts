@@ -1,4 +1,3 @@
-import { GameDataDto } from "./in-game.dto";
 import { PaddlePos } from "../enums/gameEnums";
 import { CanvasPosition } from "../enums/gameEnums";
 import { GameObject } from "./GameObject";

@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { CanvasPosition, ObjectCorner, PaddlePos } from "../enums/gameEnums";
-import { GameDataDto } from "./in-game.dto";
+import { GameDataDto } from "../dto/in-game.dto";
 import { Paddle } from "./Paddle";
 
 export abstract class GameObject {

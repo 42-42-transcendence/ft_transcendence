@@ -1,5 +1,5 @@
 import {vec2} from "gl-matrix";
-import { GameDataDto } from "./in-game.dto";
+import { GameDataDto } from "../dto/in-game.dto";
 
 export class GameManager {
     /* the playerSide 0 = leftPlayer and 1 is the other player */

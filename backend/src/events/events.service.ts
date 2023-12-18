@@ -152,16 +152,13 @@ export class EventsService {
         this.gameService.startGameEngine(gameid);
     }
 
-    startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
-        const gameId = this.g_startGame(userId1, userId2, dto, data);
+    async startGame(userId1: string, userId2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
+        const gameId = await this.g_startGame(userId1, userId2, dto, data);
         if (!gameId){
-            console.log("startGame Fail");//
-            // this.gameService.deletePlayer(this.getClient(userId1).id);
-            // this.gameService.deletePlayer(this.getClient(userId2).id);
-            // this.gameService.deleteGameOption(gameId);
+            this.gameService.cancelGame(userId1, gameId, "cancel");
+            this.gameService.cancelGame(userId2, gameId, "cancel");
             return null;
         }
-        console.log("ready to run engine!");//
 
         return (gameId);
     }

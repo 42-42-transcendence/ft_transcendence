@@ -1,8 +1,8 @@
 import { GameTypeEnum } from "../enums/gameType.enum";
 import { GameModeEnum } from "../enums/gameMode.enum";
-import { Paddle } from "./Paddle";
-import { Ball } from "./Ball";
-import { Item } from "./Item";
+import { Paddle } from "../classes/Paddle";
+import { Ball } from "../classes/Ball";
+import { Item } from "../classes/Item";
 
 export interface GameDataDto {
 	paddle: Paddle[],

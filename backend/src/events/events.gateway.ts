@@ -31,7 +31,7 @@ import { GameDataDto, GameOptionDto } from 'src/game/dto/in-game.dto';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 import { SendMessageDto } from './dto/send-message.dto';
 import { Paddle } from 'src/game/dto/Paddle';
-import { Ball } from 'src/game/dto/Ball';
+import { Ball } from 'src/game/classes/Ball';
 import { vec2 } from 'gl-matrix';
 
 
@@ -283,8 +283,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       lastTime: 0,
       mode: 'normal',
     }
-    // 유저 정상 접속 확인
-    console.log("userIDs: %s, %s", users[0].nickname, users[1].nickname);
 
     const gameID = await this.eventsService.startGame(users[0].userID, users[1].userID, gameOptions, gamedata);
     if (gameID) {
@@ -350,7 +348,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
     
     // 게임 정상 생성 확인
-    console.log("normal game ID: ", gameID);
     this.eventsService.g_startGameLoop(gameID);
   }
 
@@ -387,7 +384,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       readyUserClient.emit("startGame", { gameID: gameID, playerID: [user.nickname, readyUser.nickname], mode: "object" });
     }
 
-    console.log("object game ID: ", gameID);
     this.eventsService.g_startGameLoop(gameID);
   }
 }

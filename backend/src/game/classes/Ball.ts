@@ -3,7 +3,7 @@ import { PaddlePos } from "../enums/gameEnums";
 import { GameObject } from "./GameObject";
 import { CanvasPosition } from "../enums/gameEnums";
 import { GameManager } from "./GameManager";
-import { GameDataDto } from "./in-game.dto";
+import { GameDataDto } from "../dto/in-game.dto";
 import { Paddle } from "./Paddle";
 
 export class Ball extends GameObject{

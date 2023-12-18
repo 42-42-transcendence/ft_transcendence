@@ -1,8 +1,7 @@
 import { ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from "./game.service";
-import { GameDataDto, sendGameDataDto } from "./dto/in-game.dto";
-import { GameOptionDto } from "./dto/in-game.dto";
+import { GameDataDto, sendGameDataDto, GameOptionDto } from "./dto/in-game.dto";
 import { UserStatus } from 'src/user/enums/user-status.enum';;
 import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
 import { GameEngine } from './game.engine';
@@ -31,17 +30,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const userID = user.userID;
 
     console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
-    await this.userService.updateUserStatus(user, UserStatus.PLAYING);
     if (this.gameService.isPlayer(userID)) {
         const gameId: string = await this.gameService.getPlayerGameId(userID);
         const gameOptions: GameOptionDto = await this.gameService.getGameOptions(gameId);
+        gameOptions.isActive = true;
         this.server.in(client.id).socketsJoin(gameId);
         console.log(`${user.nickname} joined room ${gameId}`);
-        
-        if (gameOptions && gameOptions.isActive === false){
-            this.gameEngine.startGameLoop(gameId);
-            gameOptions.isActive = true;
-        }
+        await this.userService.updateUserStatus(user, UserStatus.PLAYING);
     }
   }
 
@@ -56,10 +51,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             const gameData : GameDataDto = this.gameService.getGameData(gameId);
             if (gameData) {
                 if (gameData.scores[0] !== 5 && gameData.scores[1] !== 5){
-                    console.log("------------------PLAYER ABORTED--------------------")
                     this.gameService.recordAbortLoss(gameId, user.nickname);
+                    this.gameEnd(gameData, gameId);
                 }
-                this.gameEnd(gameData, gameId);
             }
         }
         else {
@@ -74,7 +68,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log(`GAME GATEWAY ----------- ${client.id} disconnected -------------------`);
   }
 
-//   @SubscribeMessage('reconnect') // 재접속 구현 안 할 수도 
+//   @SubscribeMessage('reconnect') // 재접속 구현 X
 //   reconnectGame (@ConnectedSocket() client: Socket) : void {
 //       const Pair = this.gameService.getPair(client.id);
 //       if (Pair) {

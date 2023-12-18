@@ -246,16 +246,16 @@ export class UserService {
 		const user = await this.getUserByNickname(nickname);
 
 		if (nickname) {
-			console.log(`game ID: ${game.gameID}`);
-			console.log(`game finished: ${game.finished}`);
-			console.log(`game date: ${game.date}`);
-			console.log(`game mode: ${game.gameMode}`);
-			console.log(`game type: ${game.gameType}`);
-			console.log(`game WINNER: ${game.winner}`);
-			console.log(`PLAYER 1: ${game.player1}`);
-			console.log(`PLAYER 2: ${game.player2}`);
-			console.log(`PLAYER1 score: ${game.player1Score}`);
-			console.log(`PLAYER2 score: ${game.player2Score}`);
+			// console.log(`game ID: ${game.gameID}`);
+			// console.log(`game finished: ${game.finished}`);
+			// console.log(`game date: ${game.date}`);
+			// console.log(`game mode: ${game.gameMode}`);
+			// console.log(`game type: ${game.gameType}`);
+			// console.log(`game WINNER: ${game.winner}`);
+			// console.log(`PLAYER 1: ${game.player1}`);
+			// console.log(`PLAYER 2: ${game.player2}`);
+			// console.log(`PLAYER1 score: ${game.player1Score}`);
+			// console.log(`PLAYER2 score: ${game.player2Score}`);
 			user.matchHistory.push(matchId);
 			if (isWin === true) {
 				user.win += 1;

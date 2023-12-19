@@ -54,6 +54,8 @@ export class ChannelController {
     channels.push(...privateChannels);
     channels.push(...dmChannels);
 
+    channels.sort((a, b) => a.title < b.title ? 1 : -1);
+
     return (channels);
   }
 

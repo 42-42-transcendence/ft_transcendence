@@ -24,7 +24,7 @@ const GameInvitationItem = ({ id, message, inviterNickname }: Props) => {
     });
 
     setTimeout(() => {
-      dispatch(notificationActions.deleteNotification(id));
+      dispatch(notificationActions.clearGameNotification());
     }, 2000);
   };
 

@@ -92,7 +92,7 @@ export class GameController {
     const noti = await this.notificationService
           .getGameNotiByInvitedUserAndSendUserNicknameWithException(user, sendUser.nickname);
 
-    await this.notificationService.deleteNotification(noti.notiID);
+    await this.notificationService.deleteAllGameNotiByUserID(user.userID);
 
     if (user.status !== UserStatus.ONLINE) {
       throw new BadRequestException(`${user.nickname}님은 현재 게임을 할 수 있는 상태가 아닙니다.`);

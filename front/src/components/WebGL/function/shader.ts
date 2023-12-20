@@ -1,7 +1,9 @@
 import data from '../interface/gameData';
 
 function shader () {
-	const gl = data.gl as WebGLRenderingContext;
+	const gl = data.gl;
+    if (!gl)
+        return;
 
 	const vsGLSL = `
             attribute vec4 aVertexPosition;
@@ -36,7 +38,8 @@ function shader () {
     // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/createShader
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     if (!vertexShader) {
-        throw new Error('ERROR creating vertex shader!');
+        return;
+        // throw new Error('ERROR creating vertex shader!');
     }
     // 위에서 선언한 변수에 작성한 shader 할당
     gl.shaderSource(vertexShader, vsGLSL);

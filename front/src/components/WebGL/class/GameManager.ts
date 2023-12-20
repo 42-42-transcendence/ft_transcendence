@@ -59,13 +59,12 @@ export class GameManager {
             });
         }
 
-        if (data.gameId) {
-            data.gameId = undefined;
-        }
+        data.validation = true;
 
         ItemManager.getInstance().clearItems();
         gameDataFromServer.itemsPos = [];
-                // WebGL 컨텍스트 해제
+        
+        // WebGL 컨텍스트 해제
         gl.getExtension('WEBGL_lose_context')?.loseContext();
     }
 
@@ -91,6 +90,6 @@ export class GameManager {
         window.dispatchEvent(new CustomEvent('gameEnd', {}));
     }
     static isMatchConcluded() {
-        return data.scores[0] === 5 || data.scores[1] === 5;
+        return data.scores[0] === 10 || data.scores[1] === 10;
     }
 }

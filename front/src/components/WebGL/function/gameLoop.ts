@@ -3,7 +3,6 @@ import { render } from './render';
 import update from "./update";
 import receive from "./receive";
 import { GameManager } from "../class/GameManager";
-import { ItemManager } from '../class/ItemManager';
 
 export function gameLoop(timeStamp: number) {
 	if (data.endGame) {

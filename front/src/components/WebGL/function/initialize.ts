@@ -24,6 +24,9 @@ function initialize(state: any) {
 		data.mode = state.data.mode;
 	}
 
+	if (state.data.gameID)
+		data.gameId = state.data.gameID;
+
 	data.lastTime = performance.now();
 	data.endGame = false;
 

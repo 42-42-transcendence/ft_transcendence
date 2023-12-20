@@ -51,8 +51,8 @@ function drawLine(line: Line) {
 }
 
 export function render() {
-	if (data.endGame) return;
-	data.gl!.clear(data.gl!.COLOR_BUFFER_BIT | data.gl!.DEPTH_BUFFER_BIT);
+	if (data.endGame || !data.gl) return;
+	data.gl.clear(data.gl.COLOR_BUFFER_BIT | data.gl.DEPTH_BUFFER_BIT);
 
 	if (data.isFirstRender) {
 		initializeBuffer(data.paddleBuffer, data.paddle[0].paddleVertices);

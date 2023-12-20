@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { faker } from '@faker-js/faker';
 import { Achievement } from './entities/achievement.entity';
 import { achievements, Achievements } from './achievement';
 import { AchievementDto } from './dto/achievement.dto';

@@ -8,7 +8,7 @@ import { GameEngine} from './game.engine';
 
 interface Pair {
     gameId : string;
-    isFirst : boolean;
+    isLeft : boolean;
 }
 
 @Injectable()
@@ -31,8 +31,8 @@ export class GameService {
         }
 
         const game = await this.gameRepository.save({title: user.nickname+" vs "+user2.nickname, player1 : userNickname1, player2 : userNickname2, gameType: gameOptions.gametype, gameMode: gameOptions.gamemode});
-        this.playerToGameId.set(userNickname1, {gameId : game.gameID, isFirst : true});
-        this.playerToGameId.set(userNickname2, {gameId : game.gameID, isFirst : false});
+        this.playerToGameId.set(userNickname1, {gameId : game.gameID, isLeft : true});
+        this.playerToGameId.set(userNickname2, {gameId : game.gameID, isLeft : false});
         this.gameIdToGameOption.set(game.gameID, gameOptions);
         this.gameIdToGameData.set(game.gameID, gameData);
         return game.gameID;
@@ -56,11 +56,11 @@ export class GameService {
     // reconnectToGame (userId : string, playerName : string) : string {
     //     for (const [gameId, GameDataDto] of this.gameIdToGameData) {
     //         if (GameDataDto.players.player1 === playerName) {
-    //             this.playerToGameId.set(userId, {gameId: gameId, isFirst: true});
+    //             this.playerToGameId.set(userId, {gameId: gameId, isLeft: true});
     //             return gameId;
     //         }
     //         else if (GameDataDto.players.player2 === playerName) {
-    //             this.playerToGameId.set(userId, {gameId: gameId, isFirst: false});
+    //             this.playerToGameId.set(userId, {gameId: gameId, isLeft: false});
     //             return gameId;
     //         }
     //     }

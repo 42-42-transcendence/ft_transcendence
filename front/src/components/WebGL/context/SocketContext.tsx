@@ -4,7 +4,8 @@ import useAuthState from "../../../store/Auth/useAuthState";
 import React, {createContext, useContext, useEffect, useState} from "react";
 import data, {gameDataFromServer} from "../interface/gameData";
 import useUserState from "../../../store/User/useUserState";
-import {GameManager} from "../class/GameManager";
+import { useLocation } from 'react-router-dom';
+
 
 type SocketContextType = {
     socket: Socket | null;
@@ -19,6 +20,7 @@ type ChildProps = {
 const SocketContextProvider = ({ children }: ChildProps) => {
     const userState = useUserState();
     const authState = useAuthState();
+
     const [socket, setSocket] = useState<Socket | null>(null);
 
     useEffect(() => {
@@ -32,9 +34,10 @@ const SocketContextProvider = ({ children }: ChildProps) => {
                 },
             });
 
-            newSocket.on('nonPlayer', () => {
-                data.validation = false;
-                newSocket.disconnect();
+            newSocket.on('isValid', (isValid: boolean) => {
+                console.log("-----------valid check: ", isValid);
+                data.validation = isValid;
+                window.dispatchEvent(new CustomEvent('validationChanged', {}));
             });
 
             newSocket.on('updateGame', (gameData: any) => {

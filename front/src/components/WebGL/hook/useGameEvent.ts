@@ -10,7 +10,7 @@ const useGameEvent = () => {
     useEffect(() => {
         const handleGameEnd = () => {
             if (data.mode === 'AI') {
-                if (data.scores[0] === 5)
+                if (data.scores[0] === 10)
                     setGameResult('win');    
                 else
                     setGameResult('lost');

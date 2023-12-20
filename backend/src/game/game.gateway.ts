@@ -21,6 +21,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   	constructor(@Inject(forwardRef(() => GameService)) private gameService: GameService,
                 @Inject(forwardRef(() => UserService)) private userService : UserService,
                 ) {}
+                
   afterInit() {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
@@ -32,6 +33,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
     if (this.gameService.isPlayer(nickname)) {
+        this.server.to(client.id).emit("isValid", true);
+
         const gameId: string = await this.gameService.getPlayerGameId(nickname);
         const gameOptions: GameOptionDto = await this.gameService.getGameOptions(gameId);
         gameOptions.isActive = true;
@@ -39,8 +42,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         console.log(`${nickname} joined room ${gameId}`);
         await this.userService.updateUserStatus(user, UserStatus.PLAYING);
     }
-    else /*(if db has no game id)*/
-        this.server.to(client.id).emit("nonPlayer");
+    else
+        this.server.to(client.id).emit("isValid", false);
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
@@ -79,12 +82,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 //   @SubscribeMessage('reconnect') // 재접속 구현 X
 //   reconnectGame (@ConnectedSocket() client: Socket) : void {
-//       const Pair = this.gameService.getPair(client.id);
+//      const nickname = client.handshake.query.userID;
+//      if (typeof nickname !== 'string') {
+//          throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
+//       }
+//       const gameId: string = await this.gameService.getPlayerGameId(nickname);
+//       const Pair = this.gameService.getPair(nickname);
+// 
 //       if (Pair) {
-//           const GameDataDto : GameDataDto = this.gameService.getGameDataDto(Pair.gameId);
+//           const GameDataDto : GameDataDto = this.gameService.getGameDataDto(gameId);
 //           if (GameDataDto) {
-//               client.join(Pair.gameId);
-//               this.server.to(Pair.gameId).emit("updateGame", GameDataDto);
+//               this.server.in(client.id).socketsJoin(gameId);
+//               this.server.to(gameId).emit("updateGame", GameDataDto);
 //           }
 //       }
 //       else
@@ -102,14 +111,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
     }
-
+    if (!this.gameService.isPlayer(nickname)) {
+        return ;
+    }
+    
     const Pair = this.gameService.getPair(nickname);
     const gamedata = this.gameService.getGameData(data.gameId);
     const leftPaddle = gamedata.paddle[0];
     const rightPaddle = gamedata.paddle[1];
 
     if (Pair) {
-        if (Pair.isFirst){
+        if (Pair.isLeft){
             leftPaddle.keyPress.up = false;
         } else {
             rightPaddle.keyPress.up = false;
@@ -123,6 +135,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
     }
+    if (!this.gameService.isPlayer(nickname)) {
+        return ;
+    }
 
     const Pair = this.gameService.getPair(nickname);
     const gamedata = this.gameService.getGameData(data.gameId);
@@ -130,7 +145,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const rightPaddle = gamedata.paddle[1];
 
     if (Pair) {
-        if (Pair.isFirst){
+        if (Pair.isLeft){
             leftPaddle.keyPress.down = false;
         } else {
             rightPaddle.keyPress.down = false;
@@ -144,6 +159,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         if (typeof nickname !== 'string') {
             throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
         }
+        if (!this.gameService.isPlayer(nickname)) {
+            return ;
+        }
 
         const Pair = this.gameService.getPair(nickname);
         const gamedata = this.gameService.getGameData(data.gameId);
@@ -151,7 +169,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const rightPaddle = gamedata.paddle[1];
 
         if (Pair) {
-            if (Pair.isFirst){
+            if (Pair.isLeft){
                 leftPaddle.keyPress.up = true;
             } else {
                 rightPaddle.keyPress.up = true;
@@ -165,6 +183,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         if (typeof nickname !== 'string') {
             throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
         }
+        if (!this.gameService.isPlayer(nickname)){
+            return ;
+        }
 
         const Pair = this.gameService.getPair(nickname);
         const gamedata = this.gameService.getGameData(data.gameId);
@@ -172,7 +193,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const rightPaddle = gamedata.paddle[1];
 
         if (Pair) {
-            if (Pair.isFirst){
+            if (Pair.isLeft){
                 leftPaddle.keyPress.down = true;
             } else {
                 rightPaddle.keyPress.down = true;

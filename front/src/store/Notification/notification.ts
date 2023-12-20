@@ -38,6 +38,11 @@ const notificationSlice = createSlice({
         (notification) => notification.notiID !== action.payload
       );
     },
+    clearGameNotification: (state) => {
+      state.notifications = state.notifications.filter(
+        (notification) => notification.notiType !== 'game'
+      );
+    },
   },
 });
 

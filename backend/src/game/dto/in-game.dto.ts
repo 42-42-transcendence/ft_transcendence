@@ -11,6 +11,7 @@ export interface GameDataDto {
     items: Item[],
 	lastTime: number,
 	mode: string,
+    intervalId: NodeJS.Timeout,
 }
 
 export interface GameOptionDto {

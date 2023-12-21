@@ -5,6 +5,8 @@ import { Game } from "./entities/game.entity";;
 import { UserService } from "../user/user.service";
 import { GameDataDto, GameOptionDto } from "./dto/in-game.dto";
 import { GameEngine} from './game.engine';
+import { GameGateway } from './game.gateway';
+import { Socket } from 'socket.io';
 
 interface Pair {
     gameId : string;
@@ -15,11 +17,30 @@ interface Pair {
 export class GameService {
     constructor(@InjectRepository(Game) private gameRepository : Repository<Game>,
                 @Inject(forwardRef(() => UserService)) private userService : UserService,
+                @Inject(forwardRef(() => GameGateway)) private gameGateway: GameGateway,
                 @Inject(forwardRef(() => GameEngine)) private gameEngine : GameEngine) {}
 
     private playerToGameId: Map<string, Pair> = new Map();
     private gameIdToGameOption: Map<string, GameOptionDto> = new Map();
     private gameIdToGameData: Map<string, GameDataDto> = new Map();
+
+    private clients: Map<string, Socket> = new Map();
+
+    addClient(userID: string, socket: Socket) {
+        this.clients.set(userID, socket);
+    }
+
+    removeClient(userID: string) {
+        this.clients.delete(userID);
+    }
+
+    getClient(userID: string): Socket | undefined  {
+        return (this.clients.get(userID));
+    }
+
+    hasClient(userID: string): boolean {
+        return (this.clients.has(userID));
+    }
 
     /* ------------------- Game Methods ----------------------- */
     async startGame(userNickname1: string, userNickname2: string, gameOptions: GameOptionDto, gameData: GameDataDto): Promise<string> {
@@ -36,6 +57,30 @@ export class GameService {
         this.gameIdToGameOption.set(game.gameID, gameOptions);
         this.gameIdToGameData.set(game.gameID, gameData);
         return game.gameID;
+    }
+
+    async saveGame(nickname: string): Promise<void> {
+        let winner: string = "";
+
+        if (this.isPlayer(nickname)){
+            const gameId : string = this.getPlayerGameId(nickname);
+            if (gameId && this.isActive(gameId)) {
+                const gameData : GameDataDto = this.getGameData(gameId);
+    
+                this.getGameOptions(gameId).isActive = false;
+                if (gameData.intervalId)
+                    clearInterval(gameData.intervalId);
+                if (gameData.scores[0] !== 10 && gameData.scores[1] !== 10){
+                    winner = await this.recordAbortLoss(gameId, nickname);
+
+                    this.gameGateway.emitWinner(winner, gameId);
+                    this.deletePlayer(nickname);
+                }
+            }
+            else {
+                this.deletePlayer(nickname);
+            }
+        }
     }
 
     async cancelGame(userNickname : string, gameId : string, option: string) : Promise<void> {
@@ -160,22 +205,22 @@ export class GameService {
                 game.player2Score = 42;
                 game.winner = game.player2;
                 await this.gameRepository.save(game);
-                await this.userService.endGameUser(game.player1, gameId, true);
-                await this.userService.endGameUser(game.player2, gameId, false);
+                await this.userService.endGameUser(game.player1, gameId, false);
+                await this.userService.endGameUser(game.player2, gameId, true);
             }
             else {
                 game.player2Score = 0;
                 game.player1Score = 42;
                 game.winner = game.player1;
                 await this.gameRepository.save(game);
-                await this.userService.endGameUser(game.player1, gameId, false);
-                await this.userService.endGameUser(game.player2, gameId, true);
+                await this.userService.endGameUser(game.player1, gameId, true);
+                await this.userService.endGameUser(game.player2, gameId, false);
             }
         }
         return game.winner;
     }
 
-    async deleteGameOption(gameId : string) {
+    deleteGameOption(gameId : string) {
         const result = this.gameIdToGameOption.delete(gameId);
   
         if (result === false)
@@ -183,7 +228,7 @@ export class GameService {
             return ;
     }
 
-    async deletePlayer(userNickname : string) {
+    deletePlayer(userNickname : string) {
         const result = this.playerToGameId.delete(userNickname);
         
         if (result == false)
@@ -191,7 +236,7 @@ export class GameService {
             return ;
     }
 
-    async deleteGameData (gameId : string) {
+    deleteGameData (gameId : string) {
         const result = this.gameIdToGameData.delete(gameId);
 
         if (result == false)
@@ -203,7 +248,7 @@ export class GameService {
         return this.playerToGameId.has(userNickname);
     }
 
-    async getPlayerGameId(userNickname : string) : Promise<string> {
+    getPlayerGameId(userNickname : string) : string {
         const gameId = this.playerToGameId.get(userNickname);
         return gameId ? gameId.gameId : null;
     }
@@ -212,7 +257,7 @@ export class GameService {
         return this.playerToGameId.get(userNickname);
     }
 
-    async getGameOptions(gameId : string) : Promise<GameOptionDto> {
+    getGameOptions(gameId : string) : GameOptionDto {
         return this.gameIdToGameOption.get(gameId);
     }
 }

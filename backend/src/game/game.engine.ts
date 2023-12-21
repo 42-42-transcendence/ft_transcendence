@@ -43,6 +43,16 @@ export class GameEngine {
     async startGameLoop(gameId: string): Promise<void> {
         const interval = setInterval(async () => { 
             const gameData = this.gameService.getGameData(gameId);
+
+            if (!gameData.intervalId)
+                gameData.intervalId = interval;
+            if (!gameData){
+                clearInterval(interval);
+                return ;
+            }
+            if (gameData.lastTime === 0)
+                gameData.lastTime = new Date().getTime();
+
             const sendData: sendGameDataDto = {
                 paddlePos: [[0, 0], [0, 0]],
                 height: [0, 0],
@@ -50,15 +60,9 @@ export class GameEngine {
                 itemsPos: [],
                 scores: [0, 0],
             }
-            if (!gameData){
-                clearInterval(interval);
-                return ;
-            }
-            if (gameData.lastTime === 0)
-                gameData.lastTime = new Date().getTime();
             if (gameData.scores[0] === 10 || gameData.scores[1] === 10){
                 clearInterval(interval);
-                (await this.gameService.getGameOptions(gameId)).isActive = false;
+                this.gameService.getGameOptions(gameId).isActive = false;
                 this.updateSendData(sendData, gameData);
                 this.gameGateway.emitGameData(sendData, gameId);
                 await this.gameGateway.gameEnd(gameData, gameId);                

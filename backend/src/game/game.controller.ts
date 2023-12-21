@@ -191,7 +191,7 @@ export class GameController {
     description: '성공',
     type: Promise<{ message: string }>
   })
-  @Post('exitAI')
+  @Post('exitGame')
   @UseGuards(AuthGuard())
   async changeAIUserStatusExit(
     @GetAuth() auth: Auth,

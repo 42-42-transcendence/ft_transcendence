@@ -7,6 +7,7 @@ import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
 import { UserService } from 'src/user/user.service';
 import { SocketExceptionFilter } from 'src/events/socket.filter';
 import { SocketException } from 'src/events/socket.exception';
+import { EventsService } from 'src/events/events.service';
 
 @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
@@ -21,7 +22,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   	constructor(@Inject(forwardRef(() => GameService)) private gameService: GameService,
                 @Inject(forwardRef(() => UserService)) private userService : UserService,
                 ) {}
-                
+
   afterInit() {}
 
   async handleConnection(@ConnectedSocket() client: Socket) {
@@ -30,14 +31,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
     }
     const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+    this.gameService.addClient(user.userID, client);
 
     console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
     if (this.gameService.isPlayer(nickname)) {
         this.server.to(client.id).emit("isValid", true);
 
-        const gameId: string = await this.gameService.getPlayerGameId(nickname);
-        const gameOptions: GameOptionDto = await this.gameService.getGameOptions(gameId);
-        gameOptions.isActive = true;
+        const gameId: string = this.gameService.getPlayerGameId(nickname);
+        if (gameId){
+            const gameOptions: GameOptionDto = this.gameService.getGameOptions(gameId);
+            gameOptions.isActive = true;
+        }
         this.server.in(client.id).socketsJoin(gameId);
         console.log(`${nickname} joined room ${gameId}`);
         await this.userService.updateUserStatus(user, UserStatus.PLAYING);
@@ -53,31 +57,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
     const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
 
-    if (this.gameService.isPlayer(nickname)){
-        const gameId : string = await this.gameService.getPlayerGameId(nickname);
-
-        if (gameId && this.gameService.isActive(gameId)) {
-            const gameData : GameDataDto = this.gameService.getGameData(gameId);
-
-            (await this.gameService.getGameOptions(gameId)).isActive = false;
-            if (gameData.scores[0] !== 10 && gameData.scores[1] !== 10){
-                const winner = await this.gameService.recordAbortLoss(gameId, nickname); 
-                this.server.to(gameId).emit("endGame", winner);
-                this.gameService.deletePlayer(nickname);
-                this.gameService.deleteGameOption(gameId);
-                this.gameService.deleteGameData(gameId);
-            }
-        }
-        else {
-            this.gameService.deletePlayer(nickname);
-            this.gameService.deleteGameOption(gameId);
-            this.gameService.deleteGameData(gameId);
-        }
+    const gameId = this.gameService.getPlayerGameId(nickname);
+    if (gameId){
         this.server.in(client.id).socketsLeave(gameId);
         console.log(`${user.nickname} left room ${gameId}`);
     }
-    await this.userService.updateUserStatus(user, UserStatus.ONLINE);
-    console.log(`GAME GATEWAY ----------- ${client.id} disconnected -------------------`);
+
+    await this.gameService.saveGame(nickname);
+    this.gameService.deleteGameOption(gameId);
+    this.gameService.deleteGameData(gameId);
+
+    const updatedUser = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+    await this.userService.updateUserStatus(updatedUser, UserStatus.ONLINE);
+
+    const saveClient = this.gameService.getClient(updatedUser.userID);
+    if (client.id === saveClient.id) {
+        this.gameService.removeClient(updatedUser.userID);
+    }
+    console.log(`GAME GATEWAY ----------- ${updatedUser.nickname} ${client.id} disconnected -------------------`);
   }
 
 //   @SubscribeMessage('reconnect') // 재접속 구현 X
@@ -101,12 +98,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 //   }
 
 
-  async emitGameData(sendGameDataDto: sendGameDataDto, gameId: string) {
+  emitGameData(sendGameDataDto: sendGameDataDto, gameId: string) {
     this.server.to(gameId).emit("updateGame", sendGameDataDto);
   }
 
+  emitWinner(winner: string, gameId: string) {
+    this.server.to(gameId).emit("endGame", winner);
+  }
+
   @SubscribeMessage('UpKeyRelease')
-  async onUpKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
+  onUpKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
     const nickname = client.handshake.query.userID;
     if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
@@ -130,7 +131,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 }
 
   @SubscribeMessage('DownKeyRelease')
-  async onDownKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
+  onDownKeyRelease(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
     const nickname = client.handshake.query.userID;
     if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
@@ -154,7 +155,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 }
 
   @SubscribeMessage('UpKey')
-  async UpKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
+  UpKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
         const nickname = client.handshake.query.userID;
         if (typeof nickname !== 'string') {
             throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
@@ -178,7 +179,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
   @SubscribeMessage('DownKey')
-  async DownKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
+  DownKeyPressed(@ConnectedSocket() client: Socket, @MessageBody() data: any) : Promise<void> {
         const nickname = client.handshake.query.userID;
         if (typeof nickname !== 'string') {
             throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);

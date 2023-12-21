@@ -63,7 +63,7 @@ export function render() {
 	}
 
 	if (!data.program[0] || !data.ballBuffer)
-		throw new Error('data.program[0] or data.ballBuffer is null');
+		return ;
 
 	drawLine(line);
 	drawBall(data.ball);

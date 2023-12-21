@@ -11,6 +11,9 @@ import useBeforeunload from "../components/WebGL/hook/useBeforeunload";
 import GameResultModal from "../components/Modal/GameResultModal";
 import useGameEvent from "../components/WebGL/hook/useGameEvent";
 import useValidation from '../components/WebGL/hook/useValidation';
+import { useNavigate } from 'react-router-dom';
+import styles from '../styles/Modal.module.css';
+import { GameManager } from '../components/WebGL/class/GameManager';
 
 const GameLogic = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,6 +22,7 @@ const GameLogic = () => {
     const profileRef2 = useRef<HTMLDivElement>(null);
     const scoreRef2 = useRef<HTMLDivElement>(null);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
     const { state } = useLocation();
     const gameResult = useGameEvent();
     useValidation();
@@ -27,11 +31,16 @@ const GameLogic = () => {
     useCanvasSize();
     usePress();
 
-    let socket: any = null;
+    const closeAndRedirectHandler = () => {
+        if (data)
+            GameManager.cleanupWebGL();
+        navigate('/', { replace: true });
+    };
+
     useEffect(() => {
         try {
             if (state.data.mode !== 'AI' && (!data.validation || !state.data.gameID))
-                throw new Error('Error: Invalid game page');
+                throw new Error('This game page is invalid, or has already ended');
             data.isFirstRender = true;
             data.canvasRef = canvasRef.current;
             data.profileRef[0] = profileRef1.current;
@@ -48,17 +57,17 @@ const GameLogic = () => {
         } catch (e : any) {
             setError(e.message);
         }
-        return () => {
-            if (socket && socket.connected) {
-                socket.disconnect();
-            }
-        };
     }, [data.validation, data.gameId]);
     if (error) {
         return (
             <div style={{color:'#be0000', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column'}}>
                 <h1 className="error-message" >Error</h1>
                 <p>{error}</p>
+                <button 
+                    className={`${styles['footer-button']} ${styles.cancel}`}
+                    onClick={closeAndRedirectHandler}> 
+                    return 
+                </button>
             </div>
         );
     }

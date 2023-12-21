@@ -33,6 +33,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { Paddle } from 'src/game/classes/Paddle';
 import { Ball } from 'src/game/classes/Ball';
 import { vec2 } from 'gl-matrix';
+import { GameService } from 'src/game/game.service';
 
 
 @UseFilters(new SocketExceptionFilter())
@@ -49,6 +50,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private authService: AuthService,
     private notificationService: NotificationService,
     private eventsService: EventsService,
+    private gameService: GameService,
     private userService: UserService,
     @Inject(forwardRef(() => ChannelService))
     private channelService: ChannelService,
@@ -72,6 +74,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         beforeClient.emit("sessionExpired", `${user.nickname}님이 다른 곳에서 새로 로그인 하셨습니다.`);
       }
       this.eventsService.addClient(user.userID, client);
+      console.log("============user match history length at connection ==========", user.matchHistory.length);
       if (user.status === UserStatus.OFFLINE) {
         await this.userService.updateUserStatus(user, UserStatus.ONLINE);
       }
@@ -82,12 +85,27 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
+  
   async handleDisconnect(client: Socket) {
     try {
       const nickname = client.handshake.query.userID;
       if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
       }
+      const waitUser = await this.userService.getUserByNicknameWithWsException(nickname);
+      const waitForClient = async () => {
+        await new Promise((resolve) => {
+          const timerID = setInterval(() => {
+            if(!this.gameService.hasClient(waitUser.userID)) {
+              clearInterval(timerID);
+              resolve(null);
+            }
+          }, 50);
+        });
+      };
+  
+      await waitForClient();
+      console.log("_---------game user waited disconnect=======================");
       const user = await this.userService.getUserByNicknameWithWsException(nickname);
       const channelMembers = await user.channelMembers;
 
@@ -103,6 +121,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 현재 client.id와 저장하고 있는 client.id가 같을 때만 client를 지우고, status를 변경한다
       if (client.id === saveClient.id) {
         this.eventsService.removeClient(user.userID);
+        console.log("============user match history length at disconnectoin ==========", user.matchHistory.length);
         if (user.status !== UserStatus.OFFLINE) {
           await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
         }
@@ -282,6 +301,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       items: [],
       lastTime: 0,
       mode: 'normal',
+      intervalId: null,
     }
 
     const gameID = await this.eventsService.startGame(users[0].nickname, users[1].nickname, gameOptions, gamedata);
@@ -339,6 +359,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       items: [],
       lastTime: 0,
       mode: 'normal',
+      intervalId: null,
     }
 
     const gameID = await this.eventsService.startGame(user.nickname, readyUser.nickname, gameOptions, gamedata);
@@ -376,6 +397,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       items: [],
       lastTime: 0,
       mode: 'object',
+      intervalId: null,
     }
 
     const gameID = await this.eventsService.startGame(user.nickname, readyUser.nickname, gameOptions, gamedata);

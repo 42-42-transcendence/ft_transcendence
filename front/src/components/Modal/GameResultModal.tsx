@@ -13,7 +13,7 @@ const GameResultModal = ({ result }: Props) => {
     const navigate = useNavigate();
     const { request } = useRequest();
     const sendEndGameRequest = useCallback(async () => {
-        const response = await request(`${SERVER_URL}/api/game/exitAI`, {
+        const response = await request(`${SERVER_URL}/api/game/exitGame`, {
             method: 'POST',
         });
         if (response === null) {
@@ -23,7 +23,7 @@ const GameResultModal = ({ result }: Props) => {
 
     const closeAndRedirectHandler = () => {
         sendEndGameRequest();
-        navigate('/');
+        navigate('/', { replace: true });
     };
 
     return (

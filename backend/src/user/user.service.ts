@@ -219,6 +219,7 @@ export class UserService {
 	async getDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
 	const user = await this.getUserByNicknameWithException(targetuserID);
 	const retDashboards: DashboardUserDto[] = [];
+	console.log("============user match history length at Dashboard==========", user.matchHistory.length);
 	if(!user.matchHistory)
 		return retDashboards;
 	for (let i = 0; i < user.matchHistory.length; i++){
@@ -231,7 +232,7 @@ export class UserService {
 			mode: currentgame.gameMode,
 			isWin: currentgame.winner === user.nickname ? true : false,
 			type: currentgame.gameType === GameTypeEnum.LADDER ? GameTypeEnum.LADDER : 'friendly',
-			score: `${currentgame.player1Score}:${currentgame.player2Score}`,
+			score: user.nickname === currentgame.player1 ? `${currentgame.player1Score}:${currentgame.player2Score}` :  `${currentgame.player2Score}:${currentgame.player1Score}`,
 		}
 		retDashboards.push(tmpboard);
 	}
@@ -243,7 +244,9 @@ export class UserService {
 		const user = await this.getUserByNickname(nickname);
 
 		if (nickname) {
+			console.log("============user match history length before push==========", user.matchHistory.length);
 			user.matchHistory.push(matchId);
+			console.log("============user match history length after push==========", user.matchHistory.length);
 			if (isWin === true) {
 				user.win += 1;
 				if (game.gameType === GameTypeEnum.LADDER)

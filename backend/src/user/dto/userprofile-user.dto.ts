@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Achievement } from 'src/achievement/entities/achievement.entity';
-import { UserAchievementlistDto } from 'src/user-achievement/dto/user-ahievement-list.dto';
-import { UserAchievement } from 'src/user-achievement/entities/user-achievement.entity';
+import { UserAchievementlistDto } from './user-achievement-list.dto';
 
 export class UserprofileUserDto {
   @ApiProperty({

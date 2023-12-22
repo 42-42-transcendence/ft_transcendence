@@ -1,5 +1,4 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserAchievement } from '../../user-achievement/entities/user-achievement.entity';
 import { ChannelMember } from '../../channel-member/entities/channel-member.entity';
 import { Chat } from '../../chat/entities/chat.entity';
 import { Relation } from '../../relation/entities/relation.entity';
@@ -81,13 +80,6 @@ export class User {
     default: 1000,
   })
   point: number;
-
-  @ApiProperty({
-    description: '도전과제',
-    example: '[{it, title, description}]',
-  })
-  @OneToMany(() => UserAchievement, (userAchievement) => userAchievement.achievement)
-  userAchievements: UserAchievement[];
 
   @ApiProperty({
     description: '도전과제 달성 여부 리스트',

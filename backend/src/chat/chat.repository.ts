@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { CreateChatMessageDto } from "./dto/create-chat-message.dto";
 import { Chat } from "./entities/chat.entity";
-
 import { User } from "src/user/entities/user.entity";
 import { faker } from "@faker-js/faker";
 import { ChatType } from "./enums/chat-type.enum";

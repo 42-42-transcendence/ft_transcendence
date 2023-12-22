@@ -5,7 +5,6 @@ import { Channel } from 'src/channel/entities/channel.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ChannelMember } from './entities/channel-member.entity';
 import { ChannelMemberRole } from './enums/channel-member-role.enum';
-import { channel } from 'diagnostics_channel';
 import { ChannelTypeEnum } from 'src/channel/enums/channelType.enum';
 
 @Injectable()

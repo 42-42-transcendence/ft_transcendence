@@ -1,8 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserAchievement } from 'src/user-achievement/entities/user-achievement.entity';
-import { UserStatus } from '../enums/user-status.enum';
 import { GameModeEnum } from 'src/game/enums/gameMode.enum';
-import { GameTypeEnum } from 'src/game/enums/gameType.enum';
 
 export class DashboardUserDto {
   @ApiProperty({

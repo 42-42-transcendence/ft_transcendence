@@ -36,17 +36,13 @@ const SocketContextProvider = ({ children }: ChildProps) => {
         },
       });
 
-      // 확인차 출력
       newSocket.on('connect', () => {
-        console.log('connected context');
         newSocket.emit('notification', (notifications: Notification[]) => {
           dispatch(notificationActions.setNotification(notifications));
         });
       });
 
       newSocket.on('disconnect', (reason: string) => {
-        console.log('disconnected context');
-
         if (reason === 'io server disconnect') {
           newSocket.connect();
         }

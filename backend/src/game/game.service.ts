@@ -47,7 +47,6 @@ export class GameService {
         const user = await this.userService.getUserByNickname(userNickname1);
         const user2 = await this.userService.getUserByNickname(userNickname2);
         if (!user || !user2) {
-            console.log("user unavailable to match");
             return null;
         }
 
@@ -83,72 +82,22 @@ export class GameService {
         }
     }
 
-    async cancelGame(userNickname : string, gameId : string, option: string) : Promise<void> {
+    async cancelGame(userNickname : string, gameId : string) : Promise<void> {
         this.deletePlayer(userNickname);
         this.deleteGameOption(gameId);
         this.deleteGameData(gameId);
-        if (option === "cancel"){
-            if (this.gameRepository.findOneBy({gameID: gameId}))
-                await this.gameRepository.delete(gameId);
-        }
+        if (this.gameRepository.findOneBy({gameID: gameId}))
+            await this.gameRepository.delete(gameId);
     }
 
     startGameEngine(gameId: string){
         this.gameEngine.startGameLoop(gameId);
-    }
-
-    // 재접속 구현 X
-    // reconnectToGame (userId : string, playerName : string) : string {
-    //     for (const [gameId, GameDataDto] of this.gameIdToGameData) {
-    //         if (GameDataDto.players.player1 === playerName) {
-    //             this.playerToGameId.set(userId, {gameId: gameId, isLeft: true});
-    //             return gameId;
-    //         }
-    //         else if (GameDataDto.players.player2 === playerName) {
-    //             this.playerToGameId.set(userId, {gameId: gameId, isLeft: false});
-    //             return gameId;
-    //         }
-    //     }
-    //     return null;
-    // }
-
-    getGameData(gameId :string) : GameDataDto {
-        return this.gameIdToGameData.get(gameId);
-    }
-
-    setGameData(gameId :string, GameDataDto : GameDataDto) {
-        this.gameIdToGameData.set(gameId, GameDataDto);
     }
     
     isActive(gameId : string) : boolean {
         if (this.gameIdToGameOption.has(gameId))
             return this.gameIdToGameOption.get(gameId).isActive;
         return false;
-    }
-
-    async getFinishedGames() : Promise<Game[] | null> {
-        const games : Game[] = [];
-        const allGames = await this.gameRepository.find();
-        allGames.forEach((game) => {
-            if (game.finished)
-                games.push(game);
-        })
-        return games;
-    }
-
-    async getActiveGames() : Promise<GameOptionDto[]> {
-        const games: GameOptionDto[] = [];
-        for (const [gameId, matchData] of this.gameIdToGameOption.entries()) {
-            if (matchData.isActive == true) {
-                games.push(
-                    {player1 : matchData.player1, 
-                    player2 : matchData.player2, 
-                    gametype: matchData.gametype, 
-                    gamemode: matchData.gamemode, 
-                    isActive: matchData.isActive});
-            }
-        }
-        return games;
     }
 
     async endOfGame(dto: GameDataDto, gameId : string) : Promise<boolean> {
@@ -162,7 +111,7 @@ export class GameService {
 
 
     /* ------------------- DB, Match History ----------------------- */
-    async findAllGame() : Promise<Game[]> {
+    async findAllGames() : Promise<Game[]> {
         return await this.gameRepository.find();
     }
 
@@ -173,6 +122,16 @@ export class GameService {
         throw new NotFoundException(`해당 id를 찾을 수 없습니다: ${gameId}`);
 
       return (game);
+    }
+
+    async getFinishedGames() : Promise<Game[] | null> {
+        const games : Game[] = [];
+        const allGames = await this.gameRepository.find();
+        allGames.forEach((game) => {
+            if (game.finished)
+                games.push(game);
+        })
+        return games;
     }
 
     async finalScore(dto : GameDataDto, gameId : string): Promise<void> {
@@ -224,7 +183,6 @@ export class GameService {
         const result = this.gameIdToGameOption.delete(gameId);
   
         if (result === false)
-        //   throw new NotFoundException(`deleteGameOption: 해당 id를 찾을 수 없습니다: ${gameId}`);
             return ;
     }
 
@@ -232,7 +190,6 @@ export class GameService {
         const result = this.playerToGameId.delete(userNickname);
         
         if (result == false)
-            // throw new NotFoundException(`deletePlayer: 해당 유저 id를 찾을 수 없습니다: ${userId}`);
             return ;
     }
 
@@ -240,12 +197,15 @@ export class GameService {
         const result = this.gameIdToGameData.delete(gameId);
 
         if (result == false)
-            // throw new NotFoundException(`deleteGameData: 해당 게임 id를 찾을 수 없습니다 ${gameId}`);
             return ;
     }
 
     isPlayer(userNickname : string) : boolean {
         return this.playerToGameId.has(userNickname);
+    }
+
+    getGameData(gameId :string) : GameDataDto {
+        return this.gameIdToGameData.get(gameId);
     }
 
     getPlayerGameId(userNickname : string) : string {

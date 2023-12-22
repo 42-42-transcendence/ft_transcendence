@@ -2,8 +2,8 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
 import { ItemManager } from './classes/ItemManager';
-import PhysicsEngine from './classes/PhysicsEngine';
 import { GameDataDto, sendGameDataDto } from "./dto/in-game.dto";
+import PhysicsEngine from './classes/PhysicsEngine';
 
 @Injectable()
 export class GameEngine {

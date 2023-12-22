@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export class AchievementDto {
-  @ApiProperty({
-    description: '도전과제 번호',
-    example: '1',
-    type: 'number',
-    uniqueItems: true,
-  })
+export class UserAchievementlistDto {
   id: number;
 
   @ApiProperty({
@@ -15,7 +8,7 @@ export class AchievementDto {
     type: 'string',
     uniqueItems: true,
   })
-  name: string;
+  title: string;
 
   @ApiProperty({
     description: '도전과제 설명',
@@ -23,4 +16,6 @@ export class AchievementDto {
     uniqueItems: true,
   })
   description: string;
+
+  isAchieved: boolean;
 }

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserAchievement } from 'src/user-achievement/entities/user-achievement.entity';
 import { UserStatus } from '../enums/user-status.enum';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 

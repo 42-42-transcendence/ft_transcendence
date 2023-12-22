@@ -13,12 +13,10 @@ const GameResultModal = ({ result }: Props) => {
     const navigate = useNavigate();
     const { request } = useRequest();
     const sendEndGameRequest = useCallback(async () => {
-        const response = await request(`${SERVER_URL}/api/game/exitGame`, {
+        await request(`${SERVER_URL}/api/game/exitGame`, {
             method: 'POST',
         });
-        if (response === null) {
-            console.log("response is null");
-        }
+        
     }, [request]);
 
     const closeAndRedirectHandler = () => {

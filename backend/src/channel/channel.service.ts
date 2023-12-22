@@ -1,11 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChannelDto } from './dto/channel.dto';
 import { Channel } from './entities/channel.entity';
-import { Repository } from 'typeorm';
 import { ChannelRepository } from './channel.repository';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
-import { User } from 'src/user/entities/user.entity';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {

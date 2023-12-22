@@ -4,7 +4,6 @@ import { UserRepository } from './user.repository';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { User } from './entities/user.entity';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UserprofileUserDto } from './dto/userprofile-user.dto';
 import { UserStatus } from './enums/user-status.enum';
 import { AuthRepository } from 'src/auth/auth.repository';
@@ -12,13 +11,12 @@ import { Auth } from 'src/auth/entities/auth.entity';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { SocketException } from 'src/events/socket.exception';
-import { UserAchievementlistDto } from 'src/user-achievement/dto/user-ahievement-list.dto';
+import { UserAchievementlistDto } from './dto/user-achievement-list.dto';
 import { achievements } from './achievement';
 import { UserinfoUserDto } from './dto/userinfo-user.dto';
 import { GameService } from 'src/game/game.service';
 import { DashboardUserDto } from './dto/dashboard-user.dto';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
-import { GameModeEnum } from 'src/game/enums/gameMode.enum';
 
 @Injectable()
 export class UserService {
@@ -103,7 +101,6 @@ export class UserService {
 		}
 		const createdUser = await this.userRepository.createUser(userID);
 		await this.authrepository.relationAuthUser(auth, createdUser);
-		console.log('-------------- user db saved --------------');
 		const ret = { message: 'user db saved' };
 		return ret;
 	}
@@ -155,15 +152,7 @@ export class UserService {
 		}
 		await this.userRepository.save(user);
 		return retlist;
-		// return this.userRepository.getAchivements(User);
   	}
-
-  	async changeStatus(nickname: string, status: UserStatus) {
-    	this.userRepository.changeStatus(nickname, status);
-    	// const createduser = await this.getUserByNickname(nickname);
-    	// createduser.status = status;
-    	// await this.save(createduser);
-	}
 
 	async getAllUsers(): Promise<User[]> {
 		return (await this.userRepository.getAllUsers());
@@ -195,29 +184,9 @@ export class UserService {
 		return userinfo;
 	}
 
-	async createDummyDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
-		const user = await this.getUserByNicknameWithException(targetuserID);
-		const retDashboards: DashboardUserDto[] = [];
-		for (let i = 0; i < 10; i++){
-			const currentgameid = `uuid${i}`;
-			const tmpboard:DashboardUserDto = {
-				id: currentgameid,
-				nickname: `dummyuser${i}`,
-				image: user.avatar,
-				mode: i%2 === 1 ? GameModeEnum.NORMAL : GameModeEnum.OBJECT,
-				isWin: i%2 === 1 ? true : false,
-				type: i%2 === 1 ? GameTypeEnum.LADDER : 'friendly',
-				score: `${i}:${i}`,
-			}
-			retDashboards.push(tmpboard);
-		}
-		return retDashboards;
-		}
-
 	async getDashboards(targetuserID: string, auth: Auth): Promise<DashboardUserDto[]>{
 	const user = await this.getUserByNicknameWithException(targetuserID);
 	const retDashboards: DashboardUserDto[] = [];
-	console.log("============user match history length at Dashboard==========", user.matchHistory.length);
 	if(!user.matchHistory)
 		return retDashboards;
 	for (let i = 0; i < user.matchHistory.length; i++){
@@ -242,9 +211,7 @@ export class UserService {
 		const user = await this.getUserByNickname(nickname);
 
 		if (nickname) {
-			console.log("============user match history length before push==========", user.matchHistory.length);
 			user.matchHistory.push(matchId);
-			console.log("============user match history length after push==========", user.matchHistory.length);
 			if (isWin === true) {
 				user.win += 1;
 				if (game.gameType === GameTypeEnum.LADDER)

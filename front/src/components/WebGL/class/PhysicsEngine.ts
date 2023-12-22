@@ -4,7 +4,7 @@ import data from "../interface/gameData";
 class PhysicsEngine {
     static GuaranteeConflict(object: GameObject, delta: number, depth: number = 0) {
         if (depth > 30) {
-            console.log("depth over 30");
+            return;
         }
 
         const collisionProcesses = [

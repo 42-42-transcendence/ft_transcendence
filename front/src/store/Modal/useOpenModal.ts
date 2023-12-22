@@ -6,7 +6,7 @@ const useOpenModal = (modalID: string) => {
   const dispatch = useDispatch();
 
   const openHandler = useCallback(() => {
-    dispatch(modalActions.openModal(modalID)); // 예외처리 필요?
+    dispatch(modalActions.openModal(modalID));
   }, [dispatch, modalID]);
 
   return openHandler;

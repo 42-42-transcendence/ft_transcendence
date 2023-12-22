@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
 import { EventsMemberDto } from './dto/events-member.dto';
 import { User } from 'src/user/entities/user.entity';
@@ -16,8 +16,8 @@ export class EventsService {
     constructor(
         private relationService: RelationService,
         private channelMemberService: ChannelMemberService,
-        private userService: UserService,
-        private gameService: GameService,
+        @Inject(forwardRef(() => UserService)) private userService: UserService,
+        @Inject(forwardRef(() => GameService)) private gameService: GameService,
     ) {}
 
     private clients: Map<string, Socket> = new Map();
@@ -81,7 +81,7 @@ export class EventsService {
 
         if (index !== -1) {          
             if (gameId)
-                this.gameService.cancelGame(user.nickname, gameId, "cancel");
+                this.gameService.cancelGame(user.nickname, gameId);
             this.normalGameQueue.splice(index, 1);
         }
     }
@@ -119,7 +119,7 @@ export class EventsService {
 
         if (index !== -1) {            
             if (gameId)
-                this.gameService.cancelGame(user.nickname, gameId, "cancel");
+                this.gameService.cancelGame(user.nickname, gameId);
             this.objectGameQueue.splice(index, 1);
         }
     }
@@ -157,8 +157,8 @@ export class EventsService {
     async startGame(userNickname1: string, userNickname2: string, dto: GameOptionDto, data: GameDataDto): Promise<string> {
         const gameId = await this.g_startGame(userNickname1, userNickname2, dto, data);
         if (!gameId){
-            this.gameService.cancelGame(userNickname1, gameId, "cancel");
-            this.gameService.cancelGame(userNickname2, gameId, "cancel");
+            this.gameService.cancelGame(userNickname1, gameId);
+            this.gameService.cancelGame(userNickname2, gameId);
             return null;
         }
 

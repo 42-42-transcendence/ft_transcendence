@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { RelationDto } from './dto/relation.dto';
 import { RelationRepository } from './relation.repository';
 import { Relation } from './entities/relation.entity';
-import { RelationType } from 'typeorm/metadata/types/RelationTypes';
 import { User } from 'src/user/entities/user.entity';
 import { RelationTypeEnum } from './enums/relation-type.enum';
 

@@ -10,30 +10,29 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { AuthService } from 'src/auth/auth.service';
-import { ChannelMemberService } from 'src/channel-member/channel-member.service';
-import { ChannelService } from 'src/channel/channel.service';
+import { SocketException } from './socket.exception';
+import { SocketExceptionFilter } from './socket.filter';
+import { User } from 'src/user/entities/user.entity';
+import { UserStatus } from 'src/user/enums/user-status.enum';
+import { Chat } from 'src/chat/entities/chat.entity';
 import { Channel } from 'src/channel/entities/channel.entity';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatType } from 'src/chat/enums/chat-type.enum';
-import { User } from 'src/user/entities/user.entity';
+import { AuthService } from 'src/auth/auth.service';
+import { ChannelMemberService } from 'src/channel-member/channel-member.service';
+import { ChannelService } from 'src/channel/channel.service';
 import { UserService } from 'src/user/user.service';
 import { EventsService } from './events.service';
-import { Chat } from 'src/chat/entities/chat.entity';
-import { SocketExceptionFilter } from './socket.filter';
-import { NotificationService } from 'src/notification/notification.service';
-import { NotiType } from 'src/notification/enums/noti-type.enum';
-import { SocketException } from './socket.exception';
-import { UserStatus } from 'src/user/enums/user-status.enum';
-import { Notification } from 'src/notification/entities/notification.entity';
+import { GameService } from 'src/game/game.service';
 import { GameModeEnum } from 'src/game/enums/gameMode.enum';
 import { GameDataDto, GameOptionDto } from 'src/game/dto/in-game.dto';
 import { GameTypeEnum } from 'src/game/enums/gameType.enum';
-import { SendMessageDto } from './dto/send-message.dto';
 import { Paddle } from 'src/game/classes/Paddle';
 import { Ball } from 'src/game/classes/Ball';
 import { vec2 } from 'gl-matrix';
-import { GameService } from 'src/game/game.service';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotiType } from 'src/notification/enums/noti-type.enum';
+import { SendMessageDto } from './dto/send-message.dto';
 
 
 @UseFilters(new SocketExceptionFilter())
@@ -74,7 +73,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         beforeClient.emit("sessionExpired", `${user.nickname}님이 다른 곳에서 새로 로그인 하셨습니다.`);
       }
       this.eventsService.addClient(user.userID, client);
-      console.log("============user match history length at connection ==========", user.matchHistory.length);
       if (user.status === UserStatus.OFFLINE) {
         await this.userService.updateUserStatus(user, UserStatus.ONLINE);
       }
@@ -92,6 +90,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
       }
+
       const waitUser = await this.userService.getUserByNicknameWithWsException(nickname);
       const waitForClient = async () => {
         await new Promise((resolve) => {
@@ -103,9 +102,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           }, 50);
         });
       };
-  
       await waitForClient();
-      console.log("_---------game user waited disconnect=======================");
+
       const user = await this.userService.getUserByNicknameWithWsException(nickname);
       const channelMembers = await user.channelMembers;
 
@@ -121,7 +119,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 현재 client.id와 저장하고 있는 client.id가 같을 때만 client를 지우고, status를 변경한다
       if (client.id === saveClient.id) {
         this.eventsService.removeClient(user.userID);
-        console.log("============user match history length at disconnectoin ==========", user.matchHistory.length);
         if (user.status !== UserStatus.OFFLINE) {
           await this.userService.updateUserStatus(user, UserStatus.OFFLINE);
         }

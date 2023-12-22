@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, BadRequestException } from '@nestjs/common';
-import { GameService } from './game.service';
 import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Game } from './entities/game.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
+import { Game } from './entities/game.entity';
+import { GameService } from './game.service';
 import { UserService } from 'src/user/user.service';
 import { EventsGateway } from 'src/events/events.gateway';
 import { NotiType } from 'src/notification/enums/noti-type.enum';
@@ -23,7 +23,7 @@ export class GameController {
     private notificationService: NotificationService,
   ) {}
 
-  @ApiOperation({ summary: '게임 조회' })
+  @ApiOperation({ summary: '종료된 게임 조회' })
   @ApiOkResponse({ description: '조회 성공', type: [Game]})
   @Get()
   async getFinishedGames() : Promise<Game[]> {
@@ -34,7 +34,7 @@ export class GameController {
   @ApiOkResponse({ description: '조희 성공' , type: Game})
   @Get('all')
   async getAll() : Promise<Game[]> {
-    return this.gameService.findAllGame();
+    return this.gameService.findAllGames();
 }
 
   @ApiOperation({ summary: 'gameId로 게임 조회' })
@@ -102,7 +102,6 @@ export class GameController {
       throw new BadRequestException(`${sendUser.nickname}님은 현재 게임을 할 수 있는 상태가 아닙니다.`);
     }
 
-    // 여기에서 game방 객체를 만들던, gameID를 generate하던 gameID를 생성해줘야함
     const type = GameTypeEnum.PRIVATE;
     const mode = GameModeEnum.NORMAL;
     const players = [user, sendUser];
@@ -186,21 +185,21 @@ export class GameController {
     return ({ message: `AI모드 유저 상태를 PLAYING으로 변경`})
   }
 
-  @ApiOperation({ summary: 'AI 모드를 종료한 유저의 status를 변경한다' })
+  @ApiOperation({ summary: '게임을 종료한 유저의 status를 변경한다' })
   @ApiOkResponse({
     description: '성공',
     type: Promise<{ message: string }>
   })
   @Post('exitGame')
   @UseGuards(AuthGuard())
-  async changeAIUserStatusExit(
+  async changeUserStatusExit(
     @GetAuth() auth: Auth,
   ):Promise<{ message: string }> {
     const user = await auth.user;
 
     await this.userService.updateUserStatus(user, UserStatus.ONLINE);
     
-    return ({ message: `AI모드 종료 후 유저 상태를 ONLINE으로 변경`})
+    return ({ message: `게임 종료 후 유저 상태를 ONLINE으로 변경`})
   }
 }
 

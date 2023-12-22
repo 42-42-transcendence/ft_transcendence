@@ -25,14 +25,13 @@ const GameModeForm = () => {
     const AIMatch = async () => {
       if (!startAIMatch)
         return;
-      const response = await request(`${SERVER_URL}/api/game/startAI`, {
+      
+      await request(`${SERVER_URL}/api/game/startAI`, {
         method: 'POST',
       });
-      // if (response === null) {
-      //   console.log("response is null");
-      // } else {
-        navigate(`/game/AI-mode`, { state: { data: {mode: enteredMode, playerID: [userState.id, "AI"]}}});
-      // }
+
+      navigate(`/game/AI-mode`, { state: { data: {mode: enteredMode, playerID: [userState.id, "AI"]}}});
+      
     };
     setStartAIMatch(false);
     AIMatch();

@@ -7,6 +7,7 @@ import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
 import { UserService } from 'src/user/user.service';
 import { SocketExceptionFilter } from 'src/events/socket.filter';
 import { SocketException } from 'src/events/socket.exception';
+import { EventsService } from 'src/events/events.service';
 
 @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
@@ -19,7 +20,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @WebSocketServer() public server : Server;
 
   	constructor(@Inject(forwardRef(() => GameService)) private gameService: GameService,
-                @Inject(forwardRef(() => UserService)) private userService : UserService,
+                @Inject(forwardRef(() => UserService)) private userService: UserService,
+                @Inject(forwardRef(() => EventsService)) private eventsService: EventsService,
                 ) {}
 
   afterInit() {}
@@ -29,9 +31,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
     }
-    const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
 
-    console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
+    const waitUser = await this.userService.getUserByNicknameWithWsException(nickname);
+    const waitForClient = async () => {
+        await new Promise((resolve) => {
+            const timerID = setInterval(() => {
+                if (this.eventsService.hasClient(waitUser.userID)) {
+                    clearInterval(timerID);
+                    resolve(null);
+                }
+            }, 50);
+        });
+    };
+    await waitForClient();
+
+    const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
+    console.log(`[GAME GATEWAY] ----------- ${user.nickname} ${client.id} connected -------------------`);
     if (this.gameService.isPlayer(nickname)) {
         this.server.to(client.id).emit("isValid", true);
 
@@ -41,7 +56,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             gameOptions.isActive = true;
         }
         this.server.in(client.id).socketsJoin(gameId);
-        console.log(`${nickname} joined room ${gameId}`);
         await this.userService.updateUserStatus(user, UserStatus.PLAYING);
     }
     else
@@ -53,12 +67,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (typeof nickname !== 'string') {
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
     }
-    const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
 
     const gameId = this.gameService.getPlayerGameId(nickname);
     if (gameId){
         this.server.in(client.id).socketsLeave(gameId);
-        console.log(`${user.nickname} left room ${gameId}`);
     }
 
     await this.gameService.saveGame(nickname);
@@ -69,30 +81,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (updatedUser.status !== UserStatus.ONLINE) {
         await this.userService.updateUserStatus(updatedUser, UserStatus.ONLINE);
     }
-
-    console.log(`GAME GATEWAY ----------- ${updatedUser.nickname} ${client.id} disconnected -------------------`);
+    console.log(`[GAME GATEWAY] ----------- ${updatedUser.nickname} ${client.id} disconnected -------------------`);
   }
-
-//   @SubscribeMessage('reconnect') // 재접속 구현 X
-//   reconnectGame (@ConnectedSocket() client: Socket) : void {
-//      const nickname = client.handshake.query.userID;
-//      if (typeof nickname !== 'string') {
-//          throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
-//       }
-//       const gameId: string = await this.gameService.getPlayerGameId(nickname);
-//       const Pair = this.gameService.getPair(nickname);
-// 
-//       if (Pair) {
-//           const GameDataDto : GameDataDto = this.gameService.getGameDataDto(gameId);
-//           if (GameDataDto) {
-//               this.server.in(client.id).socketsJoin(gameId);
-//               this.server.to(gameId).emit("updateGame", GameDataDto);
-//           }
-//       }
-//       else
-//           client.emit("notReconnected");
-//   }
-
 
   emitGameData(sendGameDataDto: sendGameDataDto, gameId: string) {
     this.server.to(gameId).emit("updateGame", sendGameDataDto);
@@ -199,7 +189,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
   async gameEnd(gamedata: GameDataDto, gameId: string) : Promise<void> {
-    const   gameOptions : GameOptionDto = await this.gameService.getGameOptions(gameId);
+    const   gameOptions : GameOptionDto = this.gameService.getGameOptions(gameId);
     const   player1 = gameOptions.player1;
     const   player2 = gameOptions.player2;
     let     winner: string;
@@ -212,9 +202,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.gameService.deletePlayer(player1);
         this.gameService.deletePlayer(player2);
         const isEnded = await this.gameService.endOfGame(gamedata, gameId);
-        if (isEnded) {
+        if (isEnded)
             this.server.to(gameId).emit("endGame", winner);
-        }
     }
   }
 }

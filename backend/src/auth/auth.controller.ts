@@ -1,7 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserAuthResponseDto } from './dto/user-auth-response.dto';
@@ -13,7 +11,6 @@ import { Auth } from './entities/auth.entity';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // 본래 token과 isSignUp이라는 boolean값을 반환해야함
   @ApiOperation({
     summary: 'JWT 토큰 발급 및 회원가입 유무 파악',
   })

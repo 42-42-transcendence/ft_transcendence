@@ -14,14 +14,14 @@ import { GameModule } from 'src/game/game.module';
   imports: [
     forwardRef(() => ChannelModule),
     forwardRef(() => RelationModule),
-    forwardRef(() =>UserModule),
+    forwardRef(() => UserModule),
     ChannelMemberModule,
     ChatModule,
-    forwardRef(() =>AuthModule),
+    forwardRef(() => AuthModule),
     forwardRef(() => GameModule),
     NotificationModule,
   ],
   providers: [EventsGateway, EventsService],
-  exports: [EventsGateway]
+  exports: [EventsGateway, EventsService]
 })
 export class EventsModule {}

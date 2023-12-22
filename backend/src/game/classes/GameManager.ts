@@ -2,7 +2,6 @@ import {vec2} from "gl-matrix";
 import { GameDataDto } from "../dto/in-game.dto";
 
 export class GameManager {
-    /* the playerSide 0 = leftPlayer and 1 is the other player */
     static scoreUpdate(playerSide: number | null, gamedata: GameDataDto) {
         if (playerSide === 0 || playerSide === 1) {
             ++gamedata.scores[playerSide];

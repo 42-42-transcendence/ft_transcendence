@@ -1,27 +1,18 @@
 import {
   Controller,
   Get,
-  Post,
   Put,
   Body,
   Patch,
   Param,
-  Delete,
-  Redirect,
-  Query,
-  HttpStatus,
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserinfoUserDto } from './dto/userinfo-user.dto';
 import { UserprofileUserDto } from './dto/userprofile-user.dto';
-
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChannelMember } from 'src/channel-member/entities/channel-member.entity';
@@ -29,12 +20,10 @@ import { User } from './entities/user.entity';
 import { GetAuth } from 'src/auth/get-auth.decorator';
 import { Auth } from 'src/auth/entities/auth.entity';
 import { RelationService } from '../relation/relation.service';
-import { userInfo } from 'os';
 import { RelationTypeEnum } from 'src/relation/enums/relation-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
 import { DashboardUserDto } from './dto/dashboard-user.dto';
-import { stringify } from 'querystring';
 
 @ApiTags('USER')
 @Controller('api/user')
@@ -156,8 +145,6 @@ export class UserController {
   @Get('dashboard/:targetUserID')
   async getDashboards(@Param('targetUserID') userID: string, @GetAuth() auth: Auth): Promise<DashboardUserDto[]> {
     return await this.userService.getDashboards(userID, auth);
-    //return await this.userService.createDummyDashboards(userID, auth);
-
   }
 
 }

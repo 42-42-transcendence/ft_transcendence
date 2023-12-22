@@ -1,8 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Achievement } from './entities/achievement.entity';
-import { achievements, Achievements } from './achievement';
-import { AchievementDto } from './dto/achievement.dto';
+import { achievements } from '../user/achievement';
 
 @Injectable()
 export class AchievementRepository extends Repository<Achievement> {

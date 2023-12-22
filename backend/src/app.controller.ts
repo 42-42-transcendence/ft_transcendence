@@ -71,7 +71,6 @@ export class AppController implements OnModuleInit{
       }
     }
 
-    // 이 뒤는 chatdummy 구현 해보기
     if ((await this.chatService.getAllChats()).length === 0) {
       const newChannels = await this.channelService.getAllChannels();
 

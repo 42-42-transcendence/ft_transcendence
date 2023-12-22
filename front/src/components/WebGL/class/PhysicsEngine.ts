@@ -28,7 +28,6 @@ class PhysicsEngine {
                 object.move(collisionResult.p);
                 if (process.handleCollision(collisionResult))
                     return;
-                // object.position =
                 if (process.CheckObjectInside()) {
                     process.clamp();
                 }

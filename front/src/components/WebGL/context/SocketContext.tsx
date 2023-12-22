@@ -35,7 +35,6 @@ const SocketContextProvider = ({ children }: ChildProps) => {
             });
 
             newSocket.on('isValid', (isValid: boolean) => {
-                console.log("-----------valid check: ", isValid);
                 data.validation = isValid;
                 window.dispatchEvent(new CustomEvent('validationChanged', {}));
             });

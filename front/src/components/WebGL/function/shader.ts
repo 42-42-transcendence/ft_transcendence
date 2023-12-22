@@ -35,11 +35,9 @@ function shader () {
     `;
     /* shader */
     // shader 참조 변수 생성
-    // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/createShader
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     if (!vertexShader) {
         return;
-        // throw new Error('ERROR creating vertex shader!');
     }
     // 위에서 선언한 변수에 작성한 shader 할당
     gl.shaderSource(vertexShader, vsGLSL);
@@ -83,7 +81,6 @@ function shader () {
      if (data.positionLoc === -1) {
          throw new Error('Shader error');
      }
-     // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/enableVertexAttribArray
     // GPU에서 관리하는 attribute 변수를 활성화
     gl.enableVertexAttribArray(data.positionLoc);
     data.uColorLocation = gl.getUniformLocation(data.program[0]!, 'u_Color');

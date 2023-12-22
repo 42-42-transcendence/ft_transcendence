@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { Channel } from "./entities/channel.entity";
 import { ChannelDto } from "./dto/channel.dto";
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { faker } from "@faker-js/faker";
 import { ChannelTypeEnum } from "./enums/channelType.enum";
 import { ChannelMember } from "src/channel-member/entities/channel-member.entity";

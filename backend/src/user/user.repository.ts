@@ -5,12 +5,11 @@ import { ChannelMember } from 'src/channel-member/entities/channel-member.entity
 import { v4 as uuidv4 } from 'uuid';
 import { UserStatus } from './enums/user-status.enum';
 import { faker } from '@faker-js/faker';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UserprofileUserDto } from './dto/userprofile-user.dto';
 import { UserAchievementRepository } from 'src/user-achievement/user-achievement.repository';
-import { achievements, Achievements } from 'src/achievement/achievement';
+import { Achievements } from './achievement';
 import { UserAchievement } from 'src/user-achievement/entities/user-achievement.entity';
-import { AchievementRepository } from 'src/achievement/achievement.repository';
+// import { AchievementRepository } from 'src/achievement/achievement.repository';
 import { UserAchievementlistDto } from 'src/user-achievement/dto/user-ahievement-list.dto';
 
 @Injectable()

@@ -7,7 +7,6 @@ import { forwardRef, Inject, UseFilters } from '@nestjs/common';;
 import { UserService } from 'src/user/user.service';
 import { SocketExceptionFilter } from 'src/events/socket.filter';
 import { SocketException } from 'src/events/socket.exception';
-import { EventsService } from 'src/events/events.service';
 
 @UseFilters(new SocketExceptionFilter())
 @WebSocketGateway({
@@ -31,7 +30,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         throw new SocketException('BadRequest', `query를 잘못 입력하셨습니다.`);
     }
     const user = await this.userService.getUserByNicknameWithWsException(<string>nickname);
-    this.gameService.addClient(user.userID, client);
 
     console.log(`GAME GATEWAY ----------- ${user.nickname} ${client.id} connected -------------------`);
     if (this.gameService.isPlayer(nickname)) {
@@ -68,12 +66,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.gameService.deleteGameData(gameId);
 
     const updatedUser = await this.userService.getUserByNicknameWithWsException(<string>nickname);
-    await this.userService.updateUserStatus(updatedUser, UserStatus.ONLINE);
-
-    const saveClient = this.gameService.getClient(updatedUser.userID);
-    if (client.id === saveClient.id) {
-        this.gameService.removeClient(updatedUser.userID);
+    if (updatedUser.status !== UserStatus.ONLINE) {
+        await this.userService.updateUserStatus(updatedUser, UserStatus.ONLINE);
     }
+
     console.log(`GAME GATEWAY ----------- ${updatedUser.nickname} ${client.id} disconnected -------------------`);
   }
 

@@ -23,9 +23,9 @@ export interface GameOptionDto {
 }
 
 export interface sendGameDataDto {
-	paddlePos: [[number, number], [number, number]];
+	paddlePos: [number[], number[]];
 	height: number[];
-	ballPos: [number, number];
-    itemsPos: [number, number][];
+	ballPos: number[];
+    itemsPos: number[][];
     scores: number[];
 }

@@ -7,7 +7,6 @@ function usePress() {
 
 	const keyDownHandler = useCallback((event : KeyboardEvent)=>{
 		if (socket === null && data.mode !== 'AI') {
-			// console.error('context is null');
 			return;
 		}
 		if (event.key === 'ArrowUp') {
@@ -26,7 +25,6 @@ function usePress() {
 
 	const keyUpHandler = useCallback((event : KeyboardEvent)=> {
 		if (socket === null && data.mode !== 'AI') {
-			// console.error('context is null');
 			return;
 		}
 		if (event.key === 'ArrowUp') {

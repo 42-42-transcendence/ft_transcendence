@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChannelMemberDto } from './dto/channel-member.dto';
 import { ChannelMemberRepository } from './channel-member.repository';
 import { Channel } from 'src/channel/entities/channel.entity';

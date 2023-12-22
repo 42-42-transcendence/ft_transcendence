@@ -44,12 +44,13 @@ export class GameEngine {
         const interval = setInterval(async () => { 
             const gameData = this.gameService.getGameData(gameId);
 
-            if (!gameData.intervalId)
-                gameData.intervalId = interval;
             if (!gameData){
                 clearInterval(interval);
                 return ;
             }
+            if (!gameData.intervalId)
+                gameData.intervalId = interval;
+
             if (gameData.lastTime === 0)
                 gameData.lastTime = new Date().getTime();
 

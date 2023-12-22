@@ -18,6 +18,7 @@ function initialize(state: any) {
 
 	data.scores = [0, 0];
 	data.paddle = [new Paddle(-0.96, 0), new Paddle(0.96, 0)];
+	data.paddle[1].paddleSpeed = 1.0;
 	if (data.profileRef[0] && data.profileRef[1] && state.data && state.data.playerID) {
 		data.profileRef[0].innerHTML = state.data.playerID[0];
 		data.profileRef[1].innerHTML = state.data.playerID[1];

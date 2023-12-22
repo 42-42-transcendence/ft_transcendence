@@ -106,11 +106,11 @@ export class ChannelMemberService {
   }
 
   async getPrivateChannelsByUser(user: User): Promise<Channel[]> {
-		return (await this.channelMemberRepository.getChannelsByUserAndType(user, ChannelTypeEnum.PRIVATE));
+		return (await this.channelMemberRepository.getPrivateChannelsByUser(user, ChannelTypeEnum.PRIVATE));
 	}
 
   async getDmChannelsByUser(user: User): Promise<Channel[]> {
-		return (await this.channelMemberRepository.getChannelsByUserAndType(user, ChannelTypeEnum.DM));
+		return (await this.channelMemberRepository.getDmChannelsByUser(user, ChannelTypeEnum.DM));
 	}
 
 }

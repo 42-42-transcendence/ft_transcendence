@@ -232,6 +232,8 @@ export class UserService {
 				{
 					user.userAchievementbool[6] = true;
 					user.point -= 20;
+					if (user.point <= 0)
+						user.point = 0;
 				}
 			}
 			const resultUser = await this.userRepository.save(user);

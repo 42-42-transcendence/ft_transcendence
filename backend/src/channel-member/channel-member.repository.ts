@@ -113,7 +113,25 @@ export class ChannelMemberRepository extends Repository<ChannelMember> {
 		return (member);
 	}
 
-	async getChannelsByUserAndType(user: User, type: ChannelTypeEnum): Promise<Channel[]> {
+	async getPrivateChannelsByUser(user: User, type: ChannelTypeEnum): Promise<Channel[]> {
+		const channelMembers = await this
+			.createQueryBuilder('member')
+			.leftJoinAndSelect('member.user', 'user')
+			.leftJoinAndSelect('member.channel', 'channel')
+			.where('user.userID = :userID', { userID: user.userID })
+			.andWhere('channel.type = :type', { type })
+			.andWhere('member.role != :role', { role: ChannelMemberRole.BLOCK })
+			.getMany();
+		
+		const channels: Channel[] = [];
+		channelMembers.forEach(member => {
+			channels.push(member.channel);
+		});
+		
+		return (channels);
+	}
+
+	async getDmChannelsByUser(user: User, type: ChannelTypeEnum): Promise<Channel[]> {
 		const channelMembers = await this
 			.createQueryBuilder('member')
 			.leftJoinAndSelect('member.user', 'user')

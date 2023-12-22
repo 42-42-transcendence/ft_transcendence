@@ -35,7 +35,9 @@ export class GameManager {
     }
 
     static cleanupWebGL() {
-        const gl = data.gl as WebGLRenderingContext;
+        const gl = data.gl;
+        if (!gl)
+            return;
 
         if (data.paddleBuffer) {
             gl.deleteBuffer(data.paddleBuffer);

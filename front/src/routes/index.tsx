@@ -17,7 +17,7 @@ import Otp from './Otp';
 const router = createBrowserRouter([
   {
     errorElement: <ErrorPage />,
-    // element: <ProtectedRouter />,
+    element: <ProtectedRouter />,
     children: [
       {
         path: '/',

@@ -73,6 +73,8 @@ export abstract class GameObject {
         const crossB_D = this.crossProduct(b, d);
         const crossD_B = this.crossProduct(d, b);
         if (crossB_D === 0 || crossD_B === 0) {
+            console.log(" b: " + b + " d: " + d);
+            console.error("calculateCollision: crossB_D or crossD_B is zero");
             return { p: -1, q: -1 };
         }
         const p = (this.crossProduct(vec2.sub(vec2.create(), c, a), d)) / crossB_D;
